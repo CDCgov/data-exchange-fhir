@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "fhir_service_event_functions": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7217",
+      "launchBrowser": false
+    }
+  }
+}
