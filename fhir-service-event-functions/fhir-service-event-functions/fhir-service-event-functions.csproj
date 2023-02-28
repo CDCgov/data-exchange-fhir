@@ -5,6 +5,7 @@
     <RootNamespace>fhir_service_event_functions</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Hl7.Fhir.R4" Version="5.0.0" />
     <PackageReference Include="JsonFlatten" Version="1.0.2" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.EventHubs" Version="5.1.2" />
