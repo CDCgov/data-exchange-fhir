@@ -15,6 +15,7 @@ namespace fhir_service_event_functions.Config
         public string FhirUrl { get; set; }
         public string OcpApimSubscriptionKey { get; set; }
         public string Scope { get; set; }
+        public string ConnectionStringServiceBus { get; set; }
 
         public static AuthConfig ReadFromEnvironmentVariables()
         {
@@ -24,6 +25,7 @@ namespace fhir_service_event_functions.Config
             config.FhirUrl = Environment.GetEnvironmentVariable("FhirUrl");
             config.OcpApimSubscriptionKey = Environment.GetEnvironmentVariable("OcpApimSubscriptionKey");
             config.Scope = Environment.GetEnvironmentVariable("Scope");
+            config.ConnectionStringServiceBus = Environment.GetEnvironmentVariable("fhireventqueue_servicebusnsfhir_connectionstring");
             return config;
         }
         public static AuthConfig ReadFromJsonFile(string path)

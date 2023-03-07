@@ -1,0 +1,161 @@
+using Azure.Messaging.ServiceBus;
+using fhir_service_event_functions.Config;
+using fhir_service_event_functions.Models;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
+
+namespace fhir_service_event_functions.Functions
+{
+    public class FhirResourceCreatedPrepFunction
+    {
+
+
+        private readonly IHttpClientFactory httpClientFactory;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
+        public FhirResourceCreatedPrepFunction(IHttpClientFactory httpClientFactory)
+        {
+            this.httpClientFactory = httpClientFactory;
+        }
+
+
+        /// <summary>
+        /// Function event trigger entry point
+        /// </summary>
+        /// <param name="resourceCreatedMessage">The resource created message read from the service bus queue</param>
+        /// <param name="log">Function logger</param>
+        [FunctionName("FhirResourceCreatedPrepFunction")]
+        public async Task Run(
+            [ServiceBusTrigger("fhireventqueue", Connection = "fhireventqueue_servicebusnsfhir_connectionstring")] FhirResourceCreated resourceCreatedMessage,
+            ILogger log)
+        {
+            var exceptions = new List<Exception>();
+
+            try
+            {
+                log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
+                //string eventMessage = eventData.EventBody.ToString();
+                //FhirResourceCreated resourceCreatedMessage = JsonConvert.DeserializeObject<List<FhirResourceCreated>>(eventMessage).Single<FhirResourceCreated>();
+
+                AuthConfig authConfig = AuthConfig.ReadFromEnvironmentVariables();
+
+                // GET FHIR RESOURCE SECTION 
+
+                string requestUrl = $"{authConfig.FhirUrl}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
+
+                using (HttpClient client = httpClientFactory.CreateClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+                {
+                    // get auth token
+                    string token = await GetFhirServerToken(authConfig, client);
+
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    request.Headers.Add("Ocp-Apim-Subscription-Key", authConfig.OcpApimSubscriptionKey);
+
+                    var response = await client.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string jsonString = await response.Content.ReadAsStringAsync();
+
+                    log.LogInformation(logPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
+
+                    JObject jObject = JObject.Parse(jsonString);
+
+                    Dictionary<string, string> messagesToSend = new Dictionary<string, string>();
+
+                    messagesToSend.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), jObject.ToString());
+
+                    // END GET FHIR RESOURCE SECTION
+
+                    // START WRITING TO QUEUE SECTION
+
+                    string connectionString = authConfig.ConnectionStringServiceBus;
+                    string queueName = "fhirexportqueue";
+                    await using var serviceBusClient = new ServiceBusClient(connectionString);
+
+                    // create the sender
+                    ServiceBusSender sender = serviceBusClient.CreateSender(queueName);
+
+                    foreach (var keyValPair in messagesToSend)
+                    {
+                        // create a message that we can send. UTF-8 encoding is used when providing a string.
+                        ServiceBusMessage queueMessage = new ServiceBusMessage(keyValPair.Value);
+
+                        // send the message
+                        await sender.SendMessageAsync(queueMessage);
+                    }
+
+                    // END WRITING TO QUEUE SECTION
+
+                }
+
+                await Task.Yield();
+            }
+            catch (Exception e)
+            {
+                // We need to keep processing the rest of the batch - capture this exception and continue.
+                // Also, consider capturing details of the message that failed processing so it can be processed again later.
+                exceptions.Add(e);
+            }
+
+
+            // Once processing of the batch is complete, if any messages in the batch failed processing throw an exception so that there is a record of the failure.
+
+            if (exceptions.Count > 1)
+                throw new AggregateException(exceptions);
+
+            if (exceptions.Count == 1)
+                throw exceptions.Single();
+        }
+
+        /// <summary>
+        /// Get the service principle to access to the azure fhir server
+        /// </summary>
+        /// <param name="authConfig">The environment specfic authConfig</param>
+        /// <param name="httpClient">The httpClient to use to get the fhir token</param>
+        private async Task<string> GetFhirServerToken(AuthConfig authConfig, HttpClient httpClient)
+        {
+            string token;
+
+            var dict = new Dictionary<string, string>();
+            dict.Add("grant_type", "Client_Credentials");
+            dict.Add("client_id", authConfig.ClientId);
+            dict.Add("client_secret", authConfig.ClientSecret);
+
+            using (var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{authConfig.FhirUrl}/auth") { Content = new FormUrlEncodedContent(dict) })
+            {
+                tokenRequest.Headers.Add("Ocp-Apim-Subscription-Key", authConfig.OcpApimSubscriptionKey);
+
+                var tokenResponse = await httpClient.SendAsync(tokenRequest);
+
+                tokenResponse.EnsureSuccessStatusCode();
+
+                var result = await tokenResponse.Content.ReadFromJsonAsync<AuthTokenResult>();
+
+                //log.LogInformation(logPrefix()+ "Token acquired \n");
+
+                token = result!.access_token;
+            }
+
+            return token;
+        }
+
+        private string logPrefix()
+        {
+            return $"FhirResourceCreatedPrepFunction - {DateTime.UtcNow}: ";
+        }
+
+    }
+}
