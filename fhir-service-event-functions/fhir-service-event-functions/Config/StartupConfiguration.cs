@@ -1,30 +1,33 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Http;
-using Polly.Extensions.Http;
-using Polly;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net;
+﻿using fhir_service_event_functions.Config;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using static System.Net.Mime.MediaTypeNames;
-using fhir_service_event_functions.Config;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using Polly.Extensions.Http;
+using System;
+using System.Net;
+using System.Net.Http;
+
 
 [assembly: FunctionsStartup(typeof(StartupConfiguration))]
 namespace fhir_service_event_functions.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
+
+        public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+        {
+            string cs = Environment.GetEnvironmentVariable("FunctionappAppconfigConnectionstring");
+            builder.ConfigurationBuilder.AddAzureAppConfiguration(cs);
+        }
+
         public override void Configure(IFunctionsHostBuilder builder)
         {
             // http client factory
             builder.Services.AddHttpClient("RetryClientFactory")
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddPolicyHandler(GetRetryPolicy(3));
+
         }
 
         /// <summary>

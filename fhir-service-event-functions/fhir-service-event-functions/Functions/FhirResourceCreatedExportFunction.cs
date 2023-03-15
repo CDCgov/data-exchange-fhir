@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using fhir_service_event_functions.Config;
 using JsonFlatten;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,25 +21,28 @@ namespace fhir_service_event_functions.Functions
 
 
         private readonly IHttpClientFactory httpClientFactory;
-
+        private readonly IConfiguration configuration;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
-        public FhirResourceCreatedExportFunction(IHttpClientFactory httpClientFactory)
+        /// <param name="configuration">App Configuration</param>
+        public FhirResourceCreatedExportFunction(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
+            this.configuration = configuration;
         }
 
 
         /// <summary>
         /// Function event trigger entry point
         /// </summary>
-        /// <param name="resourceCreatedMessage">The resource created message read from the service bus queue</param>
+        /// <param name="fhirResourceToProcess">The resource created message read from the service bus queue</param>
+        /// <param name="configuration">App Configuration</param>
         /// <param name="log">Function logger</param>
         [FunctionName("FhirResourceCreatedExportFunction")]
         public async Task Run(
-            [ServiceBusTrigger("fhirexportqueue", Connection = "fhireventqueue_servicebusnsfhir_connectionstring")] string fhirResourceToProcess,
+            [ServiceBusTrigger("%FunctionExportUpstreamQueueName%", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] string fhirResourceToProcess,
             ILogger log)
         {
             var exceptions = new List<Exception>();
@@ -47,7 +51,9 @@ namespace fhir_service_event_functions.Functions
             {
                 log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {fhirResourceToProcess.ToString()}");
 
-                FeatureFlagConfig featureFlagConfig = FeatureFlagConfig.ReadFromEnvironmentVariables();
+                //FeatureFlagConfig featureFlagConfig = FeatureFlagConfig.ReadFromEnvironmentVariables();
+                bool flagFhirResourceCreatedExportFunctionFlatten = bool.Parse(configuration["FhirResourceCreatedExportFunctionFlatten"]);
+                bool flagFhirResourceCreatedExportFunctionUnbundle = bool.Parse(configuration["FhirResourceCreatedExportFunctionUnbundle"]);
 
                 using (HttpClient client = httpClientFactory.CreateClient())
                 {
@@ -56,14 +62,14 @@ namespace fhir_service_event_functions.Functions
 
                     Dictionary<string, string> filesToWrite = new Dictionary<string, string>();
 
-                    if (jObject["resourceType"] != null && jObject["resourceType"].Value<string>() == "Bundle" && featureFlagConfig.FhirResourceCreatedExportFunctionUnbundle)
+                    if (jObject["resourceType"] != null && jObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
                     {
                         // is a bundle and we will need to unbundle
                         List<JObject> unbundledFhirObjects = UnbundleFhirBundle(jObject);
 
                         foreach (JObject subObject in unbundledFhirObjects)
                         {
-                            if (featureFlagConfig.FhirResourceCreatedExportFunctionFlatten)
+                            if (flagFhirResourceCreatedExportFunctionFlatten)
                             {
                                 //flatten
                                 Dictionary<string, object> flattenedObject = new Dictionary<string, object>(subObject.Flatten());
@@ -88,7 +94,7 @@ namespace fhir_service_event_functions.Functions
                     {
                         // a single entry no need to unbundle
 
-                        if (featureFlagConfig.FhirResourceCreatedExportFunctionFlatten)
+                        if (flagFhirResourceCreatedExportFunctionFlatten)
                         {
                             //flatten
                             Dictionary<string, object> flattenedObject = new Dictionary<string, object>(jObject.Flatten());
@@ -111,7 +117,7 @@ namespace fhir_service_event_functions.Functions
 
                     // START WRITING TO DATA LAKE SECTION
 
-                    string accountName = Environment.GetEnvironmentVariable("DatalakeStorageAccountName");
+                    string accountName = configuration["DatalakeStorageAccountName"];
 
                     TokenCredential credential = new DefaultAzureCredential();
 
@@ -119,7 +125,7 @@ namespace fhir_service_event_functions.Functions
 
                     BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(Environment.GetEnvironmentVariable("DatalakeBlobContainerName"));
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["DatalakeBlobContainerName"]);
 
                     foreach (var keyValPair in filesToWrite)
                     {
