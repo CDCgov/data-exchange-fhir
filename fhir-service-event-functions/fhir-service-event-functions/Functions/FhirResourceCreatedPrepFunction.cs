@@ -41,7 +41,7 @@ namespace fhir_service_event_functions.Functions
         /// <param name="log">Function logger</param>
         [FunctionName("FhirResourceCreatedPrepFunction")]
         public async Task Run(
-            [ServiceBusTrigger("%FunctionPrepUpstreamQueueName%", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] FhirResourceCreated resourceCreatedMessage,
+            [ServiceBusTrigger("fhireventqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] FhirResourceCreated resourceCreatedMessage,
             ILogger log)
         {
             var exceptions = new List<Exception>();
@@ -84,7 +84,7 @@ namespace fhir_service_event_functions.Functions
 
                     // START WRITING TO QUEUE SECTION
 
-                    string connectionString = configuration["fhireventqueue_servicebusnsfhir_connectionstring"];
+                    string connectionString = configuration["FhireventqueueServicebusnsfhirConnectionstring"];
                     string queueName = configuration["FunctionPrepDownstreamQueueName"];
                     await using var serviceBusClient = new ServiceBusClient(connectionString);
 

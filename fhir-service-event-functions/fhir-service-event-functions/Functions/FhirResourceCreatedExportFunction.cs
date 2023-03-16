@@ -42,7 +42,7 @@ namespace fhir_service_event_functions.Functions
         /// <param name="log">Function logger</param>
         [FunctionName("FhirResourceCreatedExportFunction")]
         public async Task Run(
-            [ServiceBusTrigger("%FunctionExportUpstreamQueueName%", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] string fhirResourceToProcess,
+            [ServiceBusTrigger("fhirexportqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] string fhirResourceToProcess,
             ILogger log)
         {
             var exceptions = new List<Exception>();
