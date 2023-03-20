@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "fhir_service_processmessage_function": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7152",
+      "launchBrowser": false
+    }
+  }
+}

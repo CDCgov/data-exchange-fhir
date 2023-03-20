@@ -1,4 +1,4 @@
-﻿using fhir_service_function_sharedcode.Config;
+﻿using fhir_service_event_functions.Config;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,9 +8,8 @@ using System;
 using System.Net;
 using System.Net.Http;
 
-
 [assembly: FunctionsStartup(typeof(StartupConfiguration))]
-namespace fhir_service_function_sharedcode.Config
+namespace fhir_service_event_functions.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
