@@ -1,7 +1,6 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
-using fhir_service_event_functions.Config;
 using JsonFlatten;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +13,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fhir_service_event_functions.Functions
+namespace fhir_service_export_function
 {
     public class FhirResourceCreatedExportFunction
     {

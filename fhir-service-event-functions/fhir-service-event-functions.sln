@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fhir-service-event-functions", "fhir-service-event-functions\fhir-service-event-functions.csproj", "{3CD13E41-96C5-4560-BB02-82FC707EBD94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fhir-service-event-functions", "fhir-service-event-functions\fhir-service-event-functions.csproj", "{3CD13E41-96C5-4560-BB02-82FC707EBD94}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fhir-service-export-function", "fhir-service-export-function\fhir-service-export-function.csproj", "{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sharedcode-fhir-service-function", "fhir-service-function-sharedcode\sharedcode-fhir-service-function.csproj", "{B8CAA094-BFE8-4C68-BC07-94B512DF446B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fhir-service-event-function", "fhir-service-event-function\fhir-service-event-function.csproj", "{B37F1D47-FCDB-4EAF-8E55-709732598516}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{3CD13E41-96C5-4560-BB02-82FC707EBD94}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CD13E41-96C5-4560-BB02-82FC707EBD94}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CD13E41-96C5-4560-BB02-82FC707EBD94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

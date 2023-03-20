@@ -1,6 +1,5 @@
 using Azure.Messaging.ServiceBus;
-using fhir_service_event_functions.Config;
-using fhir_service_event_functions.Models;
+using fhir_service_function_sharedcode.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
