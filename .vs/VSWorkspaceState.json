@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\fhir-service-event-functions",
+    "\\fhir-service-event-functions\\fhir-service-event-functions",
+    "\\fhir-service-event-functions\\fhir-service-event-functions\\Config"
+  ],
+  "SelectedNode": "\\fhir-service-event-functions\\fhir-service-event-functions\\ProcessMessage.cs",
+  "PreviewInSolutionExplorer": false
+}
