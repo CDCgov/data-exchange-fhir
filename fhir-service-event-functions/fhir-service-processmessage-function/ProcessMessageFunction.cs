@@ -56,7 +56,9 @@ namespace fhir_service_processmessage_function
                 JsonNode resourceNode = data["entry"][1]["resource"];
                 PostContentBundleResult postResult = await PostContentBundle(configuration, resourceNode.ToJsonString(), location, log);
 
-                return new OkObjectResult(postResult.JsonString);
+                data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
+
+                return new OkObjectResult(data.ToJsonString());
             }
             else
             {
