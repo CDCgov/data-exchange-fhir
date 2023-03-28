@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
-using sharedcode_fhir_service_function.Models;
+using CDC.DEX.FHIR.Function.SharedCode.Models;
 using System.Net.Http.Json;
 
-namespace sharedcode_fhir_service_function.Util
+namespace CDC.DEX.FHIR.Function.SharedCode.Util
 {
     public class FhirServiceUtils
     {

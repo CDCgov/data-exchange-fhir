@@ -1,6 +1,6 @@
 using Azure.Messaging.ServiceBus;
-using sharedcode_fhir_service_function.Models;
-using sharedcode_fhir_service_function.Util;
+using CDC.DEX.FHIR.Function.SharedCode.Models;
+using CDC.DEX.FHIR.Function.SharedCode.Util;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,9 +13,9 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
-namespace fhir_service_event_functions.Functions
+namespace CDC.DEX.FHIR.Function.ProcessEvent
 {
-    public class FhirResourceCreatedPrepFunction
+    public class ProcessEvent
     {
 
 
@@ -26,7 +26,7 @@ namespace fhir_service_event_functions.Functions
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedPrepFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public FhirResourceCreatedPrepFunction(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ProcessEvent(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
@@ -39,7 +39,7 @@ namespace fhir_service_event_functions.Functions
         /// <param name="resourceCreatedMessage">The resource created message read from the service bus queue</param>
         /// <param name="configuration">App Configuration</param>
         /// <param name="log">Function logger</param>
-        [FunctionName("FhirResourceCreatedPrepFunction")]
+        [FunctionName("ProcessEvent")]
         public async Task Run(
             [ServiceBusTrigger("fhireventqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] FhirResourceCreated resourceCreatedMessage,
             ILogger log)
@@ -126,7 +126,7 @@ namespace fhir_service_event_functions.Functions
 
         private string logPrefix()
         {
-            return $"FhirResourceCreatedPrepFunction - {DateTime.UtcNow}: ";
+            return $"ProcessEvent - {DateTime.UtcNow}: ";
         }
 
     }
