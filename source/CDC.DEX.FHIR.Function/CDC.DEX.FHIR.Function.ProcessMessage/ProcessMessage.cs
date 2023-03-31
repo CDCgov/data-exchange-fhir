@@ -5,8 +5,8 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using sharedcode_fhir_service_function.Models;
-using sharedcode_fhir_service_function.Util;
+using CDC.DEX.FHIR.Function.SharedCode.Models;
+using CDC.DEX.FHIR.Function.SharedCode.Util;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,9 +14,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
-namespace fhir_service_processmessage_function
+namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
-    public class ProcessMessageFunction
+    public class ProcessMessage
     {
 
         private readonly IHttpClientFactory httpClientFactory;
@@ -26,7 +26,7 @@ namespace fhir_service_processmessage_function
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedPrepFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public ProcessMessageFunction(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ProcessMessage(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;

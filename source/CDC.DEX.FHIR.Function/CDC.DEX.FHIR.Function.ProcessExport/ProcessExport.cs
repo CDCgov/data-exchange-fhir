@@ -13,9 +13,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace fhir_service_export_function
+namespace CDC.DEX.FHIR.Function.ProcessExport
 {
-    public class FhirResourceCreatedExportFunction
+    public class ProcessExport
     {
 
 
@@ -26,7 +26,7 @@ namespace fhir_service_export_function
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public FhirResourceCreatedExportFunction(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ProcessExport(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
@@ -39,7 +39,7 @@ namespace fhir_service_export_function
         /// <param name="fhirResourceToProcess">The resource created message read from the service bus queue</param>
         /// <param name="configuration">App Configuration</param>
         /// <param name="log">Function logger</param>
-        [FunctionName("FhirResourceCreatedExportFunction")]
+        [FunctionName("ProcessExport")]
         public async Task Run(
             [ServiceBusTrigger("fhirexportqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] string fhirResourceToProcess,
             ILogger log)
@@ -189,7 +189,7 @@ namespace fhir_service_export_function
 
         private string logPrefix()
         {
-            return $"FhirResourceCreatedExportFunction - {DateTime.UtcNow}: ";
+            return $"ProcessExport - {DateTime.UtcNow}: ";
         }
 
     }

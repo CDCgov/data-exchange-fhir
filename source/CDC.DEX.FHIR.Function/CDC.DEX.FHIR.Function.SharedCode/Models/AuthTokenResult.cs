@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sharedcode_fhir_service_function.Models
+namespace CDC.DEX.FHIR.Function.SharedCode.Models
 {
     public class AuthTokenResult
     {

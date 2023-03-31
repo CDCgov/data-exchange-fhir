@@ -1,4 +1,4 @@
-﻿using fhir_service_event_functions.Config;
+﻿using CDC.DEX.FHIR.Function.ProcessExport.Config;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Http;
 
 [assembly: FunctionsStartup(typeof(StartupConfiguration))]
-namespace fhir_service_event_functions.Config
+namespace CDC.DEX.FHIR.Function.ProcessExport.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {

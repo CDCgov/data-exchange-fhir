@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "fhir_service_export_function": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7267",
-      "launchBrowser": false
-    }
-  }
-}

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CDC.DEX.FHIR.Function.ProcessMessage": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7152"
+    }
+  }
+}
