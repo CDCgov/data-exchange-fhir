@@ -20,7 +20,7 @@ namespace CDC.DEX.FHIR.Function.SharedCode.Util
             dict.Add("client_id", configuration["ClientId"]);
             dict.Add("client_secret", configuration["ClientSecret"]);
 
-            using (var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{configuration["FhirUrl"]}/auth") { Content = new FormUrlEncodedContent(dict) })
+            using (var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{configuration["BaseFhirUrl"]}/auth") { Content = new FormUrlEncodedContent(dict) })
             {
                 tokenRequest.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 

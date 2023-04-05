@@ -55,7 +55,7 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent
                 //AuthConfig authConfig = AuthConfig.ReadFromEnvironmentVariables();
 
                 // GET FHIR RESOURCE SECTION 
-                string requestUrl = $"{configuration["FhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
+                string requestUrl = $"{configuration["BaseFhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
 
                 using (HttpClient client = httpClientFactory.CreateClient())
                 using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
@@ -84,8 +84,8 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent
 
                     // START WRITING TO QUEUE SECTION
 
-                    string connectionString = configuration["FhireventqueueServicebusnsfhirConnectionstring"];
-                    string queueName = configuration["FunctionPrepDownstreamQueueName"];
+                    string connectionString = configuration["FhirServiceBusConnectionString"];
+                    string queueName = configuration["Event:DownstreamQueue"];
                     await using var serviceBusClient = new ServiceBusClient(connectionString);
 
                     // create the sender

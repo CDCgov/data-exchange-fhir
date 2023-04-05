@@ -16,7 +16,7 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent.Config
 
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
-            string cs = Environment.GetEnvironmentVariable("FunctionappAppconfigConnectionstring");
+            string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
             builder.ConfigurationBuilder.AddAzureAppConfiguration(cs);
         }
 

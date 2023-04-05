@@ -51,8 +51,8 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                 log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {fhirResourceToProcess.ToString()}");
 
                 //FeatureFlagConfig featureFlagConfig = FeatureFlagConfig.ReadFromEnvironmentVariables();
-                bool flagFhirResourceCreatedExportFunctionFlatten = bool.Parse(configuration["FhirResourceCreatedExportFunctionFlatten"]);
-                bool flagFhirResourceCreatedExportFunctionUnbundle = bool.Parse(configuration["FhirResourceCreatedExportFunctionUnbundle"]);
+                bool flagFhirResourceCreatedExportFunctionFlatten = bool.Parse(configuration["Export:FlattenExport"]);
+                bool flagFhirResourceCreatedExportFunctionUnbundle = bool.Parse(configuration["Export:UnbundleExport"]);
 
                 using (HttpClient client = httpClientFactory.CreateClient())
                 {
@@ -116,7 +116,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     // START WRITING TO DATA LAKE SECTION
 
-                    string accountName = configuration["DatalakeStorageAccountName"];
+                    string accountName = configuration["Export:DatalakeStorageAccount"];
 
                     TokenCredential credential = new DefaultAzureCredential();
 
@@ -124,7 +124,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["DatalakeBlobContainerName"]);
+                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["Export:DatalakeBlobContainer"]);
 
                     foreach (var keyValPair in filesToWrite)
                     {
