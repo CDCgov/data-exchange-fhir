@@ -1,0 +1,84 @@
+{
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "actions": {
+        "Get_FHIR_resource_data_from_FHIR_Service_API": {
+          "inputs": {
+            "authentication": {
+              "audience": "@concat('https://', parameters('FhirLocation'))",
+              "type": "ManagedServiceIdentity"
+            },
+            "method": "GET",
+            "uri": "@variables('FhirUrl')"
+          },
+          "runAfter": {
+            "Initialize_variable_FhirUrl": [
+              "Succeeded"
+            ]
+          },
+          "type": "Http"
+        },
+        "If_FHIR_resource_data_response": {
+          "actions": {
+            "Send_message": {
+              "inputs": {
+                "parameters": {
+                  "entityName": "fhirexportqueue",
+                  "message": {
+                    "contentData": "@body('Get_FHIR_resource_data_from_FHIR_Service_API')",
+                    "contentType": "application/json; charset=utf-8"
+                  }
+                },
+                "serviceProviderConfiguration": {
+                  "connectionName": "serviceBus",
+                  "operationId": "sendMessage",
+                  "serviceProviderId": "/serviceProviders/serviceBus"
+                }
+              },
+              "runAfter": {},
+              "type": "ServiceProvider"
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@outputs('Get_FHIR_resource_data_from_FHIR_Service_API')['statusCode']",
+                  200
+                ]
+              }
+            ]
+          },
+          "runAfter": {
+            "Get_FHIR_resource_data_from_FHIR_Service_API": [
+              "Succeeded"
+            ]
+          },
+          "type": "If"
+        },
+        "Initialize_variable_FhirUrl": {
+          "inputs": {
+            "variables": [
+              {
+                "name": "FhirUrl",
+                "type": "string",
+                "value": "@{concat('https://', parameters('FhirLocation'), '/', parameters('FhirResource'))}"
+              }
+            ]
+          },
+          "runAfter": {},
+          "type": "InitializeVariable"
+        }
+      },
+      "contentVersion": "1.0.0.0",
+      "outputs": {},
+      "triggers": {
+        "manual": {
+          "inputs": {},
+          "kind": "Http",
+          "type": "Request"
+        }
+      }
+    },
+    "kind": "Stateful"
+  }
