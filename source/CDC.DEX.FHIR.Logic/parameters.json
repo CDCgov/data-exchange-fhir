@@ -1,0 +1,10 @@
+{
+    "FhirLocation": {
+      "type": "String",
+      "value": "cdcdmidevwseastus-fhir-service.fhir.azurehealthcareapis.com"
+    },
+    "FhirResource": {
+      "type": "String",
+      "value": "Bundle/b67a9519-0a4d-4565-92bd-739ff394ffbb"
+    }
+  }
