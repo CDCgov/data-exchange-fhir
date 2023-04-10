@@ -41,7 +41,7 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent
         /// <param name="log">Function logger</param>
         [FunctionName("ProcessEvent")]
         public async Task Run(
-            [ServiceBusTrigger("fhireventqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] FhirResourceCreated resourceCreatedMessage,
+            [ServiceBusTrigger("fhireventqueue", Connection = "FhirServiceBusConnectionString")] FhirResourceCreated resourceCreatedMessage,
             ILogger log)
         {
             var exceptions = new List<Exception>();

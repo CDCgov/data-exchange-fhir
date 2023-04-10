@@ -41,7 +41,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
         /// <param name="log">Function logger</param>
         [FunctionName("ProcessExport")]
         public async Task Run(
-            [ServiceBusTrigger("fhirexportqueue", Connection = "FhireventqueueServicebusnsfhirConnectionstring")] string fhirResourceToProcess,
+            [ServiceBusTrigger("fhirexportqueue", Connection = "FhirServiceBusConnectionString")] string fhirResourceToProcess,
             ILogger log)
         {
             var exceptions = new List<Exception>();

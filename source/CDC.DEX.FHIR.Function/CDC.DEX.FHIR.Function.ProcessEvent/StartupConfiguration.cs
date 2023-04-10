@@ -1,4 +1,6 @@
-﻿using CDC.DEX.FHIR.Function.ProcessEvent.Config;
+﻿using Azure.Identity;
+using CDC.DEX.FHIR.Function.ProcessEvent.Config;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +19,14 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent.Config
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
             string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
-            builder.ConfigurationBuilder.AddAzureAppConfiguration(cs);
+            builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
+            {
+                options.Connect(cs)
+                       .ConfigureKeyVault(kv =>
+                       {
+                           kv.SetCredential(new DefaultAzureCredential());
+                       });
+            });
         }
 
         public override void Configure(IFunctionsHostBuilder builder)
