@@ -45,14 +45,14 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             data = JsonSerializer.Deserialize<JsonNode>(req.Body);
             jsonString = data.ToString();
 
-            var location = new Uri($"{configuration["FhirUrl"]}/Bundle/$validate");
+            var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
             PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, log);
             JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
             bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
 
             if (isValid)
             {
-                location = new Uri($"{configuration["FhirUrl"]}/Bundle");
+                location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle");
                 JsonNode resourceNode = data["entry"][1]["resource"];
                 PostContentBundleResult postResult = await PostContentBundle(configuration, resourceNode.ToJsonString(), location, log);
 
