@@ -73,13 +73,19 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                                 //flatten
                                 string flattenedJson = FlattenJsonResource(subObject);
 
-                                filesToWrite.Add(subObject["resourceType"].Value<string>() + " - " + jObject["id"] + "_" + subObject["id"].Value<string>(), flattenedJson.ToString());
+                                string pathToWrite = subObject["resourceType"].Value<string>();
+                                //get profile data for sorting bundles
+                                pathToWrite += "/" + jObject["id"].Value<string>();
+                                pathToWrite += "_" + subObject["id"].Value<string>();
+                                filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                             }
                             else
                             {
                                 //no flatten
-                                filesToWrite.Add(subObject["resourceType"].Value<string>() + " - " + jObject["id"] + "_" + subObject["id"].Value<string>(), subObject.ToString());
-
+                                string pathToWrite = subObject["resourceType"].Value<string>();
+                                //get profile data for sorting bundles
+                                pathToWrite += "/" + subObject["id"].Value<string>();
+                                filesToWrite.Add(pathToWrite, subObject.ToString());
                             }
                         }
                     }
@@ -92,12 +98,29 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                             //flatten
                             string flattenedJson = FlattenJsonResource(jObject);
 
-
-                            filesToWrite.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), flattenedJson.ToString());
+                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            //get profile data for sorting bundles
+                            if (jObject["resourceType"].Value<string>() == "Bundle")
+                            {
+                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
+                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                                pathToWrite += "/" + profilePath;
+                            }
+                            pathToWrite += "/" + jObject["id"].Value<string>();
+                            filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
                         {
-                            filesToWrite.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), jObject.ToString());
+                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            //get profile data for sorting bundles
+                            if (jObject["resourceType"].Value<string>() == "Bundle")
+                            {
+                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
+                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                                pathToWrite += "/" + profilePath;
+                            }
+                            pathToWrite += "/" + jObject["id"].Value<string>();
+                            filesToWrite.Add(pathToWrite, jObject.ToString());
                         }
                     }
 
