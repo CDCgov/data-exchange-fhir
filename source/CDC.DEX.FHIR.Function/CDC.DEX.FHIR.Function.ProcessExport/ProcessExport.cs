@@ -5,12 +5,12 @@ using JsonFlatten;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.ProcessExport
@@ -71,21 +71,21 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                             if (flagFhirResourceCreatedExportFunctionFlatten)
                             {
                                 //flatten
-                                Dictionary<string, object> flattenedObject = new Dictionary<string, object>(subObject.Flatten());
+                                string flattenedJson = FlattenJsonResource(subObject);
 
-                                StringBuilder contentToWriteToFile = new StringBuilder();
-                                foreach (var keyValPair in flattenedObject)
-                                {
-                                    contentToWriteToFile.Append($"\"{keyValPair.Key}\":\"{keyValPair.Value}\" \n");
-                                }
-
-                                filesToWrite.Add(subObject["resourceType"].Value<string>() + " - " + jObject["id"] + "_" + subObject["id"].Value<string>(), contentToWriteToFile.ToString());
+                                string pathToWrite = subObject["resourceType"].Value<string>();
+                                //get profile data for sorting bundles
+                                pathToWrite += "/" + jObject["id"].Value<string>();
+                                pathToWrite += "_" + subObject["id"].Value<string>();
+                                filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                             }
                             else
                             {
                                 //no flatten
-                                filesToWrite.Add(subObject["resourceType"].Value<string>() + " - " + jObject["id"] + "_" + subObject["id"].Value<string>(), subObject.ToString());
-
+                                string pathToWrite = subObject["resourceType"].Value<string>();
+                                //get profile data for sorting bundles
+                                pathToWrite += "/" + subObject["id"].Value<string>();
+                                filesToWrite.Add(pathToWrite, subObject.ToString());
                             }
                         }
                     }
@@ -96,19 +96,31 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                         if (flagFhirResourceCreatedExportFunctionFlatten)
                         {
                             //flatten
-                            Dictionary<string, object> flattenedObject = new Dictionary<string, object>(jObject.Flatten());
+                            string flattenedJson = FlattenJsonResource(jObject);
 
-                            StringBuilder contentToWriteToFile = new StringBuilder();
-                            foreach (var keyValPair in flattenedObject)
+                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            //get profile data for sorting bundles
+                            if (jObject["resourceType"].Value<string>() == "Bundle")
                             {
-                                contentToWriteToFile.Append($"\"{keyValPair.Key}\":\"{keyValPair.Value}\" \n");
+                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
+                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                                pathToWrite += "/" + profilePath;
                             }
-
-                            filesToWrite.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), contentToWriteToFile.ToString());
+                            pathToWrite += "/" + jObject["id"].Value<string>();
+                            filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
                         {
-                            filesToWrite.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), jObject.ToString());
+                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            //get profile data for sorting bundles
+                            if (jObject["resourceType"].Value<string>() == "Bundle")
+                            {
+                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
+                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                                pathToWrite += "/" + profilePath;
+                            }
+                            pathToWrite += "/" + jObject["id"].Value<string>();
+                            filesToWrite.Add(pathToWrite, jObject.ToString());
                         }
                     }
 
@@ -128,8 +140,8 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     foreach (var keyValPair in filesToWrite)
                     {
-                        BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}");
-                        log.LogInformation(logPrefix() + $"Writing data to file {keyValPair.Key}: \n {keyValPair.Value}");
+                        BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
+                        log.LogInformation(logPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
                         await blobClient.UploadAsync(BinaryData.FromString($"{keyValPair.Value}"), true);
                     }
 
@@ -185,6 +197,30 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             }
 
             return unbundledObjects;
+        }
+
+        /// <summary>
+        /// Flatten all entries within this json object, then reconstruct the now-flattened json
+        /// </summary>
+        /// <param name="bundleJObject">The top level JOBject to be flattened</param>
+        public string FlattenJsonResource(JObject jsonToFlatten)
+        {
+            Dictionary<string, object> flattenedObject = new Dictionary<string, object>(jsonToFlatten.Flatten());
+
+            return JsonConvert.SerializeObject(flattenedObject);
+
+            //StringBuilder contentToWriteToFile = new StringBuilder();
+            //contentToWriteToFile.Append("{ \n");
+            //foreach (var keyValPair in flattenedObject)
+            //{
+            //    contentToWriteToFile.Append($"\"{keyValPair.Key}\":\"{keyValPair.Value}\",");
+            //    //clean newline from strings
+            //    contentToWriteToFile.Replace("\n", " ").Replace("\r", " ");
+            //    //contentToWriteToFile.Append('\n');
+            //}
+            //contentToWriteToFile.Append('}');
+            //
+            //return contentToWriteToFile.ToString();
         }
 
         private string logPrefix()
