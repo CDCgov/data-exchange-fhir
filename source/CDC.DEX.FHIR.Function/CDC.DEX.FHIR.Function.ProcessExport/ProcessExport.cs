@@ -1,6 +1,8 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using CDC.DEX.FHIR.Function.SharedCode.Models;
+using CDC.DEX.FHIR.Function.SharedCode.Util;
 using JsonFlatten;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.ProcessExport
@@ -41,115 +44,143 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
         /// <param name="log">Function logger</param>
         [FunctionName("ProcessExport")]
         public async Task Run(
-            [ServiceBusTrigger("fhirexportqueue", Connection = "FhirServiceBusConnectionString")] string fhirResourceToProcess,
+            [ServiceBusTrigger("fhireventqueue", Connection = "FhirServiceBusConnectionString")] FhirResourceCreated resourceCreatedMessage,
             ILogger log)
         {
             var exceptions = new List<Exception>();
 
             try
             {
-                log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {fhirResourceToProcess.ToString()}");
+                //EVENT SECTION
+
+                log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
+
+                string requestUrl = $"{configuration["BaseFhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
+
+                JObject fhirResourceToProcessJObject;
+
+                using (HttpClient client = httpClientFactory.CreateClient())
+                using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+                {
+                    // get auth token
+                    string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
+
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
+
+                    var response = await client.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    string jsonString = await response.Content.ReadAsStringAsync();
+
+                    log.LogInformation(logPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
+
+                    fhirResourceToProcessJObject = JObject.Parse(jsonString);
+
+                    //Dictionary<string, string> messagesToSend = new Dictionary<string, string>();
+                    //messagesToSend.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), jObject.ToString());
+                }
+
+                //EXPORT SECTION
+
+                //log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {fhirResourceToProcess.ToString()}");
 
                 //FeatureFlagConfig featureFlagConfig = FeatureFlagConfig.ReadFromEnvironmentVariables();
                 bool flagFhirResourceCreatedExportFunctionFlatten = bool.Parse(configuration["Export:FlattenExport"]);
                 bool flagFhirResourceCreatedExportFunctionUnbundle = bool.Parse(configuration["Export:UnbundleExport"]);
 
-                using (HttpClient client = httpClientFactory.CreateClient())
+
+
+                //JObject jObject = JObject.Parse(fhirResourceToProcess);
+
+                Dictionary<string, string> filesToWrite = new Dictionary<string, string>();
+
+                if (fhirResourceToProcessJObject["resourceType"] != null && fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
                 {
+                    // is a bundle and we will need to unbundle
+                    List<JObject> unbundledFhirObjects = UnbundleFhirBundle(fhirResourceToProcessJObject);
 
-                    JObject jObject = JObject.Parse(fhirResourceToProcess);
-
-                    Dictionary<string, string> filesToWrite = new Dictionary<string, string>();
-
-                    if (jObject["resourceType"] != null && jObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
+                    foreach (JObject subObject in unbundledFhirObjects)
                     {
-                        // is a bundle and we will need to unbundle
-                        List<JObject> unbundledFhirObjects = UnbundleFhirBundle(jObject);
-
-                        foreach (JObject subObject in unbundledFhirObjects)
-                        {
-                            if (flagFhirResourceCreatedExportFunctionFlatten)
-                            {
-                                //flatten
-                                string flattenedJson = FlattenJsonResource(subObject);
-
-                                string pathToWrite = subObject["resourceType"].Value<string>();
-                                //get profile data for sorting bundles
-                                pathToWrite += "/" + jObject["id"].Value<string>();
-                                pathToWrite += "_" + subObject["id"].Value<string>();
-                                filesToWrite.Add(pathToWrite, flattenedJson.ToString());
-                            }
-                            else
-                            {
-                                //no flatten
-                                string pathToWrite = subObject["resourceType"].Value<string>();
-                                //get profile data for sorting bundles
-                                pathToWrite += "/" + subObject["id"].Value<string>();
-                                filesToWrite.Add(pathToWrite, subObject.ToString());
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // a single entry no need to unbundle
-
                         if (flagFhirResourceCreatedExportFunctionFlatten)
                         {
                             //flatten
-                            string flattenedJson = FlattenJsonResource(jObject);
+                            string flattenedJson = FlattenJsonResource(subObject);
 
-                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            if (jObject["resourceType"].Value<string>() == "Bundle")
-                            {
-                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
-                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
-                                pathToWrite += "/" + profilePath;
-                            }
-                            pathToWrite += "/" + jObject["id"].Value<string>();
+                            pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+                            pathToWrite += "_" + subObject["id"].Value<string>();
                             filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
                         {
-                            string pathToWrite = jObject["resourceType"].Value<string>();
+                            //no flatten
+                            string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            if (jObject["resourceType"].Value<string>() == "Bundle")
-                            {
-                                string profilePath = jObject["meta"]["profile"][0].Value<string>();
-                                profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
-                                pathToWrite += "/" + profilePath;
-                            }
-                            pathToWrite += "/" + jObject["id"].Value<string>();
-                            filesToWrite.Add(pathToWrite, jObject.ToString());
+                            pathToWrite += "/" + subObject["id"].Value<string>();
+                            filesToWrite.Add(pathToWrite, subObject.ToString());
                         }
                     }
+                }
+                else
+                {
+                    // a single entry no need to unbundle
 
-                    // END GET FHIR RESOURCE SECTION
-
-                    // START WRITING TO DATA LAKE SECTION
-
-                    string accountName = configuration["Export:DatalakeStorageAccount"];
-
-                    TokenCredential credential = new DefaultAzureCredential();
-
-                    string blobUri = "https://" + accountName + ".blob.core.windows.net";
-
-                    BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
-
-                    BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["Export:DatalakeBlobContainer"]);
-
-                    foreach (var keyValPair in filesToWrite)
+                    if (flagFhirResourceCreatedExportFunctionFlatten)
                     {
-                        BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                        log.LogInformation(logPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
-                        await blobClient.UploadAsync(BinaryData.FromString($"{keyValPair.Value}"), true);
+                        //flatten
+                        string flattenedJson = FlattenJsonResource(fhirResourceToProcessJObject);
+
+                        string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
+                        //get profile data for sorting bundles
+                        if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
+                        {
+                            string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
+                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                            pathToWrite += "/" + profilePath;
+                        }
+                        pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+                        filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                     }
-
-                    // END WRITING TO DATA LAKE SECTION
-
+                    else
+                    {
+                        string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
+                        //get profile data for sorting bundles
+                        if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
+                        {
+                            string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
+                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                            pathToWrite += "/" + profilePath;
+                        }
+                        pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+                        filesToWrite.Add(pathToWrite, fhirResourceToProcessJObject.ToString());
+                    }
                 }
 
+                // END GET FHIR RESOURCE SECTION
 
+                // START WRITING TO DATA LAKE SECTION
+
+                string accountName = configuration["Export:DatalakeStorageAccount"];
+
+                TokenCredential credential = new DefaultAzureCredential();
+
+                string blobUri = "https://" + accountName + ".blob.core.windows.net";
+
+                BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
+
+                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["Export:DatalakeBlobContainer"]);
+
+                foreach (var keyValPair in filesToWrite)
+                {
+                    BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
+                    log.LogInformation(logPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
+                    await blobClient.UploadAsync(BinaryData.FromString($"{keyValPair.Value}"), true);
+                }
+
+                // END WRITING TO DATA LAKE SECTION
 
                 await Task.Yield();
             }
