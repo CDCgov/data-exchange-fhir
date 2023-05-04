@@ -159,6 +159,22 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                     }
                 }
 
+                // FOR CONNECTATHON ALWAYS MAKE A FLATTEN VERSION, IN A SEPERATE DIRECTORY
+                string flattenedJsonTemp = FlattenJsonResource(fhirResourceToProcessJObject);
+
+                string pathToWriteTemp = "Flatten/"+fhirResourceToProcessJObject["resourceType"].Value<string>();
+                //get profile data for sorting bundles
+                if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
+                {
+                    string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
+                    profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                    pathToWriteTemp += "/" + profilePath;
+                }
+                pathToWriteTemp += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+                filesToWrite.Add(pathToWriteTemp, flattenedJsonTemp.ToString());
+                // CONNECTATHON ADDITIONAL FLATTEN END
+
+
                 // END GET FHIR RESOURCE SECTION
 
                 // START WRITING TO DATA LAKE SECTION
