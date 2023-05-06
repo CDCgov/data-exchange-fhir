@@ -42,6 +42,8 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             JsonNode data;
             string jsonString;
 
+            bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+
             data = JsonSerializer.Deserialize<JsonNode>(req.Body);
             jsonString = data.ToString();
 
@@ -52,12 +54,29 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
-            bool isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
+
+            //bool isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
             //JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
             //bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
 
             // set the content type to customer special fhir application/fhir+json
             //req.HttpContext.Response.Headers.Add("Content-Type", "application/fhir+json");
+
+
+
+            bool isValid;
+            if (flagProcessMessageFunctionSkipValidate)
+            {
+                log.LogInformation("Skipping ProcessMessage Validation");
+                isValid = true;
+            }
+            else
+            {
+                isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
+            }
+
+            //JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
+            //bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
 
             ContentResult contentResult = new ContentResult();
             contentResult.ContentType = "application/fhir+json";
