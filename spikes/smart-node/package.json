@@ -1,0 +1,11 @@
+{
+  "name": "smart-node",
+  "version": "1.0.0",
+  "description": "smart node app for testing purposes",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "lrp4",
+  "license": "as main repo"
+}
