@@ -1,8 +1,8 @@
 ### Prerequisite 
 
-environment variables in a file env.js
+environment variables in a file .env
 
-reference file env_sample.js
+reference file .env_sample
 
 ### Run
 
