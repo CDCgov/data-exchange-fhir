@@ -49,10 +49,7 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent
             try
             {
                 log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
-                //string eventMessage = eventData.EventBody.ToString();
-                //FhirResourceCreated resourceCreatedMessage = JsonConvert.DeserializeObject<List<FhirResourceCreated>>(eventMessage).Single<FhirResourceCreated>();
 
-                //AuthConfig authConfig = AuthConfig.ReadFromEnvironmentVariables();
 
                 // GET FHIR RESOURCE SECTION 
                 string requestUrl = $"{configuration["BaseFhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";

@@ -54,16 +54,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
-
-            //bool isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
-            //JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
-            //bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
-
-            // set the content type to customer special fhir application/fhir+json
-            //req.HttpContext.Response.Headers.Add("Content-Type", "application/fhir+json");
-
-
-
             bool isValid;
             if (flagProcessMessageFunctionSkipValidate)
             {
@@ -74,9 +64,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
             }
-
-            //JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
-            //bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
 
             ContentResult contentResult = new ContentResult();
             contentResult.ContentType = "application/fhir+json";

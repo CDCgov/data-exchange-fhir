@@ -78,21 +78,14 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     fhirResourceToProcessJObject = JObject.Parse(jsonString);
 
-                    //Dictionary<string, string> messagesToSend = new Dictionary<string, string>();
-                    //messagesToSend.Add(jObject["resourceType"].Value<string>() + " - " + jObject["id"].Value<string>(), jObject.ToString());
                 }
 
                 //EXPORT SECTION
 
                 //log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {fhirResourceToProcess.ToString()}");
 
-                //FeatureFlagConfig featureFlagConfig = FeatureFlagConfig.ReadFromEnvironmentVariables();
                 bool flagFhirResourceCreatedExportFunctionFlatten = bool.Parse(configuration["Export:FlattenExport"]);
                 bool flagFhirResourceCreatedExportFunctionUnbundle = bool.Parse(configuration["Export:UnbundleExport"]);
-
-
-
-                //JObject jObject = JObject.Parse(fhirResourceToProcess);
 
                 Dictionary<string, string> filesToWrite = new Dictionary<string, string>();
 
@@ -256,18 +249,6 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
             return JsonConvert.SerializeObject(flattenedObject);
 
-            //StringBuilder contentToWriteToFile = new StringBuilder();
-            //contentToWriteToFile.Append("{ \n");
-            //foreach (var keyValPair in flattenedObject)
-            //{
-            //    contentToWriteToFile.Append($"\"{keyValPair.Key}\":\"{keyValPair.Value}\",");
-            //    //clean newline from strings
-            //    contentToWriteToFile.Replace("\n", " ").Replace("\r", " ");
-            //    //contentToWriteToFile.Append('\n');
-            //}
-            //contentToWriteToFile.Append('}');
-            //
-            //return contentToWriteToFile.ToString();
         }
 
         private string logPrefix()
