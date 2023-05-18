@@ -42,6 +42,8 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             JsonNode data;
             string jsonString;
 
+            bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+
             data = JsonSerializer.Deserialize<JsonNode>(req.Body);
             jsonString = data.ToString();
 
@@ -52,9 +54,19 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
-            bool isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\""); 
-            //JsonNode validationNode = JsonNode.Parse(validateReportingBundleResult.JsonString);
-            //bool isValid = validationNode["issue"][0]["diagnostics"].ToString() == "All OK";
+            bool isValid;
+            if (flagProcessMessageFunctionSkipValidate)
+            {
+                log.LogInformation("Skipping ProcessMessage Validation");
+                isValid = true;
+            }
+            else
+            {
+                isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
+            }
+
+            ContentResult contentResult = new ContentResult();
+            contentResult.ContentType = "application/fhir+json";
 
             if (isValid)
             {
@@ -64,11 +76,15 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
 
-                return new OkObjectResult(data.ToJsonString());
+                contentResult.Content = data.ToJsonString();
+                contentResult.StatusCode = 200;
+                return contentResult;
             }
             else
             {
-                return new BadRequestObjectResult(validateReportingBundleResult.JsonString);
+                contentResult.Content = validateReportingBundleResult.JsonString;
+                contentResult.StatusCode = 400;
+                return contentResult;
             }
 
         }
