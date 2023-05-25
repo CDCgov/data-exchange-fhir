@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CDC.DEX.FHIR.Function.ProcessEvent": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7168"
+    }
+  }
+}
