@@ -1,0 +1,14 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "31aab51c46eb3a22eae163171de7eb2f",
+  "meta": {
+    "lastUpdated": "2023-05-30T21:58:34.5259073+00:00"
+  },
+  "issue": [
+    {
+      "severity": "error",
+      "code": "invalid",
+      "diagnostics": "Error occurred when parsing model: 'While building a POCO: Asked to deserialize unknown type 'Medrequest' (at Resource.entry[1].resource[0])'."
+    }
+  ]
+}
