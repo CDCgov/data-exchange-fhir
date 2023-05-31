@@ -6,6 +6,13 @@
     "storage1": {
       "type": "storage.emulator",
       "connectionId": "AzureWebJobsStorage"
+    },
+    "appConfig1": {
+      "secretStore": null,
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.AppConfiguration/configurationStores/cdc-dmi-function-app-config",
+      "type": "appConfig.azure",
+      "connectionId": "AppConfig",
+      "dynamicId": null
     }
   }
 }
