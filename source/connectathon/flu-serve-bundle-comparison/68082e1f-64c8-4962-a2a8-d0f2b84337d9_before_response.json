@@ -1,9 +1,9 @@
 {
   "resourceType": "Bundle",
-  "id": "68082e1f-64c8-4962-a2a8-d0f2b84337d9",
+  "id": "77a425f4-b16c-4c73-a7a9-f44990ca508b",
   "meta": {
     "versionId": "1",
-    "lastUpdated": "2023-05-06T18:36:45.34+00:00",
+    "lastUpdated": "2023-06-01T11:59:53.875+00:00",
     "profile": [
       "http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle"
     ]
@@ -41,6 +41,9 @@
         },
         "subject": {
           "reference": "https://gw.interop.community/Harrison4Saffron/data/Patient/23809"
+        },
+        "encounter": {
+          "reference": "https://gw.interop.community/Harrison4Saffron/data/Encounter/640148"
         },
         "date": "2023-05-06T18:36:25+00:00",
         "author": [
