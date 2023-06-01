@@ -3,6 +3,16 @@
 ## Overview
 
 FHIR Server, systems, and resources for the CDC Data Exchange FHIR.
+
+## Content
+
+`/source` - source code for:
+- process event
+- process export
+- process message
+- shared code
+
+`/spikes` - conectathons, exploratory developments spikes, archive.
   
 ## Public Domain Standard Notice
 This repository constitutes a work of the United States Government and is not
