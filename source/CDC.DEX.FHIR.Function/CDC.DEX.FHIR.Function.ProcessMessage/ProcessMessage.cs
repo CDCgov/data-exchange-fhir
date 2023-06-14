@@ -50,7 +50,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             log.LogInformation("ProcessMessage bundle received: "+ jsonString);
 
             var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
-            PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, log);
+            PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, req.Headers["Authorization"], log);
 
             log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
@@ -72,7 +72,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle");
                 JsonNode resourceNode = data["entry"][1]["resource"];
-                PostContentBundleResult postResult = await PostContentBundle(configuration, resourceNode.ToJsonString(), location, log);
+                PostContentBundleResult postResult = await PostContentBundle(configuration, resourceNode.ToJsonString(), location, req.Headers["Authorization"], log);
 
                 data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
 
@@ -89,7 +89,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         }
 
-        private async Task<PostContentBundleResult> PostContentBundle(IConfiguration configuration, string bundleJson, Uri location, ILogger log)
+        private async Task<PostContentBundleResult> PostContentBundle(IConfiguration configuration, string bundleJson, Uri location, string bearerToken, ILogger log)
         {
             PostContentBundleResult postContentResponse;
 
