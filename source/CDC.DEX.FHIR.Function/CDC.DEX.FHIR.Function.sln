@@ -3,11 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDC.DEX.FHIR.Function.ProcessExport", "CDC.DEX.FHIR.Function.ProcessExport\CDC.DEX.FHIR.Function.ProcessExport.csproj", "{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDC.DEX.FHIR.Function.DataExport", "CDC.DEX.FHIR.Function.ProcessExport\CDC.DEX.FHIR.Function.DataExport.csproj", "{C8C96036-68EC-47A8-AC0C-DBC20BF3DC39}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDC.DEX.FHIR.Function.SharedCode", "CDC.DEX.FHIR.Function.SharedCode\CDC.DEX.FHIR.Function.SharedCode.csproj", "{B8CAA094-BFE8-4C68-BC07-94B512DF446B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDC.DEX.FHIR.Function.ProcessEvent", "CDC.DEX.FHIR.Function.ProcessEvent\CDC.DEX.FHIR.Function.ProcessEvent.csproj", "{B37F1D47-FCDB-4EAF-8E55-709732598516}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDC.DEX.FHIR.Function.ProcessMessage", "CDC.DEX.FHIR.Function.ProcessMessage\CDC.DEX.FHIR.Function.ProcessMessage.csproj", "{9B90FBF0-487A-419D-9BB5-DD17D7DA282C}"
 EndProject
@@ -25,10 +23,6 @@ Global
 		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8CAA094-BFE8-4C68-BC07-94B512DF446B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B37F1D47-FCDB-4EAF-8E55-709732598516}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B90FBF0-487A-419D-9BB5-DD17D7DA282C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B90FBF0-487A-419D-9BB5-DD17D7DA282C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B90FBF0-487A-419D-9BB5-DD17D7DA282C}.Release|Any CPU.ActiveCfg = Release|Any CPU

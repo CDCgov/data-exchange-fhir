@@ -16,23 +16,25 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace CDC.DEX.FHIR.Function.ProcessExport
+namespace CDC.DEX.FHIR.Function.DataExport
 {
-    public class ProcessExport
+    public class DataExport
     {
 
 
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
+        private readonly FhirEventProcessor fhirEventProcessor;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public ProcessExport(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public DataExport(IHttpClientFactory httpClientFactory, IConfiguration configuration,FhirEventProcessor fhirEventProcessor)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
+            this.fhirEventProcessor =  fhirEventProcessor;
         }
 
 
@@ -42,7 +44,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
         /// <param name="fhirResourceToProcess">The resource created message read from the service bus queue</param>
         /// <param name="configuration">App Configuration</param>
         /// <param name="log">Function logger</param>
-        [FunctionName("ProcessExport")]
+        [FunctionName("DataExport")]
         public async Task Run(
             [ServiceBusTrigger("fhireventqueue", Connection = "FhirServiceBusConnectionString")] FhirResourceCreated resourceCreatedMessage,
             ILogger log)
@@ -53,32 +55,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             {
                 //EVENT SECTION
 
-                log.LogInformation(logPrefix() + $"Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
-
-                string requestUrl = $"{configuration["BaseFhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
-
-                JObject fhirResourceToProcessJObject;
-
-                using (HttpClient client = httpClientFactory.CreateClient())
-                using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
-                {
-                    // get auth token
-                    string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
-
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
-
-                    var response = await client.SendAsync(request);
-
-                    response.EnsureSuccessStatusCode();
-
-                    string jsonString = await response.Content.ReadAsStringAsync();
-
-                    log.LogInformation(logPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
-
-                    fhirResourceToProcessJObject = JObject.Parse(jsonString);
-
-                }
+                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage,httpClientFactory,configuration,log);
 
                 //EXPORT SECTION
 
@@ -185,7 +162,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                 foreach (var keyValPair in filesToWrite)
                 {
                     BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                    log.LogInformation(logPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
+                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
                     await blobClient.UploadAsync(BinaryData.FromString($"{keyValPair.Value}"), true);
                 }
 
@@ -251,9 +228,9 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
         }
 
-        private string logPrefix()
+        public static string LogPrefix()
         {
-            return $"ProcessExport - {DateTime.UtcNow}: ";
+            return $"DataExport - {DateTime.UtcNow}: ";
         }
 
     }

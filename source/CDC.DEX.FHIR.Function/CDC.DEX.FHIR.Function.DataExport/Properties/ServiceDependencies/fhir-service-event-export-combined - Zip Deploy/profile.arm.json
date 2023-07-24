@@ -21,7 +21,7 @@
     },
     "resourceName": {
       "type": "string",
-      "defaultValue": "fhir-service-event-hub-functions",
+      "defaultValue": "fhir-service-event-export-combined",
       "metadata": {
         "description": "Name of the main resource to be created by this template."
       }

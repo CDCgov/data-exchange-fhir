@@ -1,6 +1,5 @@
 ﻿using Azure.Identity;
-using CDC.DEX.FHIR.Function.ProcessEvent.Config;
-using Microsoft.AspNetCore.Http;
+using CDC.DEX.FHIR.Function.DataExport.Config;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +10,7 @@ using System.Net;
 using System.Net.Http;
 
 [assembly: FunctionsStartup(typeof(StartupConfiguration))]
-namespace CDC.DEX.FHIR.Function.ProcessEvent.Config
+namespace CDC.DEX.FHIR.Function.DataExport.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
@@ -35,6 +34,7 @@ namespace CDC.DEX.FHIR.Function.ProcessEvent.Config
             builder.Services.AddHttpClient("RetryClientFactory")
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddPolicyHandler(GetRetryPolicy(3));
+            builder.Services.AddSingleton<FhirEventProcessor>(new FhirEventProcessor());
 
         }
 
