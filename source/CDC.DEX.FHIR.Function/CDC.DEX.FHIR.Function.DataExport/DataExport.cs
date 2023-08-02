@@ -151,7 +151,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 string accountName = configuration["Export:DatalakeStorageAccount"];
 
-                TokenCredential credential = new DefaultAzureCredential();
+                TokenCredential credential = new ClientSecretCredential(configuration["Export:EDAVTenatId"], configuration["Export:EDAVClientId"], configuration["Export:EDAVClientSecret"]);
 
                 string blobUri = "https://" + accountName + ".blob.core.windows.net";
 
