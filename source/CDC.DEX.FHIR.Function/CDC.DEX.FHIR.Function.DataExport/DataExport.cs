@@ -68,7 +68,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 if (fhirResourceToProcessJObject["resourceType"] != null && fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
                 {
-                    // is a bundle and we will need to unbundle
+                    // is a bundle and unbundle flag is true, need to unbundle
                     List<JObject> unbundledFhirObjects = UnbundleFhirBundle(fhirResourceToProcessJObject);
 
                     foreach (JObject subObject in unbundledFhirObjects)
@@ -108,7 +108,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                         if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
                         {
                             string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/")+1);
                             pathToWrite += "/" + profilePath;
                         }
                         pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
@@ -121,7 +121,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                         if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
                         {
                             string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/")+1);
                             pathToWrite += "/" + profilePath;
                         }
                         pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
@@ -137,7 +137,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
                 {
                     string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                    profilePath = profilePath.Substring(profilePath.LastIndexOf("/"));
+                    profilePath = profilePath.Substring(profilePath.LastIndexOf("/") + 1);
                     pathToWriteTemp += "/" + profilePath;
                 }
                 pathToWriteTemp += "/" + fhirResourceToProcessJObject["id"].Value<string>();
