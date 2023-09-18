@@ -66,6 +66,52 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 Dictionary<string, string> filesToWrite = new Dictionary<string, string>();
 
+
+                // DESTINATION DETERMINATION
+
+                // default SA and container path
+                string storageAccountName = configuration["Export:DatalakeStorageAccount"];
+                string blobContainerPath = configuration["Export:DatalakeBlobContainer"];
+                string SATenantIdConfigName = "Export:EDAVTenatId";
+                string SAClientIdConfigName = "Export:EDAVClientId";
+                string SAClientSecretConfigName = "Export:EDAVClientSecret";
+
+
+                string testDestinationConfig = configuration["Export:DestinationConfig"];
+                JObject testDestinationConfigJSON = JObject.Parse(testDestinationConfig);
+
+                if(fhirResourceToProcessJObject.ContainsKey("meta")&& fhirResourceToProcessJObject["meta"].Value<JObject>().ContainsKey("profile"))
+                {
+                    // potentially change how the resources are sorted
+                    string validationProfile = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
+
+                    foreach(JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
+                    {
+                        foreach(string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
+                        {
+                            if (validationProfile.Trim() == profilePath.Trim())
+                            {
+                                storageAccountName = configuration[profileConfig["StorageAccount"].Value<string>().Trim()];
+                                blobContainerPath = configuration[profileConfig["BlobContainerPath"].Value<string>().Trim()];
+                                SATenantIdConfigName = profileConfig["SAServicePrincipalTenantIdConfigName"].Value<string>().Trim();
+                                SAClientIdConfigName = profileConfig["SAServicePrincipalClientIdConfigName"].Value<string>().Trim();
+                                SAClientSecretConfigName = profileConfig["SAServicePrincipalClientSecretConfigName"].Value<string>().Trim();
+                            }
+                        }
+
+                    }
+
+                }
+
+                // get auth for SA
+                TokenCredential credential = new ClientSecretCredential(
+                    configuration[SATenantIdConfigName],
+                    configuration[SAClientIdConfigName],
+                    configuration[SAClientSecretConfigName]);
+
+
+                // DATA EXPORT PROCESSING
+
                 if (fhirResourceToProcessJObject["resourceType"] != null && fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
                 {
                     // is a bundle and unbundle flag is true, need to unbundle
@@ -149,15 +195,13 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 // START WRITING TO DATA LAKE SECTION
 
-                string accountName = configuration["Export:DatalakeStorageAccount"];
 
-                TokenCredential credential = new ClientSecretCredential(configuration["Export:EDAVTenatId"], configuration["Export:EDAVClientId"], configuration["Export:EDAVClientSecret"]);
 
-                string blobUri = "https://" + accountName + ".blob.core.windows.net";
+                string blobUri = "https://" + storageAccountName + ".blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
-                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(configuration["Export:DatalakeBlobContainer"]);
+                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobContainerPath);
 
                 foreach (var keyValPair in filesToWrite)
                 {
