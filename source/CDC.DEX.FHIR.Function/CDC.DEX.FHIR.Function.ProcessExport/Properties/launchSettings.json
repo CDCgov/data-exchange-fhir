@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "CDC.DEX.FHIR.Function.ProcessExport": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7267"
-    }
-  }
-}
