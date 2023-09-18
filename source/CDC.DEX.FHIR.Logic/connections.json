@@ -1,0 +1,17 @@
+{
+    "serviceProviderConnections": {
+      "serviceBus": {
+        "parameterValues": {
+          "fullyQualifiedNamespace": "@appsetting('serviceBus_fullyQualifiedNamespace')",
+          "authProvider": {
+            "Type": "ManagedServiceIdentity"
+          }
+        },
+        "serviceProvider": {
+          "id": "/serviceProviders/serviceBus"
+        },
+        "displayName": "connectiontoexportqueue"
+      }
+    },
+    "managedApiConnections": {}
+  }
