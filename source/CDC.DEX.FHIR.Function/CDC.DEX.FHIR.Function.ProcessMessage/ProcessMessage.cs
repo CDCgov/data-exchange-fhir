@@ -92,7 +92,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 else
                 {
                     contentResult.Content = validateReportingBundleResult.JsonString;
-                    contentResult.StatusCode = 400;
+                    contentResult.StatusCode = 422;
                     return contentResult;
                 }
             }
