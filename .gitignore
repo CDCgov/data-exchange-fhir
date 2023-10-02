@@ -1,6 +1,6 @@
 .vs
 .vscode
-
+local.settings.*
 
 
 ## Ignore Visual Studio temporary files, build results, and
