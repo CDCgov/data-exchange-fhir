@@ -86,7 +86,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     data = JsonNode.Parse(postResult.JsonString);
 
                     contentResult.Content = data.ToJsonString();
-                    contentResult.StatusCode = 200;
+                    contentResult.StatusCode = 201;
                     return contentResult;
                 }
                 else
