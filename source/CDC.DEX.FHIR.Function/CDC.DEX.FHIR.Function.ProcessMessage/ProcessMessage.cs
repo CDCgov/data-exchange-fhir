@@ -120,13 +120,11 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 //string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
 
                 
-                Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
-                string cleanedBearerToken = regexString.Replace(bearerToken, "");
-                cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
+
 
                 //passthrough the cleaned auth bearer token used
                 //request.Headers.Add("Authorization", cleanedBearerToken);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",cleanedBearerToken);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CleanBearerToken(bearerToken));
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
@@ -141,6 +139,15 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             }
 
             return postContentResponse;
+        }
+
+        private string CleanBearerToken(string bearerToken)
+        {
+            Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
+            string cleanedBearerToken = regexString.Replace(bearerToken, "");
+            cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
+
+            return cleanedBearerToken;
         }
 
 
