@@ -122,9 +122,11 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 
                 Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
                 string cleanedBearerToken = regexString.Replace(bearerToken, "");
+                cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
 
                 //passthrough the cleaned auth bearer token used
-                request.Headers.Add("Authorization", cleanedBearerToken);
+                //request.Headers.Add("Authorization", cleanedBearerToken);
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer",cleanedBearerToken);
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
