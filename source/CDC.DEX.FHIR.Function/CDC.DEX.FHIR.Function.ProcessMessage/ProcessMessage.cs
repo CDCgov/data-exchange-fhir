@@ -54,7 +54,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 log.LogInformation("ProcessMessage bundle received: " + jsonString);
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
-                PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, req.Headers["Authorization"], log);
+
+                string cleanedBearerToken = CleanBearerToken(req.Headers["Authorization"]);
+
+                PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
 
                 log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
@@ -80,8 +83,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     //JsonNode resourceNode = data["entry"][1]["resource"];
                     JsonNode messageNode = data;
 
-
-                    PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, req.Headers["Authorization"], log);
+                    PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, cleanedBearerToken, log);
 
                     //data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
                     data = JsonNode.Parse(postResult.JsonString);
@@ -119,12 +121,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 //string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
 
-                
-
 
                 //passthrough the cleaned auth bearer token used
                 //request.Headers.Add("Authorization", cleanedBearerToken);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CleanBearerToken(bearerToken));
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
