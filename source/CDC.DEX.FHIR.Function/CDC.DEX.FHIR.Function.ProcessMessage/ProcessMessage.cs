@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -117,8 +118,13 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
 
                 //string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
-                //passthrough the auth bearer token used
-                request.Headers.Add("Authorization", bearerToken);
+
+                
+                Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
+                string cleanedBearerToken = regexString.Replace(bearerToken, "");
+
+                //passthrough the cleaned auth bearer token used
+                request.Headers.Add("Authorization", cleanedBearerToken);
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
