@@ -119,12 +119,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
             {
 
-                //string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
-
-
                 //passthrough the cleaned auth bearer token used
-                //request.Headers.Add("Authorization", cleanedBearerToken);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                // add the Ocp-Apim-Subscription-Key if it's configured
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
