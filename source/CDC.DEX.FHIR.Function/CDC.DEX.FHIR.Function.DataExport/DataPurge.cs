@@ -24,30 +24,27 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
-        private readonly FhirEventProcessor fhirEventProcessor;
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public DataPurge(IHttpClientFactory httpClientFactory, IConfiguration configuration, FhirEventProcessor fhirEventProcessor)
+        public DataPurge(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
-            this.fhirEventProcessor = fhirEventProcessor;
         }
 
 
         /// <summary>
-        /// Function event trigger entry point
+        /// Function timed trigger entry point
         /// </summary>
-        /// <param name="fhirResourceToProcess">The resource created message read from the service bus queue</param>
-        /// <param name="configuration">App Configuration</param>
+        /// <param name="triggerSchedule">The timer schedule which the function is triggered off of, configured dynamically through config</param>
         /// <param name="log">Function logger</param>
         [FunctionName("DataPurge")]
-        public async System.Threading.Tasks.Task RunAsync([TimerTrigger("%Purge:Schedule%")] TimerInfo myTimer, ILogger log)
+        public async System.Threading.Tasks.Task RunAsync([TimerTrigger("%Purge:Schedule%")] TimerInfo triggerSchedule, ILogger log)
         {
-            log.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            log.LogInformation($"DataPurge Timer trigger function executed at: {DateTime.Now}");
 
             var serializer = new FhirJsonSerializer(new SerializerSettings()
             {
@@ -74,43 +71,56 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             string testDestinationConfig = configuration["Export:DestinationConfig"];
             JObject testDestinationConfigJSON = JObject.Parse(testDestinationConfig);
 
+            Dictionary<string,string> resourceIdsToDelete = new Dictionary<string,string>();
 
             foreach (JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
             {
-                //take each profile and add it to a search query
+                //take each profile and add it to a search query,
+                //but only if it has a DaysToRetain (if it's missing or less than 1, never purge)
 
-                var searchParam = new SearchParams().Where($"_lastUpdated=lt{DateTime.Now.AddDays(-0).ToString("s")}");
-
-                foreach (string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
+                if (profileConfig.ContainsKey("DaysToRetain") && profileConfig["DaysToRetain"].Value<int>() >= 0)
                 {
-                    searchParam.Where($"_profile={profilePath}");
-                }
 
-                Bundle results = await client.SearchAsync<Bundle>(searchParam);
+                    int daysToRetain = profileConfig["DaysToRetain"].Value<int>();
 
-                int resultCount=0;
+                    var searchParam = new SearchParams().Where($"_lastUpdated=le{DateTime.UtcNow.AddDays(-daysToRetain).ToString("s")}");
 
-                List<string> resourceIdsToDelete = new List<string>();
-              
-                do{
-                    foreach (EntryComponent entryComponent in results.Entry)
+                    foreach (string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
                     {
-                        resourceIdsToDelete.Add(entryComponent.Resource.Id);
+                        searchParam.Where($"_profile={profilePath}");
                     }
-                    resultCount += results.Entry.Count();
+
+                    Bundle results = await client.SearchAsync<Bundle>(searchParam);
+
+                    //int resultCount = 0;
+
+                    do
+                    {
+                        foreach (EntryComponent entryComponent in results.Entry)
+                        {
+                            resourceIdsToDelete.Add(entryComponent.Resource.Id, entryComponent.Resource.TypeName);
+                        }
+                        //resultCount += results.Entry.Count();
+                    }
+                    while ((results = await client.ContinueAsync(results)) != null);
+
+
+                    //log.LogInformation(searchParam.ToUriParamList().ToQueryString());
+                    //log.LogInformation(resultCount.ToString());
+                    //log.LogInformation(serializer.SerializeToString(results));
+
                 }
-                while ((results = await client.ContinueAsync(results)) != null);
-
-
-                log.LogInformation(searchParam.ToUriParamList().ToQueryString());
-                log.LogInformation(resultCount.ToString());
-                //log.LogInformation(serializer.SerializeToString(results));
-
             }
 
             // delete the history and the resource
-
-
+            foreach(string resourceId in resourceIdsToDelete.Keys)
+            {
+                SearchParams searchParams = new SearchParams();
+                searchParams.Add("_id", resourceId);
+                searchParams.Add("hardDelete", "true");
+                await client.DeleteAsync(resourceIdsToDelete[resourceId], searchParams);
+                log.LogInformation($"Hard Delete Successful: {resourceIdsToDelete[resourceId]}/{resourceId}");
+            }
 
 
         }
