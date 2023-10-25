@@ -86,13 +86,13 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     data = JsonNode.Parse(postResult.JsonString);
 
                     contentResult.Content = data.ToJsonString();
-                    contentResult.StatusCode = 200;
+                    contentResult.StatusCode = 201;
                     return contentResult;
                 }
                 else
                 {
                     contentResult.Content = validateReportingBundleResult.JsonString;
-                    contentResult.StatusCode = 400;
+                    contentResult.StatusCode = 422;
                     return contentResult;
                 }
             }
