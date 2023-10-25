@@ -1,0 +1,11 @@
+{
+  "RootPath": "",
+  "BaseFhirUrl": "",
+  "ClientId": "",
+  "ClientSecret": "",
+  "BearerToken": "",
+  "TokenAudience": "",
+  "TokenIssuer": "",
+  "TokenSubject": "",
+  "TokenExpiry": ""
+}
