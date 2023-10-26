@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -53,7 +54,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 log.LogInformation("ProcessMessage bundle received: " + jsonString);
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
-                PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, req.Headers["Authorization"], log);
+
+                string cleanedBearerToken = CleanBearerToken(req.Headers["Authorization"]);
+
+                PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
 
                 log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
@@ -79,8 +83,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     //JsonNode resourceNode = data["entry"][1]["resource"];
                     JsonNode messageNode = data;
 
-
-                    PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, req.Headers["Authorization"], log);
+                    PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, cleanedBearerToken, log);
 
                     //data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
                     data = JsonNode.Parse(postResult.JsonString);
@@ -116,9 +119,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
             {
 
-                //string token = await FhirServiceUtils.GetFhirServerToken(configuration, client);
-                //passthrough the auth bearer token used
-                request.Headers.Add("Authorization", bearerToken);
+                //passthrough the cleaned auth bearer token used
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+
+                // add the Ocp-Apim-Subscription-Key if it's configured
                 request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
                 var response = await client.SendAsync(request);
@@ -133,6 +137,15 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             }
 
             return postContentResponse;
+        }
+
+        private string CleanBearerToken(string bearerToken)
+        {
+            Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
+            string cleanedBearerToken = regexString.Replace(bearerToken, "");
+            cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
+
+            return cleanedBearerToken;
         }
 
 
