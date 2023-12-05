@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2023-05-06
+## [0.3.0] - 2023-10-27
+	- Added DataPurge function as a timed function to remove records from the fire after a period of minimum retention
+	- Added manual bulk uploading utility to repo
+	- Updated $process-message http response codes
+	- Includes various fixes for compliance
+
+## [0.2.0] - 2023-10-02
 	- Functional version used at September 2023 Connectathon
 	- Moved functionality of event-triggered processing merged into single function app with data exporting
 	- Removed now deprecated event function app
