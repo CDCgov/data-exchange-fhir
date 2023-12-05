@@ -76,14 +76,14 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             foreach (JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
             {
                 //take each profile and add it to a search query,
-                //but only if it has a DaysToRetain (if it's missing or less than 1, never purge)
+                //but only if it has a HoursToRetain (if it's missing or less than 1, never purge)
 
-                if (profileConfig.ContainsKey("DaysToRetain") && profileConfig["DaysToRetain"].Value<int>() >= 0)
+                if (profileConfig.ContainsKey("HoursToRetain") && profileConfig["HoursToRetain"].Value<int>() >= 0)
                 {
 
-                    int daysToRetain = profileConfig["DaysToRetain"].Value<int>();
+                    int hoursToRetain = profileConfig["HoursToRetain"].Value<int>();
 
-                    var searchParam = new SearchParams().Where($"_lastUpdated=le{DateTime.UtcNow.AddDays(-daysToRetain).ToString("s")}");
+                    var searchParam = new SearchParams().Where($"_lastUpdated=le{DateTime.UtcNow.AddHours(-hoursToRetain).ToString("s")}");
 
                     foreach (string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
                     {
