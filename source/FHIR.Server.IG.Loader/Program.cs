@@ -451,7 +451,7 @@ namespace CDC.DEX.FHIR
         // fix invalid div section in fhir metadata file contents
         static string FixDiv(string content)
         {
-            Regex regex = new(@"<div(.*?)</div>"); // find div section
+            Regex regex = new(@"<div(.*?)</div>", RegexOptions.None, TimeSpan.FromMilliseconds(100)); // find div section
             MatchCollection matches = regex.Matches(content);
 
             Match? match = null;
