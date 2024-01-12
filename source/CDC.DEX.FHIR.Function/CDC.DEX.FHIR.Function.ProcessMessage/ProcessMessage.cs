@@ -6,7 +6,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
-using CDC.DEX.FHIR.Function.SharedCode.Util;
+// using CDC.DEX.FHIR.Function.SharedCode.Util;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -39,27 +40,67 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             ILogger log)
         {
 
+            ContentResult contentResult = new ContentResult();
+            contentResult.ContentType = "application/fhir+json";
+
             try
             {
                 log.LogInformation("C# HTTP trigger function processed a request.");
 
-                JsonNode data;
-                string jsonString;
+                // limit log of bundles or validation result to the first 100 chars
+                const int maxLengthForLog = 500;
+
+
+                // guard for missing Authorization in Headers
+                const string authorizationKeyName = "Authorization";
+                if (!req.Headers.ContainsKey(authorizationKeyName)) 
+                {
+                    const string errorMessage =  $"Headers missing {authorizationKeyName}";
+                    log.LogError(errorMessage);
+                    contentResult.Content = JsonErrorStr(errorMessage);
+                    contentResult.StatusCode = 401;
+                    return contentResult;
+                } // .if
 
                 bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+                
+                // guard for empty request body, no payload
+                if (req.ContentLength == 0) {
+                    const string errorMessage =  $"request body content length null";
+                    log.LogError(errorMessage);
+                    contentResult.Content = JsonErrorStr(errorMessage);
+                    contentResult.StatusCode = 400;
+                    return contentResult;
+                } // .if
 
-                data = JsonSerializer.Deserialize<JsonNode>(req.Body);
-                jsonString = data.ToString();
+                // try to deserialize body payload to json
+                JsonNode data;
+                string jsonString = string.Empty;
+                try 
+                {
+                    data = JsonSerializer.Deserialize<JsonNode>(req.Body);
+                    jsonString = data.ToString() ?? string.Empty;
+                } // .try
+                catch (JsonException  e) 
+                {
+                    log.LogError(e.ToString());
+                    contentResult.Content = JsonErrorStr("error deserialize received JSON");
+                    contentResult.StatusCode = 400;
+                    return contentResult;
+                } // .catch
 
-                log.LogInformation("ProcessMessage bundle received: " + jsonString);
+                log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
+
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
-                string cleanedBearerToken = CleanBearerToken(req.Headers["Authorization"]);
+                string cleanedBearerToken = CleanBearerToken(req.Headers[authorizationKeyName]);
 
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
 
-                log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
+                log.LogInformation("ProcessMessage validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
+
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
@@ -71,9 +112,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 {
                     isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
                 }
-
-                ContentResult contentResult = new ContentResult();
-                contentResult.ContentType = "application/fhir+json";
 
                 if (isValid)
                 {
@@ -99,21 +137,32 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     return contentResult;
                 }
             }
-            catch (HttpRequestException e)
+            // catch (HttpRequestException e)
+            catch( Exception e)
             {
-                ContentResult contentResult = new ContentResult();
-                contentResult.ContentType = "application/fhir+json";
-                contentResult.StatusCode = ((int)e.StatusCode.Value);
-                return contentResult;
-            }
+                if (e is HttpRequestException httpException)
+                {
+                    contentResult.Content = JsonErrorStr($"http error {httpException.StatusCode}");
+                    contentResult.StatusCode = (int)httpException.StatusCode;
+                }
+                    else 
+                {
+                    contentResult.Content = JsonErrorStr("unexpected condition was encountered");
+                    contentResult.StatusCode = 500; // code for internal server error as exception
+                }
+                log.LogError(e.ToString());
 
-        }
+                return contentResult;
+
+            } // .catch
+
+        } // .run
 
         private async Task<PostContentBundleResult> PostContentBundle(IConfiguration configuration, string bundleJson, Uri location, string bearerToken, ILogger log)
         {
             PostContentBundleResult postContentResponse;
 
-            log.LogInformation($"http response: {location.AbsoluteUri}");
+            log.LogInformation($"PostContentBundle, sending for validation to FHIR server endpoint: {location.AbsoluteUri}");
 
             using (HttpClient client = httpClientFactory.CreateClient())
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
@@ -131,7 +180,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 string jsonString = await response.Content.ReadAsStringAsync();
 
-                log.LogInformation($"http response: {response.IsSuccessStatusCode}");
+                log.LogInformation($"PostContentBundle, received from FHIR server http response status code success: {response.IsSuccessStatusCode}");
 
                 postContentResponse = new PostContentBundleResult() { StatusCode = response.StatusCode, JsonString = jsonString };
             }
@@ -146,8 +195,20 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
 
             return cleanedBearerToken;
-        }
+        } // .CleanBearerToken
 
+        private string JsonErrorStr(string errorMessage)
+        {
+            return (new JsonObject
+            {
+                ["error"] = errorMessage.ToLower(),
+            }).ToJsonString();
+        } // .JsonErrorStr
 
-    }
-}
+        private string TruncateStrForLog(string jsonString, int maxLen)   
+        {
+            return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
+        } // .TruncateStrForLog
+
+    } // .class 
+} // .namespace 
