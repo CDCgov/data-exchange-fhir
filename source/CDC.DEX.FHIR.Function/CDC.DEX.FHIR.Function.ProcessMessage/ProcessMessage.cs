@@ -140,12 +140,12 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             // catch (HttpRequestException e)
             catch( Exception e)
             {
-                if (e is HttpRequestException httpException)
+                if (e is HttpRequestException httpException) // exception returned from the FHIR server call
                 {
                     contentResult.Content = JsonErrorStr($"http error {httpException.StatusCode}");
                     contentResult.StatusCode = (int)httpException.StatusCode;
                 }
-                    else 
+                    else // something else (exception) happened
                 {
                     contentResult.Content = JsonErrorStr("unexpected condition was encountered");
                     contentResult.StatusCode = 500; // code for internal server error as exception
