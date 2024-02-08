@@ -39,9 +39,11 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-
-            ContentResult contentResult = new ContentResult();
-            contentResult.ContentType = "application/fhir+json";
+            DateTime startProcessMessage = DateTime.Now;
+            ContentResult contentResult = new ContentResult
+            {
+                ContentType = "application/fhir+json"
+            };
 
             try
             {
@@ -96,9 +98,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 string cleanedBearerToken = CleanBearerToken(req.Headers[authorizationKeyName]);
 
+                DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
-
-                log.LogInformation("ProcessMessage validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
+                log.LogInformation($"ProcessMessage validation done, duration ms: {durationFHIRValidation.Milliseconds} result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
 
@@ -155,6 +158,12 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 return contentResult;
 
             } // .catch
+            finally 
+            {
+                TimeSpan durationProcessMessage = DateTime.Now - startProcessMessage;
+                log.LogInformation($"ProcessMessage run duration ms: {durationProcessMessage.Milliseconds}");
+
+            }
 
         } // .run
 
