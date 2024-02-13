@@ -101,7 +101,9 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-                log.LogInformation($"ProcessMessage validation done, duration ms: {durationFHIRValidation.Milliseconds} result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                log.LogInformation($"ProcessMessage validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                log.LogInformation($"ProcessMessage validation run duration ms: {durationFHIRValidation.Milliseconds}");
+                
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
 
