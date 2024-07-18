@@ -15,7 +15,6 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
-
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
     public class ProcessMessage
@@ -206,7 +205,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
 
             return cleanedBearerToken;
-        } // .CleanBearerToken
+        }
 
         private string JsonErrorStr(string errorMessage)
         {
