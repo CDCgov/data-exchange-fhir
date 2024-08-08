@@ -13,6 +13,7 @@ env:
   CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
   CLEINT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
   TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
+  RESOURCE_GROUP: 'ocio-ede-prd-moderate-fhir-rg'
 
 jobs:
   build-and-deploy:
@@ -37,7 +38,7 @@ jobs:
     - name: 'Az login'
       shell: pwsh
       run: |
-        az login --service-principal --username=$CLIENT_ID --password=$CLIENT_SECRET --tenant=$TENANT_ID
+        az login --service-principal --username=$CLIENT_ID --password=$CLIENT_SECRET --tenant=$TENANT_ID --allow-no-subscriptions
         
     - name: 'Deploy to Azure Function App'
       shell: pwsh
