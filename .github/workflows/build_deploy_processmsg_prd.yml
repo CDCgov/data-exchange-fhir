@@ -11,7 +11,7 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
   DOTNET_VERSION: '6.0.x'    
   CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
-  CLEINT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
+  CLIENT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
   TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
   RESOURCE_GROUP: 'ocio-ede-prd-moderate-fhir-rg'
 
