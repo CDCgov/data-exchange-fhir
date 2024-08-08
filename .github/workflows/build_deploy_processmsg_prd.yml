@@ -44,7 +44,7 @@ jobs:
       shell: pwsh
       run: |
         az functionapp deployment source config-zip \
-          --resource-group ${{ env.RESOURCE_GROUP }} \
+          -g ${{ env.RESOURCE_GROUP }} \
           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
           --src-path './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output.zip'
 
