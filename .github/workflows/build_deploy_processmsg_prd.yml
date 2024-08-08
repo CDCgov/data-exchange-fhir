@@ -1,0 +1,51 @@
+name: Deploy ProcessMessage Function App to PROD
+
+on:
+  push:
+    branches:
+      - main
+      - feature/fhir-prd
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'ocio-ede-prd-fhir-processmsg-fa'   
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
+  DOTNET_VERSION: '6.0.x'    
+  CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
+  CLEINT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
+  TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    environment: prod
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v3
+
+    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: pwsh
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --configuration Release --output ./output
+        popd
+          
+    - name: 'Az login'
+      shell: pwsh
+      run: |
+        az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET -t $TENANT_ID
+        
+    - name: 'Deploy to Azure Function App'
+      shell: pwsh
+      run: |
+        az functionapp deployment source config-zip \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
+          --src-path './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output.zip'
+
+
+
