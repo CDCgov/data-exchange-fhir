@@ -38,7 +38,7 @@ jobs:
     - name: 'Az login'
       shell: pwsh
       run: |
-        az login --service-principal -u $CLIENT_ID -p=$CLIENT_SECRET -t $TENANT_ID --allow-no-subscriptions
+        az login --service-principal -u=$CLIENT_ID -p=$CLIENT_SECRET -t=$TENANT_ID --allow-no-subscriptions
         
     - name: 'Deploy to Azure Function App'
       shell: pwsh
