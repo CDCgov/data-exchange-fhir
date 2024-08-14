@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Net;
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -35,7 +36,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         [FunctionName("ProcessMessage")]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             DateTime startProcessMessage = DateTime.Now;
@@ -219,6 +220,19 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
         {
             return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
         } // .TruncateStrForLog
+
+        [FunctionName("Health")]
+        public async Task<IActionResult> RunHealthCheck(
+              [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
+        {
+            ContentResult contentResult = new ContentResult
+            {
+                ContentType = "application/json",
+                StatusCode = (int) HttpStatusCode.OK  // 200
+            };
+
+            return contentResult;
+        }
 
     } // .class 
 } // .namespace 
