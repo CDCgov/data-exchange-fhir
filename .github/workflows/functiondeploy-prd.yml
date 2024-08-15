@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main # or the branch you want to deploy from
+      - feature/fhir-prd
 
 env:
    AZURE_FUNCTIONAPP_NAME: 'ocio-ede-prd-fhir-dataexport-fa'
