@@ -1,49 +1,49 @@
-# name: Deploy ProcessMessage Function App to PROD
-# on:
-#   push:
-#     branches:
-#       - main
-#       - feature/fhir-prd
+name: Deploy ProcessMessage Function App to PROD
+on:
+  push:
+    branches:
+      - main
+      - feature/fhir-prd
 
-# env:
-#   AZURE_FUNCTIONAPP_NAME: 'ocio-ede-prd-fhir-processmsg-fa'   
-#   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
-#   DOTNET_VERSION: '6.0.x'    
-#   CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
-#   CLIENT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
-#   TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
-#   RESOURCE_GROUP: 'ocio-ede-prd-moderate-fhir-rg'
+env:
+  AZURE_FUNCTIONAPP_NAME: 'ocio-ede-prd-fhir-processmsg-fa'   
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
+  DOTNET_VERSION: '6.0.x'    
+  CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
+  CLIENT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
+  TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
+  RESOURCE_GROUP: 'ocio-ede-prd-moderate-fhir-rg'
 
-# jobs:
-#   build-and-deploy:
-#     runs-on: windows-latest
-#     environment: prod
-#     steps:
-#     - name: 'Checkout GitHub Action'
-#       uses: actions/checkout@v3
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    environment: prod
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v3
 
-#     - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-#       uses: actions/setup-dotnet@v3
-#       with:
-#         dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
-#     - name: 'Resolve Project Dependencies Using Dotnet'
-#       shell: pwsh
-#       run: |
-#         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-#         dotnet build --configuration Release --output ./output
-#         dotnet publish --configuration Release --output ./output
-#         popd
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: pwsh
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        dotnet build --configuration Release --output ./output
+        dotnet publish --configuration Release --output ./output
+        popd
           
-#     - name: 'Az login'
-#       shell: pwsh
-#       run: |
-#         az login --service-principal --username ${{ env.CLIENT_ID }} --password ${{ env.CLIENT_SECRET }} --tenant ${{ env.TENANT_ID }} --allow-no-subscriptions
+    - name: 'Az login'
+      shell: pwsh
+      run: |
+        az login --service-principal --username ${{ env.CLIENT_ID }} --password ${{ env.CLIENT_SECRET }} --tenant ${{ env.TENANT_ID }} --allow-no-subscriptions
         
-#     - name: 'Deploy to Azure Function App'
-#       shell: pwsh
-#       run: |
-#         az functionapp deployment source config-zip `
-#           -g ${{ env.RESOURCE_GROUP }} `
-#           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} `
-#           --src './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output/*.zip'
+    - name: 'Deploy to Azure Function App'
+      shell: pwsh
+      run: |
+        az functionapp deployment source config-zip `
+          -g ${{ env.RESOURCE_GROUP }} `
+          --name ${{ env.AZURE_FUNCTIONAPP_NAME }} `
+          --src './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output/*.zip'
