@@ -31,8 +31,8 @@ jobs:
       shell: pwsh
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --configuration Release --output ${{runner.temp}}/output
-        dotnet publish --configuration Release --output ${{runner.temp}}/output
+        dotnet build --configuration Release --output ${{runner.temp}}
+        dotnet publish --configuration Release --output ${{runner.temp}}
         popd
           
     - name: 'Az login'
@@ -46,4 +46,4 @@ jobs:
         sudo az functionapp deployment source config-zip \
           -g ${{ env.RESOURCE_GROUP }} \
           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
-          --src '${{runner.temp}}/output'
+          --src '${{runner.temp}}'
