@@ -41,9 +41,9 @@ jobs:
         az login --service-principal --username ${{ env.CLIENT_ID }} --password ${{ env.CLIENT_SECRET }} --tenant ${{ env.TENANT_ID }} --allow-no-subscriptions
         
     - name: 'Deploy to Azure Function App'
-      shell: pwsh
+      shell: bash
       run: |
-        az functionapp deployment source config-zip `
+        sudo az functionapp deployment source config-zip `
           -g ${{ env.RESOURCE_GROUP }} `
           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} `
           --src '${{runner.temp}}/output'
