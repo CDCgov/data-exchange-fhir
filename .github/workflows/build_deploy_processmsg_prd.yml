@@ -32,7 +32,6 @@ jobs:
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ${{runner.temp}}
-        dotnet publish --configuration Release --output ${{runner.temp}}
         popd
           
     - name: 'Az login'
@@ -43,7 +42,9 @@ jobs:
     - name: 'Deploy to Azure Function App'
       shell: bash
       run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        zip -r functionapp.zip .
         az functionapp deployment source config-zip \
           -g ${{ env.RESOURCE_GROUP }} \
           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
-          --src '${{runner.temp}}'
+          --src functionapp.zip
