@@ -33,7 +33,6 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ${{runner.temp}}/output
         dotnet publish --configuration Release --output ${{runner.temp}}/output
-        Compress-Archive -Path ./output/* -DestinationPath ${{runner.temp}}/publish.zip
         popd
           
     - name: 'Az login'
