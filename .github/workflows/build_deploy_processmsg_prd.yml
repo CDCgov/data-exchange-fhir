@@ -33,7 +33,7 @@ jobs:
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ./output
         dotnet publish --configuration Release --output ./output
-        Compress-Archive -Path ./output/* -DestinationPath ../publish.zip
+        Compress-Archive -Path ./output/* -DestinationPath $env:RUNNER_TEMP/publish.zip
         popd
           
     - name: 'Az login'
@@ -47,4 +47,4 @@ jobs:
         az functionapp deployment source config-zip `
           -g ${{ env.RESOURCE_GROUP }} `
           --name ${{ env.AZURE_FUNCTIONAPP_NAME }} `
-          --src './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          --src '$env:RUNNER_TEMP/publish.zip'
