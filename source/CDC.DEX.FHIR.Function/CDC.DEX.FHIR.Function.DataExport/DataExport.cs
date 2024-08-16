@@ -55,7 +55,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
             {
                 //EVENT SECTION
 
+                log.LogInformation(LogPrefix() + "ProcessFhirEvent Start");
+
                 JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage,httpClientFactory,configuration,log);
+
+                log.LogInformation(LogPrefix() + "ProcessFhirEvent Done");
 
                 //EXPORT SECTION
 
@@ -102,13 +106,21 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     }
 
                 }
+ 
+
 
                 // get auth for SA
+                log.LogInformation(LogPrefix() + "ClientSecretCredential Start");
+
+                log.LogInformation(LogPrefix() + "ClientSecretCredential Start "+ configuration[SATenantIdConfigName]);
+                log.LogInformation(LogPrefix() + "ClientSecretCredential Start " + configuration[SAClientIdConfigName]);
+                log.LogInformation(LogPrefix() + "ClientSecretCredential Start " + configuration[SAClientSecretConfigName]);
+
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
                     configuration[SAClientIdConfigName],
                     configuration[SAClientSecretConfigName]);
-
+                log.LogInformation(LogPrefix() + "ClientSecretCredential End");
 
                 // DATA EXPORT PROCESSING
 
@@ -151,44 +163,23 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
-                        if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
-                        {
-                            string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/")+1);
-                            pathToWrite += "/" + profilePath;
-                        }
-                        pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+                    
+                        pathToWrite += "/" + configuration["Platfom"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
                         filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                     }
                     else
                     {
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
-                        if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
-                        {
-                            string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                            profilePath = profilePath.Substring(profilePath.LastIndexOf("/")+1);
-                            pathToWrite += "/" + profilePath;
-                        }
-                        pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
+
+                        pathToWrite += "/" + configuration["Platform"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
+
+
                         filesToWrite.Add(pathToWrite, fhirResourceToProcessJObject.ToString());
                     }
                 }
 
-                // FOR CONNECTATHON ALWAYS MAKE A FLATTEN VERSION, IN A SEPERATE DIRECTORY
-                string flattenedJsonTemp = FlattenJsonResource(fhirResourceToProcessJObject);
-
-                string pathToWriteTemp = "Flatten/"+fhirResourceToProcessJObject["resourceType"].Value<string>();
-                //get profile data for sorting bundles
-                if (fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle")
-                {
-                    string profilePath = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
-                    profilePath = profilePath.Substring(profilePath.LastIndexOf("/") + 1);
-                    pathToWriteTemp += "/" + profilePath;
-                }
-                pathToWriteTemp += "/" + fhirResourceToProcessJObject["id"].Value<string>();
-                filesToWrite.Add(pathToWriteTemp, flattenedJsonTemp.ToString());
-                // CONNECTATHON ADDITIONAL FLATTEN END
+         
 
 
                 // END GET FHIR RESOURCE SECTION
@@ -196,7 +187,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 // START WRITING TO DATA LAKE SECTION
 
 
-
+                log.LogInformation(LogPrefix() + "Upload Start");
                 string blobUri = "https://" + storageAccountName + ".blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
@@ -206,13 +197,13 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 foreach (var keyValPair in filesToWrite)
                 {
                     BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json: \n {keyValPair.Value}");
-                    await blobClient.UploadAsync(BinaryData.FromString($"{keyValPair.Value}"), true);
+                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json:");
+                    blobClient.Upload(BinaryData.FromString($"{keyValPair.Value}"), true);
                 }
-
+                log.LogInformation(LogPrefix() + "Upload End");
                 // END WRITING TO DATA LAKE SECTION
 
-                await Task.Yield();
+
             }
             catch (Exception e)
             {
