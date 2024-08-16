@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment: prod
     steps:
     - name: 'Checkout GitHub Action'
@@ -28,14 +28,14 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: pwsh
+      shell: bash
       run: |
         pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
         dotnet build --configuration Release --output ${{runner.temp}}
         popd
           
     - name: 'Az login'
-      shell: pwsh
+      shell: bash
       run: |
         az login --service-principal --username ${{ env.CLIENT_ID }} --password ${{ env.CLIENT_SECRET }} --tenant ${{ env.TENANT_ID }} --allow-no-subscriptions
         
