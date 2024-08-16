@@ -43,7 +43,7 @@ jobs:
     - name: 'Deploy to Azure Function App'
       shell: bash
       run: |
-        sudo az functionapp deployment source config-zip `
-          -g ${{ env.RESOURCE_GROUP }} `
-          --name ${{ env.AZURE_FUNCTIONAPP_NAME }} `
+        sudo az functionapp deployment source config-zip \
+          -g ${{ env.RESOURCE_GROUP }} \
+          --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
           --src '${{runner.temp}}/output'
