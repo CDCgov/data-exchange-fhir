@@ -38,7 +38,7 @@ jobs:
                   owner: 'cdcent',
                   repo: 'data-exchange-fhir-devops',
                   workflow_id: '${{ inputs.WORKFLOW }}',
-                  ref: 'main',
+                  ref: 'master',
                   inputs: {
                     REF: '${{ inputs.REF }}'
                   }
