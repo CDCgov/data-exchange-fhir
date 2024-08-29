@@ -1,50 +1,21 @@
 name: Deploy ProcessMessage Function App to PROD
 on:
+  workflow_dispatch:
+    inputs:
+      REF:
+        description: Branch from CDCgov/data-exchange-upload that you want to deploy to the dev environment.
+        default: main
+        required: true
+        type: string
   push:
     branches:
-      - main
-      - feature/fhir-prd
-
-env:
-  AZURE_FUNCTIONAPP_NAME: 'ocio-ede-prd-fhir-processmsg-fa'   
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
-  DOTNET_VERSION: '6.0.x'    
-  CLIENT_ID: ${{secrets.PRD_AZ_CLIENT_ID}}
-  CLIENT_SECRET: ${{secrets.PRD_AZ_CLIENT_SECRET}}
-  TENANT_ID: ${{secrets.PRD_AZ_TENANT_ID}}
-  RESOURCE_GROUP: 'ocio-ede-prd-moderate-fhir-rg'
+        - main
+        - feature/fhir-prd
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v3
-
-    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: bash
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --configuration Release --output ${{runner.temp}}
-        popd
-          
-    - name: 'Az login'
-      shell: bash
-      run: |
-        az login --service-principal --username ${{ env.CLIENT_ID }} --password ${{ env.CLIENT_SECRET }} --tenant ${{ env.TENANT_ID }} --allow-no-subscriptions
-        
-    - name: 'Deploy to Azure Function App'
-      shell: bash
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        zip -r functionapp.zip .
-        az functionapp deployment source config-zip \
-          -g ${{ env.RESOURCE_GROUP }} \
-          --name ${{ env.AZURE_FUNCTIONAPP_NAME }} \
-          --src functionapp.zip
+  remote-trigger:
+    uses: ./.github/workflows/remote-cd-trigger-template.yml
+    with:
+      WORKFLOW: build_deploy_processmsg_prd.yml
+      REF: ${{ inputs.REF }}
+    secrets: inherit
