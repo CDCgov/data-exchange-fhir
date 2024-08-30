@@ -1,0 +1,45 @@
+name: Template - Remote trigger to CDCent
+on:
+  workflow_call:
+    inputs:
+      WORKFLOW:
+        type: string
+        description: "Workflow yml file that should be triggered."
+        required: true
+      REF: 
+        type: string
+        description: "Git tag or branch the workflow is running on."
+        required: false
+        default: 'main'
+
+jobs:
+  invoke-cd-trigger:
+    runs-on: ubuntu-latest
+    env:
+        GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout Gen GitHub App Access Token
+        uses: actions/checkout@v3
+        with:
+          repository: kave/github-app-token
+      - name: Generate Token
+        run: |
+          sudo gem install jwt
+          echo "${{ secrets.CDC_COE_BOTFREY_PEM }}" > app-private-key.pem
+          chmod +x ./get-github-app-access-token.sh;
+          . ./get-github-app-access-token.sh;
+          echo "access_token=${TOKEN}" >> "$GITHUB_ENV"
+      - name: Manually Dispatch Remote CICD Trigger Event 
+        uses: actions/github-script@v6
+        with:
+            github-token: ${{ env.access_token }}
+            script: |
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: 'cdcent',
+                  repo: 'data-exchange-fhir-devops',
+                  workflow_id: '${{ inputs.WORKFLOW }}',
+                  ref: 'master',
+                  inputs: {
+                    REF: '${{ inputs.REF }}'
+                  }
+                })
