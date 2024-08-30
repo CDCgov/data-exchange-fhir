@@ -1,0 +1,21 @@
+name: Deploy DataExport Function App to PROD
+on:
+  workflow_dispatch:
+    inputs:
+      REF:
+        description: Branch from CDCgov/data-exchange-upload that you want to deploy to the dev environment.
+        default: main
+        required: true
+        type: string
+  push:
+    branches:
+        - main
+        - feature/fhir-prd
+
+jobs:
+  remote-trigger:
+    uses: ./.github/workflows/remote-cd-trigger-template.yml
+    with:
+      WORKFLOW: build_deploy_dataexport_prd.yml
+      REF: ${{ inputs.REF }}
+    secrets: inherit
