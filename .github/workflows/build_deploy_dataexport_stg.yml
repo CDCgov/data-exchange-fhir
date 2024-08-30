@@ -16,6 +16,6 @@ jobs:
   remote-trigger:
     uses: ./.github/workflows/remote-cd-trigger-template.yml
     with:
-      WORKFLOW: build_deploy_processmsg_stg.yml
+      WORKFLOW: build_deploy_dataexport_stg.yml
       REF: ${{ inputs.REF }}
     secrets: inherit
