@@ -1,41 +1,21 @@
-name: Deploy ProcessMessage Function App
-
+name: Deploy ProcessMessage Function App to STG
 on:
+  workflow_dispatch:
+    inputs:
+      REF:
+        description: Branch from CDCgov/data-exchange-fhir that you want to deploy to the stg environment.
+        default: main
+        required: true
+        type: string
   push:
     branches:
-      - main
-      - feature/fhir-stg
-
-env:
-  AZURE_FUNCTIONAPP_NAME: 'ocio-ede-fhir-processmessage-stg'   
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.ProcessMessage'
-  DOTNET_VERSION: '6.0.x'                   
+        - main
+        - feature/fhir-stg
 
 jobs:
-  build-and-deploy:
-    runs-on: windows-latest
-    environment: stg
-    steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v3
-
-    - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: 'Resolve Project Dependencies Using Dotnet'
-      shell: pwsh
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        dotnet build --configuration Release --output ./output
-        popd
-
-    - name: 'Run Azure Functions Action'
-      uses: Azure/functions-action@v1
-      id: fa
-      with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-        publish-profile: ${{ secrets.PROCESSMSG_FUNAPP_STG_PUBLISH_PROFILE }}
-
+  remote-trigger:
+    uses: ./.github/workflows/remote-cd-trigger-template.yml
+    with:
+      WORKFLOW: build_deploy_processmsg_stg.yml
+      REF: ${{ inputs.REF }}
+    secrets: inherit
