@@ -49,6 +49,9 @@ resource fhir 'Microsoft.HealthcareApis/workspaces/fhirservices@2021-06-01-previ
 @description('FHIR Export required linked storage account')
 resource exportStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
   name: exportStoreName
+  identity:{
+      type: 'SystemAssigned'
+  }
   location: location
   kind: 'StorageV2'
   sku: {
@@ -69,6 +72,9 @@ module exportFhirRoleAssignment './identity.bicep'= {
 
 resource fhirExisting 'Microsoft.HealthcareApis/workspaces/fhirservices@2021-06-01-preview' existing = if (!createFhirService) {
   name: '${newOrExistingWorkspaceName}/${fhirServiceName}'
+  identity:{
+      type: 'SystemAssigned'
+  }
 }
 
 output fhirId string = createFhirService ? fhir.id : fhirExisting.id

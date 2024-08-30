@@ -15,6 +15,9 @@ var modifiedLocatin = contains(allowedRegions, location) ? location : 'centralus
 
 resource web 'Microsoft.Web/staticSites@2022-03-01' = {
   name: staticWebAppName
+  identity:{
+      type: 'SystemAssigned'
+  }
   location: modifiedLocatin
   tags: appTags
   sku: sku

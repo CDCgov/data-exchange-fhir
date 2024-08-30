@@ -21,9 +21,9 @@ namespace SMARTCustomOperations.Export.Filters
         private readonly string _id;
         private readonly ExportCustomOperationsConfig _configuration;
 
-        private static readonly Regex ExportCheckExpression = new(@"/?[A-Za-z0-9\-_]*/_operations/export/([A-Za-z0-9\\-]+)");
-        private static readonly Regex GroupExportExpression = new(@"/?[A-Za-z0-9\-_]*/Group/([A-Za-z0-9\-]+)/\$export");
-        private static readonly Regex GetExportFileExpression = new(@"/?[A-Za-z0-9\-_]*/_export/([A-Za-z0-9\-]+)/(.*)");
+        private static readonly Regex ExportCheckExpression = new Regex(@"/?[A-Za-z0-9\-_]*/_operations/export/([A-Za-z0-9\\-]+)",RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        private static readonly Regex GroupExportExpression = new Regex(@"/?[A-Za-z0-9\-_]*/Group/([A-Za-z0-9\-]+)/\$export", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        private static readonly Regex GetExportFileExpression = new Regex(@"/?[A-Za-z0-9\-_]*/_export/([A-Za-z0-9\-]+)/(.*)", RegexOptions.None, TimeSpan.FromMilliseconds(100));
 
         public ExtractPipelinePropertiesInputFilter(ILogger<ExtractPipelinePropertiesInputFilter> logger, ExportCustomOperationsConfig configuration)
         {

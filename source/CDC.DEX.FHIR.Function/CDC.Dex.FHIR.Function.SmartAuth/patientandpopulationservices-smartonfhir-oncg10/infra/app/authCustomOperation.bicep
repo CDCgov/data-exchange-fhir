@@ -49,7 +49,9 @@ var authCustomOperationsFunctionAppName = '${name}-aad-func'
 @description('Used for Custom Operation Azure Function App temp storage and auth.')
 resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: customOperationsFuncStorName
-
+  identity:{
+      type: 'SystemAssigned'
+  }
   resource blobService 'blobServices@2021-06-01' = {
     name: 'default'
   }
@@ -57,7 +59,7 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' exist
 
 var siteConfig = enableVNetSupport ? {
   netFrameworkVersion: 'v8.0'
-  use32BitWorkerProcess: false
+  use32BitWorkerProcess: false 
   cors: {
     allowedOrigins: [
       smartFrontendAppUrl
@@ -74,7 +76,7 @@ var siteConfig = enableVNetSupport ? {
 }
 
 @description('Azure Function used to run auth flow custom operations using the Azure Health Data Services Toolkit')
-resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = { // Sensitive
   name: authCustomOperationsFunctionAppName
   location: location
   kind: enableVNetSupport ? 'functionapp' : 'functionapp,linux'

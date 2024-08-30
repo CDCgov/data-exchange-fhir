@@ -45,7 +45,7 @@ namespace SMARTCustomOperations.AzureAuth.Services
 							{
 								new Coding
 								{
-									System = "http://hl7.org/fhir/resource-types",
+									System = "https://hl7.org/fhir/resource-types",
 									Code = "CarePlan"
 								}
 							}

@@ -36,6 +36,9 @@ var exportCustomOperationsFunctionAppName = '${name}-exp-func'
 @description('Used for Custom Operation Azure Function App temp storage and auth.')
 resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: customOperationsFuncStorName
+  identity:{
+      type: 'SystemAssigned'
+  }
 }
 
 resource funcTableService 'Microsoft.Storage/storageAccounts/tableServices@2022-05-01' = {
@@ -57,7 +60,7 @@ var siteConfig = enableVNetSupport ? {
 }
 
 @description('Azure Function used to run export custom operations using the Azure Health Data Services Toolkit')
-resource exportCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
+resource exportCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = { // Sensitive
   name: exportCustomOperationsFunctionAppName
   location: location
   kind: enableVNetSupport ? 'functionapp' : 'functionapp,linux'

@@ -30,7 +30,7 @@ var writerAccessPolicy = [for writerId in writerObjectIds: {
 
 var comboAccessPolicy = union(readerAccessPolicy, writerAccessPolicy)
 
-resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
+resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = { // Sensitive
   name: vaultName
   location: location
   properties: {
