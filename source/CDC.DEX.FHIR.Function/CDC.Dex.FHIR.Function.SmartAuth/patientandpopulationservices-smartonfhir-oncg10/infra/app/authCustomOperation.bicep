@@ -90,6 +90,7 @@ resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = {
     enabled: true
     serverFarmId: hostingPlanId
     reserved: !enableVNetSupport
+    clientCertEnabled: true  // Explicitly enable client certificate authentication
     clientAffinityEnabled: false
     siteConfig: siteConfig
   }
