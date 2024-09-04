@@ -76,7 +76,7 @@ var siteConfig = enableVNetSupport ? {
 }
 
 @description('Azure Function used to run auth flow custom operations using the Azure Health Data Services Toolkit')
-resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2023-03-01' = {
+resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: authCustomOperationsFunctionAppName
   location: location
   kind: enableVNetSupport ? 'functionapp' : 'functionapp,linux'
