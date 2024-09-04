@@ -9,7 +9,7 @@ param enableVNetSupport bool
 var customOperationsFuncStorName = '${nameCleanShort}funcsa'
 
 @description('Used for Custom Operation Azure Function App temp storage and auth.')
-resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01'  existing = {
   name: customOperationsFuncStorName
   identity:{
       type: 'SystemAssigned'

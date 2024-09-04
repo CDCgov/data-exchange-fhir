@@ -47,7 +47,7 @@ resource fhir 'Microsoft.HealthcareApis/workspaces/fhirservices@2021-06-01-previ
 }
 
 @description('FHIR Export required linked storage account')
-resource exportStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' = {
+resource exportStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
   name: exportStoreName
   identity:{
       type: 'SystemAssigned'

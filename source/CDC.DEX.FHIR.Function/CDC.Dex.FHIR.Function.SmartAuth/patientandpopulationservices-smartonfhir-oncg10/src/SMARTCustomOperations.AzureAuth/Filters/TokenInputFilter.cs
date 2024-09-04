@@ -115,7 +115,7 @@ namespace SMARTCustomOperations.AzureAuth.Filters
             }
             catch (HttpRequestException)
             {
-                FilterErrorEventArgs error = new(name: Name, id: Id, fatal: true, error: new ConfigurationErrorsException($"JWKS url {clientConfig?.JwksUri?.ToString()} is not responding. Please check the client configuration."));
+                FilterErrorEventArgs error = new(name: Name, id: Id, fatal: true, error: new ConfigurationErrorsException($"JWKS url {JwksUri?.ToString()} is not responding. Please check the client configuration."));
                 OnFilterError?.Invoke(this, error);
                 return context.SetContextErrorBody(error, _configuration.Debug);
             }
