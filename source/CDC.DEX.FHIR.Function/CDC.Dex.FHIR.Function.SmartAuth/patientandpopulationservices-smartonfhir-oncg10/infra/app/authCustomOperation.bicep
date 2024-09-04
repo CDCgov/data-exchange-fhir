@@ -94,15 +94,6 @@ resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2022-09-01' = {
     clientCertEnabled: true
     clientCertMode: 'Required'
     siteConfig: siteConfig
-    globalValidation: 
-    {
-      requireAuthentication: true
-      nauthenticatedClientAction: 'AllowAnonymous'
-    }
-    platform: 
-    {
-     enabled: true
-    }
   }
 
   tags: union(appTags, {'azd-service-name': 'auth'})

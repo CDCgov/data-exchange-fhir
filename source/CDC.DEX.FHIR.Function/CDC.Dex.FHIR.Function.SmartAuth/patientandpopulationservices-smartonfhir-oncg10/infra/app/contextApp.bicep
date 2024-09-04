@@ -23,8 +23,6 @@ resource web 'Microsoft.Web/staticSites@2022-03-01' = {
   sku: sku
   properties: {
     provider: 'Custom'
-    clientCertEnabled: true
-    clientCertMode: 'Required'
   }
 }
 
