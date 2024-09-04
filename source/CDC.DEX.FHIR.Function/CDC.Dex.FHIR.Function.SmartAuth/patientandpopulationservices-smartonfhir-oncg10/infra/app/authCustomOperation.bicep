@@ -52,11 +52,6 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' exist
   identity:{
       type: 'SystemAssigned'
   }
-  property:{
-      databaseOptions:{
-          isEncrypted: true
-      }
-  }
   resource blobService 'blobServices@2021-06-01' = {
     name: 'default'
   }

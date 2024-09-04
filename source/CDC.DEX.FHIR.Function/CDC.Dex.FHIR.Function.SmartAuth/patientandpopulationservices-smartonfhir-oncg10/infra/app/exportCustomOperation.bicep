@@ -39,11 +39,6 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' exist
   identity:{
       type: 'SystemAssigned'
   }
-    property:{
-      databaseOptions:{
-          isEncrypted: true
-      }
-  }
 }
 
 resource funcTableService 'Microsoft.Storage/storageAccounts/tableServices@2022-05-01' = {
