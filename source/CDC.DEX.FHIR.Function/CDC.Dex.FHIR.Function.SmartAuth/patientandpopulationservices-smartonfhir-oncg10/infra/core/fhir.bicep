@@ -52,6 +52,11 @@ resource exportStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' exi
   identity:{
       type: 'SystemAssigned'
   }
+   property:{
+     databaseOptions:{
+         isEncrypted: true
+     }
+  }
   location: location
   kind: 'StorageV2'
   sku: {

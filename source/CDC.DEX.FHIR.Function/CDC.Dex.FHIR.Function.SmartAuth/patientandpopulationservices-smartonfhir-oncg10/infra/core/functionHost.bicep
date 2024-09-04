@@ -14,6 +14,11 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01'  exis
   identity:{
       type: 'SystemAssigned'
   }
+  property:{
+    databaseOptions:{
+        isEncrypted: true
+    }
+  }
   location: location
   kind: 'StorageV2'
   sku: {
