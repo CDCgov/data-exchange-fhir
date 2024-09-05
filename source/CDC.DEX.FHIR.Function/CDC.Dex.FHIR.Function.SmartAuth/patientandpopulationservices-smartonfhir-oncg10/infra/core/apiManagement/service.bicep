@@ -20,6 +20,12 @@ resource apim 'Microsoft.ApiManagement/service@2021-12-01-preview' = {
   properties: {
     publisherEmail: publisherEmail
     publisherName: publisherName
+    authenticationSettings: { // Compliant: API has authentication enabled
+    openid: {
+        bearerTokenSendingMethods: ['authorizationHeader']
+        openidProviderId: '<an OpenID provider ID>'
+        }
+    }
   }
 
   resource apimLogger 'loggers' = {

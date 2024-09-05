@@ -12,6 +12,12 @@ resource smartAuthApi 'Microsoft.ApiManagement/service/apis@2021-12-01-preview' 
     protocols: [
       'https'
     ]
+    authenticationSettings: { // Compliant: API has authentication enabled
+    openid: {
+        bearerTokenSendingMethods: ['authorizationHeader']
+        openidProviderId: '<an OpenID provider ID>'
+        }
+    }
     path: '/auth'
   }
 
