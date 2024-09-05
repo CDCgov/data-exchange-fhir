@@ -8,8 +8,6 @@ resource smartApi 'Microsoft.ApiManagement/service/apis@2021-12-01-preview' = {
     displayName: 'SMART v1'
     apiRevision: 'v1'
     subscriptionRequired: false
-    clientCertEnabled: true
-    clientCertMode: 'Required'
     serviceUrl: fhirBaseUrl
     protocols: [
       'https'
