@@ -35,6 +35,7 @@ resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = { // Sensitive
   location: location
   properties: {
     tenantId: tenantId
+    enableRbacAuthorization: true
     accessPolicies: comboAccessPolicy
     sku: {
       name: skuName
