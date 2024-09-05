@@ -13,6 +13,12 @@ resource smartApi 'Microsoft.ApiManagement/service/apis@2021-12-01-preview' = {
       'https'
     ]
     path: '/smart'
+    authenticationSettings: { // Compliant: API has authentication enabled
+    openid: {
+        bearerTokenSendingMethods: ['authorizationHeader']
+        openidProviderId: '<an OpenID provider ID>'
+        }
+    }
   }
 
   resource metadataOverrideOperation 'operations' = {
