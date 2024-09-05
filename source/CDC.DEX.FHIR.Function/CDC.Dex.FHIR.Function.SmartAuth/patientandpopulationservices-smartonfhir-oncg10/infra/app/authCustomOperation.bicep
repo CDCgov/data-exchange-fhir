@@ -79,6 +79,18 @@ var siteConfig = enableVNetSupport ? {
 resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: authCustomOperationsFunctionAppName
   location: location
+    resource authSettings 'config@2022-09-01' = { // Compliant
+        name: 'authsettingsV2'
+        properties: {
+            globalValidation: {
+                requireAuthentication: true
+                unauthenticatedClientAction: 'AllowAnonymous'
+            }
+            platform: {
+                enabled: true
+            }
+        }
+    }
   kind: enableVNetSupport ? 'functionapp' : 'functionapp,linux'
 
   identity: {
