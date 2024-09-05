@@ -84,7 +84,6 @@ resource authCustomOperationFunctionApp 'Microsoft.Web/sites@2022-09-01' = {
         properties: {
             globalValidation: {
                 requireAuthentication: true
-                unauthenticatedClientAction: 'AllowAnonymous'
             }
             platform: {
                 enabled: true
