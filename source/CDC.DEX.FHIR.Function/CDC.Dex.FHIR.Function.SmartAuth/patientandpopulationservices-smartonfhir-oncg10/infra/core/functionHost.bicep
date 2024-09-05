@@ -20,6 +20,11 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01'  exis
     name: 'Standard_LRS'
   }
   tags: appTags
+  properties: {
+    encryption: {
+      requireInfrastructureEncryption: true
+    }
+  }
 }
 
 @description('Name for the App Service used to host Custom Operation Function Apps.')
