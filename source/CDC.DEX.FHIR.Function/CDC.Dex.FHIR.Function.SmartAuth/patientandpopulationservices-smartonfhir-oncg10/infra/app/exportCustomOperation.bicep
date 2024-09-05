@@ -63,6 +63,19 @@ var siteConfig = enableVNetSupport ? {
 resource exportCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = { // Sensitive
   name: exportCustomOperationsFunctionAppName
   location: location
+  resources: [
+        {
+            type: "config",
+            apiVersion: "2022-03-01",
+            name: "authsettingsV2",
+            properties: {
+                globalValidation: {
+                    requireAuthentication: true,
+                    unauthenticatedClientAction: "RedirectToLoginPage"
+                }
+            }
+        }
+     ]
   kind: enableVNetSupport ? 'functionapp' : 'functionapp,linux'
 
   identity: {
