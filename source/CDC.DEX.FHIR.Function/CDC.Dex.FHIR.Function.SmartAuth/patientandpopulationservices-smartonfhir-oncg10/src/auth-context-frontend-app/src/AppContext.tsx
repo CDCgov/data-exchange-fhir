@@ -175,8 +175,9 @@ const sleep = (ms: number) => new Promise(
 const updateScopesWhereNeeded = async (modifiedAuthInfo: AppConsentInfo) : Promise<void> => {
   console.log("Saving scopes...");
 
-  // We only care about removing scopes if needed. Consent prompt will ask user to re-add any needed scopes.
-  if (modifiedAuthInfo.scopes.filter(x => x.enabled == false && x.consented == true).length >= 0) {
+    // We only care about removing scopes if needed. Consent prompt will ask user to re-add any needed scopes. Comment this out since 
+    //the length of "modifiedAuthInfo.scopes.filter(x => x.enabled == false && x.consented == true)" is always greater or equal to zero.
+  //if (modifiedAuthInfo.scopes.filter(x => x.enabled == false && x.consented == true).length >= 0) { 
     
     // Convert scopes the user has enabled to consented for the API call.
     modifiedAuthInfo.scopes.forEach(scope => {
@@ -228,7 +229,7 @@ const updateScopesWhereNeeded = async (modifiedAuthInfo: AppConsentInfo) : Promi
       displayError("Scopes did not properly replicate.");
       return;
     }
-  }
+  //}
 
   // Redirect to authorization endpoint.
   const newQueryParams = queryParams;
