@@ -57,9 +57,11 @@ resource exportStorageAccount 'Microsoft.Storage/storageAccounts@2021-08-01' exi
   sku: {
     name: 'Standard_LRS'
   }
-  encryption: {
-    requireInfrastructureEncryption: true
-        }
+  properties: {
+    encryption: {
+      requireInfrastructureEncryption: true
+    }
+  }
   tags: appTags
 }
 
