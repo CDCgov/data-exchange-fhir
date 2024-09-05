@@ -75,6 +75,8 @@ resource exportCustomOperationFunctionApp 'Microsoft.Web/sites@2021-03-01' = { /
     serverFarmId: hostingPlanId
     reserved: !enableVNetSupport
     clientAffinityEnabled: false
+    clientCertEnabled: true
+    clientCertMode: 'Optional'
     siteConfig: siteConfig
   }
 
