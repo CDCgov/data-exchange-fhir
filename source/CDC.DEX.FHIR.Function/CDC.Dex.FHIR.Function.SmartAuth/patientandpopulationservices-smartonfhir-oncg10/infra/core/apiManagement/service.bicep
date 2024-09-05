@@ -17,6 +17,12 @@ resource apim 'Microsoft.ApiManagement/service@2021-12-01-preview' = {
   identity: {
     type: 'SystemAssigned'
   }
+  resource portalSettings 'portalsettings@2022-09-01-preview' = {
+    name: 'signin'
+    properties: {
+        enabled: true // Compliant: Sign-in is enabled for portal access
+    }
+  }
   properties: {
     publisherEmail: publisherEmail
     publisherName: publisherName
