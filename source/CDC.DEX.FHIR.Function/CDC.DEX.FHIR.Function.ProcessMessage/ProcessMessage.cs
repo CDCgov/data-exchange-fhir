@@ -86,14 +86,12 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 catch (JsonException  e) 
                 {
                   
-                    //log.LogError(e.ToString());
-                    log.LogError("Failed to deserialize the request body. Ensure the request body is valid JSON.");
+                    log.LogError(e.ToString());
                     contentResult.Content = JsonErrorStr("error deserialize received JSON");
                     contentResult.StatusCode = 400;
                     return contentResult;
                 } // .catch
 
-                //log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
                 log.LogInformation("ProcessMessage bundle received");
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
@@ -103,12 +101,11 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-                //log.LogInformation($"ProcessMessage FHIR validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
-                log.LogInformation($"ProcessMessage FHIR validation done with result: " + validateReportingBundleResult.StatusCode);
+                string statusCode = validateReportingBundleResult.StatusCode;
+                log.LogInformation($"ProcessMessage FHIR validation done with result: " + statusCode);
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
                 
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
-
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
