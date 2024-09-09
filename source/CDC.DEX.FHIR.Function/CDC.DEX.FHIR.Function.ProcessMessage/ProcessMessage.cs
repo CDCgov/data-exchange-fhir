@@ -195,7 +195,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             return postContentResponse;
         }
 
-        private string CleanBearerToken(string bearerToken)
+        private static string CleanBearerToken(string bearerToken)
         {
             Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
             string cleanedBearerToken = regexString.Replace(bearerToken, "");
@@ -204,7 +204,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             return cleanedBearerToken;
         }
 
-        private string JsonErrorStr(string errorMessage)
+        private static string JsonErrorStr(string errorMessage)
         {
             return (new JsonObject
             {
@@ -212,7 +212,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             }).ToJsonString();
         } // .JsonErrorStr
 
-        private string TruncateStrForLog(string jsonString, int maxLen)   
+        private static string TruncateStrForLog(string jsonString, int maxLen)   
         {
             return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
         } // .TruncateStrForLog
