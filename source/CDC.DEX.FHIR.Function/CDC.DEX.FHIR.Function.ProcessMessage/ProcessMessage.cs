@@ -49,7 +49,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 log.LogInformation("ProcessMessage HTTP trigger function received a request.");
 
-                // limit log of bundles or validation result to the first 100 chars
+                // limit log of bundles or validation result to the first 500 chars
                 const int maxLengthForLog = 500;
 
 
@@ -85,14 +85,16 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 } // .try
                 catch (JsonException  e) 
                 {
-                    log.LogError(e.ToString());
+                  
+                    //log.LogError(e.ToString());
+                    log.LogError("Failed to deserialize the request body. Ensure the request body is valid JSON.");
                     contentResult.Content = JsonErrorStr("error deserialize received JSON");
                     contentResult.StatusCode = 400;
                     return contentResult;
                 } // .catch
 
-                log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
-
+                //log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
+                log.LogInformation("ProcessMessage bundle received");
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
@@ -101,7 +103,8 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-                log.LogInformation($"ProcessMessage FHIR validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                //log.LogInformation($"ProcessMessage FHIR validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                log.LogInformation($"ProcessMessage FHIR validation done with result: " + validateReportingBundleResult.StatusCode);
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
                 
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
@@ -150,7 +153,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     contentResult.Content = JsonErrorStr($"http error {httpException.StatusCode}");
                     contentResult.StatusCode = (int)httpException.StatusCode;
                 }
-                    else // something else (exception) happened
+                else // something else (exception) happened
                 {
                     contentResult.Content = JsonErrorStr("unexpected condition was encountered");
                     contentResult.StatusCode = 500; // code for internal server error as exception
