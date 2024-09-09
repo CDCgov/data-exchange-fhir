@@ -49,10 +49,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 log.LogInformation("ProcessMessage HTTP trigger function received a request.");
 
-                // limit log of bundles or validation result to the first 500 chars
-                const int maxLengthForLog = 500;
-
-
                 // guard for missing Authorization in Headers
                 const string authorizationKeyName = "Authorization";
                 if (!req.Headers.ContainsKey(authorizationKeyName)) 
@@ -102,7 +98,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
                 string statusCode = validateReportingBundleResult.StatusCode;
-                log.LogInformation($"ProcessMessage FHIR validation done with result: " + statusCode);
+                log.LogInformation("ProcessMessage FHIR validation done with result: {statusCode}", statusCode);
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
                 
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
