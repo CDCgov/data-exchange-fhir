@@ -112,9 +112,9 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 // get auth for SA
                 log.LogInformation(LogPrefix() + "ClientSecretCredential Start");
 
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start "+ configuration[SATenantIdConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start " + configuration[SAClientIdConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start " + configuration[SAClientSecretConfigName]);
+                log.LogInformation(LogPrefix() + "ClientSecretCredential SATenantIdConfigName " + configuration[SATenantIdConfigName]);
+                log.LogInformation(LogPrefix() + "ClientSecretCredential SAClientIdConfigName " + configuration[SAClientIdConfigName]);
+              
 
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
