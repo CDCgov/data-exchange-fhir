@@ -38,6 +38,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
             {
                 // get auth token
                 string token = await FhirServiceUtils.GetFhirServerToken(config, client);
+                int maxLengthForLog = 500;
 
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
@@ -48,7 +49,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 string jsonString = await response.Content.ReadAsStringAsync();
 
-                log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
+                log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
 
                 fhirResourceToProcessJObject = JObject.Parse(jsonString);
 
