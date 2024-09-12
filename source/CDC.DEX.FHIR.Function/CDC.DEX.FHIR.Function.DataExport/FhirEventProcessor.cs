@@ -34,25 +34,33 @@ namespace CDC.DEX.FHIR.Function.DataExport
             JObject fhirResourceToProcessJObject;
 
             using (HttpClient client = httpClientFactory.CreateClient())
-            using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
             {
-                // get auth token
-                string token = await FhirServiceUtils.GetFhirServerToken(config, client);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
 
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
+                using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+                {
+                    // get auth token
+                    log.LogInformation(DataExport.LogPrefix() + "GetFhirServerToken Start");
+                   string token = await FhirServiceUtils.GetFhirServerToken(config, client,log);
+                    log.LogInformation(DataExport.LogPrefix() + "GetFhirServerToken End");
 
-                var response = await client.SendAsync(request);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
 
-                response.EnsureSuccessStatusCode();
+                    log.LogInformation(DataExport.LogPrefix() + "SendAsync Start " + request.RequestUri);
+                    var response = await client.SendAsync(request);
+                    log.LogInformation(DataExport.LogPrefix() + "SendAsync End ");
 
-                string jsonString = await response.Content.ReadAsStringAsync();
+                    response.EnsureSuccessStatusCode();
 
-                log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
+                    string jsonString = await response.Content.ReadAsStringAsync();
 
-                fhirResourceToProcessJObject = JObject.Parse(jsonString);
+                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
 
-                return fhirResourceToProcessJObject;
+                    fhirResourceToProcessJObject = JObject.Parse(jsonString);
+
+                    return fhirResourceToProcessJObject;
+                }
             }
         }
     }

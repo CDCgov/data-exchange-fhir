@@ -55,7 +55,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             using (HttpClient authclient = httpClientFactory.CreateClient())
             {
                 // get auth token
-                bearerToken = await FhirServiceUtils.GetFhirServerToken(configuration, authclient);
+                bearerToken = await FhirServiceUtils.GetFhirServerToken(configuration, authclient,log);
             }
             var handler = new AuthorizationMessageHandler();
             handler.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
