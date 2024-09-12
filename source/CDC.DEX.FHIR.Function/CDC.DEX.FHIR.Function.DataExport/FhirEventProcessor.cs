@@ -16,6 +16,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
     public class FhirEventProcessor
     {
 
+        private string TruncateStrForLog(string jsonString, int maxLen)
+        {
+            return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
+        } // .TruncateStrForLog
+
         /// <summary>
         /// Read resource created event message and retrieve the created fhir resource
         /// </summary>
@@ -36,7 +41,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
             using (HttpClient client = httpClientFactory.CreateClient())
             {
 
-                string token = await FhirServiceUtils.GetFhirServerToken(config, client);
+                string token = await FhirServiceUtils.GetFhirServerToken(config, client,log);
                 int maxLengthForLog = 500;
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
@@ -45,9 +50,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
                 {
                     // get auth token
-                    log.LogInformation(DataExport.LogPrefix() + "GetFhirServerToken Start");
-                   string token = await FhirServiceUtils.GetFhirServerToken(config, client,log);
-                    log.LogInformation(DataExport.LogPrefix() + "GetFhirServerToken End");
+                 
 
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
@@ -58,7 +61,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                     response.EnsureSuccessStatusCode();
                     string jsonString = await response.Content.ReadAsStringAsync();
-                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(jsonString, maxLengthForLog));
                     fhirResourceToProcessJObject = JObject.Parse(jsonString);
                     return fhirResourceToProcessJObject;
                 }
