@@ -91,7 +91,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     return contentResult;
                 } // .catch
 
-                log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
+                log.LogInformation($"ProcessMessage bundle received: {TruncateStrForLog(data.ToJsonString(), maxLengthForLog)}");
 
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
@@ -101,7 +101,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-                log.LogInformation($"ProcessMessage FHIR validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                log.LogInformation($"ProcessMessage FHIR validation done with result: {TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog)}");
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
                 
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);

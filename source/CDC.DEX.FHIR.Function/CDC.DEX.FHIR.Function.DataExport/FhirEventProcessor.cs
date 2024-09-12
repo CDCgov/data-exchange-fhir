@@ -31,8 +31,8 @@ namespace CDC.DEX.FHIR.Function.DataExport
         public async Task<JObject>  ProcessFhirEvent(FhirResourceCreated resourceCreatedMessage, IHttpClientFactory httpClientFactory, IConfiguration config, ILogger log)
         {
             //EVENT SECTION
-
-            log.LogInformation(DataExport.LogPrefix() + $"Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
+            string logPrefix = DataExport.LogPrefix();
+            log.LogInformation($"{logPrefix} Service Bus queue trigger function processed a message: {resourceCreatedMessage.ToString()}");
 
             string requestUrl = $"{config["BaseFhirUrl"]}/{resourceCreatedMessage.data.resourceType}/{resourceCreatedMessage.data.resourceFhirId}/_history/{resourceCreatedMessage.data.resourceVersionId}";
 
@@ -50,18 +50,16 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
                 {
                     // get auth token
-                 
-
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
 
-                    log.LogInformation(DataExport.LogPrefix() + "SendAsync Start " + request.RequestUri);
+                    //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
+                    log.LogInformation($"{logPrefix} SendAsync Start {request.RequestUri}");
                     var response = await client.SendAsync(request);
-                    log.LogInformation(DataExport.LogPrefix() + "SendAsync End ");
+                    log.LogInformation($"{logPrefix} SendAsync End ");
 
                     response.EnsureSuccessStatusCode();
                     string jsonString = await response.Content.ReadAsStringAsync();
-                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(jsonString, maxLengthForLog));
+                    log.LogInformation($"{logPrefix} FHIR Record details returned from FHIR service: {TruncateStrForLog(jsonString, maxLengthForLog)}");
                     fhirResourceToProcessJObject = JObject.Parse(jsonString);
                     return fhirResourceToProcessJObject;
                 }

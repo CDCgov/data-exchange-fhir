@@ -55,11 +55,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
             {
                 //EVENT SECTION
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Start");
+                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Start");
 
-                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage,httpClientFactory,configuration,log);
+                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage, httpClientFactory, configuration, log);
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Done");
+                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Done");
 
                 //EXPORT SECTION
 
@@ -106,24 +106,19 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     }
 
                 }
- 
-
 
                 // get auth for SA
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start");
-
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SATenantIdConfigName " + configuration[SATenantIdConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SAClientIdConfigName " + configuration[SAClientIdConfigName]);
-              
+                log.LogInformation($"{LogPrefix()} ClientSecretCredential Start");
+                log.LogInformation($"{LogPrefix()} ClientSecretCredential SATenantIdConfigName {configuration[SATenantIdConfigName]}");
+                log.LogInformation($"{LogPrefix()} ClientSecretCredential SAClientIdConfigName {configuration[SAClientIdConfigName]}");      
 
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
                     configuration[SAClientIdConfigName],
                     configuration[SAClientSecretConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential End");
+                log.LogInformation($"{LogPrefix()} ClientSecretCredential End");
 
                 // DATA EXPORT PROCESSING
-
                 if (fhirResourceToProcessJObject["resourceType"] != null && fhirResourceToProcessJObject["resourceType"].Value<string>() == "Bundle" && flagFhirResourceCreatedExportFunctionUnbundle)
                 {
                     // is a bundle and unbundle flag is true, need to unbundle
@@ -138,8 +133,8 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                             string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
-                            pathToWrite += "_" + subObject["id"].Value<string>();
+                            pathToWrite += $"/{fhirResourceToProcessJObject["id"].Value<string>()}";
+                            pathToWrite += $"_{subObject["id"].Value<string>()}";
                             filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
@@ -147,7 +142,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                             //no flatten
                             string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            pathToWrite += "/" + subObject["id"].Value<string>();
+                            pathToWrite += $"/{subObject["id"].Value<string>()}";
                             filesToWrite.Add(pathToWrite, subObject.ToString());
                         }
                     }
@@ -164,7 +159,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
                     
-                        pathToWrite += "/" + configuration["Platfom"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
+                        pathToWrite += $"/{configuration["Platfom"]}/Source/{fhirResourceToProcessJObject["id"].Value<string>()}";
                         filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                     }
                     else
@@ -172,23 +167,19 @@ namespace CDC.DEX.FHIR.Function.DataExport
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
 
-                        pathToWrite += "/" + configuration["Platform"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
+                        pathToWrite += $"/{configuration["Platform"]}/Source/{fhirResourceToProcessJObject["id"].Value<string>()}";
 
 
                         filesToWrite.Add(pathToWrite, fhirResourceToProcessJObject.ToString());
                     }
                 }
 
-         
-
-
                 // END GET FHIR RESOURCE SECTION
 
                 // START WRITING TO DATA LAKE SECTION
 
-
-                log.LogInformation(LogPrefix() + "Upload Start");
-                string blobUri = "https://" + storageAccountName + ".blob.core.windows.net";
+                log.LogInformation($"{LogPrefix()} Upload Start");
+                string blobUri = $"https:// {storageAccountName} .blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
@@ -197,12 +188,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 foreach (var keyValPair in filesToWrite)
                 {
                     BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json:");
+                    log.LogInformation($"{LogPrefix()} Writing data to file {keyValPair.Key}.json");
                     blobClient.Upload(BinaryData.FromString($"{keyValPair.Value}"), true);
                 }
-                log.LogInformation(LogPrefix() + "Upload End");
+                log.LogInformation($"{LogPrefix()} Upload End");
                 // END WRITING TO DATA LAKE SECTION
-
 
             }
             catch (Exception e)
