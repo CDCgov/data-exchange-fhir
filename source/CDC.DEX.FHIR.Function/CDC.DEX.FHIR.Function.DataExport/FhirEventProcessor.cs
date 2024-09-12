@@ -35,7 +35,12 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
             using (HttpClient client = httpClientFactory.CreateClient())
             {
+
+                string token = await FhirServiceUtils.GetFhirServerToken(config, client);
+                int maxLengthForLog = 500;
+
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
+
 
                 using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
                 {
@@ -52,13 +57,9 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     log.LogInformation(DataExport.LogPrefix() + "SendAsync End ");
 
                     response.EnsureSuccessStatusCode();
-
                     string jsonString = await response.Content.ReadAsStringAsync();
-
-                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
-
+                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
                     fhirResourceToProcessJObject = JObject.Parse(jsonString);
-
                     return fhirResourceToProcessJObject;
                 }
             }
