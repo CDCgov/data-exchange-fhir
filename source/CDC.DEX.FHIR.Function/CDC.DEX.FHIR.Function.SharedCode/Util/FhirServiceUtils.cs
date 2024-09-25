@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 
 namespace CDC.DEX.FHIR.Function.SharedCode.Util
 {
@@ -11,7 +12,7 @@ namespace CDC.DEX.FHIR.Function.SharedCode.Util
         /// </summary>
         /// <param name="authConfig">The environment specfic authConfig</param>
         /// <param name="httpClient">The httpClient to use to get the fhir token</param>
-        public static async Task<string> GetFhirServerToken(IConfiguration configuration, HttpClient httpClient)
+        public static async Task<string> GetFhirServerToken(IConfiguration configuration, HttpClient httpClient, ILogger log)
         {
             string token;
 
@@ -20,10 +21,11 @@ namespace CDC.DEX.FHIR.Function.SharedCode.Util
             dict.Add("client_id", configuration["ClientId"]);
             dict.Add("client_secret", configuration["ClientSecret"]);
 
-            using (var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{configuration["BaseFhirUrl"]}/basicAuth") { Content = new FormUrlEncodedContent(dict) })
+            using (var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{configuration["TokenBaseFhirUrl"]}") { Content = new FormUrlEncodedContent(dict) })
             {
-                tokenRequest.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
+                //  tokenRequest.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
 
+                log.LogInformation("GetFhirServerToken Start" + tokenRequest.RequestUri);
                 var tokenResponse = await httpClient.SendAsync(tokenRequest);
 
                 tokenResponse.EnsureSuccessStatusCode();

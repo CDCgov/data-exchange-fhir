@@ -16,6 +16,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
     public class FhirEventProcessor
     {
 
+        private string TruncateStrForLog(string jsonString, int maxLen)
+        {
+            return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
+        } // .TruncateStrForLog
+
         /// <summary>
         /// Read resource created event message and retrieve the created fhir resource
         /// </summary>
@@ -34,25 +39,32 @@ namespace CDC.DEX.FHIR.Function.DataExport
             JObject fhirResourceToProcessJObject;
 
             using (HttpClient client = httpClientFactory.CreateClient())
-            using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
             {
-                // get auth token
-                string token = await FhirServiceUtils.GetFhirServerToken(config, client);
 
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
+                string token = await FhirServiceUtils.GetFhirServerToken(config, client,log);
+                int maxLengthForLog = 500;
 
-                var response = await client.SendAsync(request);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
 
-                response.EnsureSuccessStatusCode();
 
-                string jsonString = await response.Content.ReadAsStringAsync();
+                using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
+                {
+                    // get auth token
+                 
 
-                log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: {jsonString}");
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
 
-                fhirResourceToProcessJObject = JObject.Parse(jsonString);
+                    log.LogInformation(DataExport.LogPrefix() + "SendAsync Start " + request.RequestUri);
+                    var response = await client.SendAsync(request);
+                    log.LogInformation(DataExport.LogPrefix() + "SendAsync End ");
 
-                return fhirResourceToProcessJObject;
+                    response.EnsureSuccessStatusCode();
+                    string jsonString = await response.Content.ReadAsStringAsync();
+                    log.LogInformation(DataExport.LogPrefix() + $"FHIR Record details returned from FHIR service: " + TruncateStrForLog(jsonString, maxLengthForLog));
+                    fhirResourceToProcessJObject = JObject.Parse(jsonString);
+                    return fhirResourceToProcessJObject;
+                }
             }
         }
     }
