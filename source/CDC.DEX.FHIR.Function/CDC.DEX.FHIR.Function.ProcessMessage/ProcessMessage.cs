@@ -83,12 +83,13 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 {
                   
                     log.LogError(e.ToString());
-                    contentResult.Content = JsonErrorStr("error deserialize received JSON");
+                    contentResult.Content = JsonErrorStr(e.toString());
                     contentResult.StatusCode = 400;
                     return contentResult;
                 } // .catch
 
-                log.LogInformation("ProcessMessage bundle received");
+                string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
+                log.LogInformation($"ProcessMessage bundle received: {logJsonString}");
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
@@ -98,7 +99,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
                 string statusCode = validateReportingBundleResult.StatusCode;
-                log.LogInformation("ProcessMessage FHIR validation done with result: {statusCode}", statusCode);
+                log.LogInformation($"ProcessMessage FHIR validation done with result: {statusCode}");
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
                 
                 // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
@@ -106,7 +107,8 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
-                    log.LogInformation("ProcessMessage Skipping FHIR Validation");
+                    string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                    log.LogInformation($"ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}");
                     isValid = true;
                 }
                 else
@@ -160,7 +162,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 TimeSpan durationProcessMessage = DateTime.Now - startProcessMessage;
                 log.LogInformation($"ProcessMessage total run duration ms: {durationProcessMessage.Milliseconds}");
-
             }
 
         } // .run
