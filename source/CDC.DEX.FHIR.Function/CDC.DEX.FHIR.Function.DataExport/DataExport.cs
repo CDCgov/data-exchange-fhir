@@ -54,12 +54,13 @@ namespace CDC.DEX.FHIR.Function.DataExport
             try
             {
                 //EVENT SECTION
+                string logPrefix = LogPrefix();
 
-                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Start");
+                log.LogInformation("{logPrefix} ProcessFhirEvent Start", logPrefix);
 
                 JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage, httpClientFactory, configuration, log);
 
-                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Done");
+                log.LogInformation("{logPrefix} ProcessFhirEvent Done", logPrefix);
 
                 //EXPORT SECTION
 
@@ -107,20 +108,19 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 }
 
-
-
                 // get auth for SA
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start");
-
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SATenantIdConfigName " + configuration[SATenantIdConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SAClientIdConfigName " + configuration[SAClientIdConfigName]);
+                log.LogInformation("{logPrefix} ClientSecretCredential Start", logPrefix);
+                string enantIdConfig = configuration[SATenantIdConfigName]
+                log.LogInformation("{logPrefix} ClientSecretCredential SATenantIdConfigName {config}", logPrefix, configenantId);
+                string clientIdConfig = configuration[SATenantIdConfigName]
+                log.LogInformation(" {logPrefix} ClientSecretCredential SAClientIdConfigName {clientIdConfig}" , logPrefix, clientIdConfig);
 
 
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
                     configuration[SAClientIdConfigName],
                     configuration[SAClientSecretConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential End");
+                log.LogInformation("{logPrefix} ClientSecretCredential End", logPrefix);
 
                 // DATA EXPORT PROCESSING
 
@@ -187,7 +187,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 // START WRITING TO DATA LAKE SECTION
 
 
-                log.LogInformation(LogPrefix() + "Upload Start");
+                log.LogInformation("{logPrefix} Upload Start", logPrefix);
                 string blobUri = $"https://{storageAccountName}.blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
@@ -196,11 +196,12 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 foreach (var keyValPair in filesToWrite)
                 {
-                    BlobClient blobClient = blobContainerClient.GetBlobClient(keyValPair.Key);
-                    log.LogInformation($"{LogPrefix()} Writing data to file {keyValPair.Key}");
+                    string keyValueKey = keyValPair.Key;
+                    BlobClient blobClient = blobContainerClient.GetBlobClient(keyValueKey);
+                    log.LogInformation("{logPrefix} Writing data to file {keyValueKey}", logPrefix, keyValueKey);
                     blobClient.Upload(BinaryData.FromString(keyValPair.Value), true);
                 }
-                log.LogInformation($"{LogPrefix()} Upload End");
+                log.LogInformation("{logPrefix} Upload End", logPrefix);
                 // END WRITING TO DATA LAKE SECTION
 
 

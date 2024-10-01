@@ -55,13 +55,16 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     //  request.Headers.Add("Ocp-Apim-Subscription-Key", config["OcpApimSubscriptionKey"]);
 
-                    log.LogInformation($"{DataExport.LogPrefix()}. SendAsync Start {request.RequestUri}");
+                    string dataExportLogPrefix = DataExport.LogPrefix();
+                    string requestUri = request.RequestUri;
+                    log.LogInformation("{dataExportLogPrefix}. SendAsync Start {request.RequestUri}", dataExportLogPrefix, );
                     var response = await client.SendAsync(request);
-                    log.LogInformation($"{DataExport.LogPrefix()}. SendAsync End");
+                    log.LogInformation("{dataExportLogPrefix}. SendAsync End", dataExportLogPrefix);
 
                     response.EnsureSuccessStatusCode();
                     string jsonString = await response.Content.ReadAsStringAsync();
-                    log.LogInformation($"DataExport.LogPrefix() FHIR Record details returned from FHIR service: {TruncateStrForLog(jsonString, maxLengthForLog)}");
+                    string jsonStringtrancate = TruncateStrForLog(jsonString, maxLengthForLog);
+                    log.LogInformation("{dataExportLogPrefix} FHIR Record details returned from FHIR service: {jsonStringtrancate}", dataExportLogPrefix, jsonStringtrancate);
                     fhirResourceToProcessJObject = JObject.Parse(jsonString);
                     return fhirResourceToProcessJObject;
                 }
