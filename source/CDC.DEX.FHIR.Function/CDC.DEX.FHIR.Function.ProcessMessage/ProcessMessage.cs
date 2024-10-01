@@ -6,7 +6,6 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
-// using CDC.DEX.FHIR.Function.SharedCode.Util;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -23,11 +22,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
-        /// <summary>
         /// Constructor
-        /// </summary>
-        /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedPrepFunction</param>
-        /// <param name="configuration">App Configuration</param>
         public ProcessMessage(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             this.httpClientFactory = httpClientFactory;
@@ -49,6 +44,9 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 log.LogInformation("ProcessMessage HTTP trigger function received a request.");
 
+                // limit log of bundles or validation result to the first 300 chars
+                const int maxLengthForLog = 300;
+
                 // guard for missing Authorization in Headers
                 const string authorizationKeyName = "Authorization";
                 if (!req.Headers.ContainsKey(authorizationKeyName)) 
@@ -56,7 +54,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     const string errorMessage =  $"Headers missing {authorizationKeyName}";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
-                    contentResult.StatusCode = 401;
+                    contentResult.StatusCode = StatusCodes.Status401Unauthorized;
                     return contentResult;
                 } // .if
 
@@ -67,7 +65,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     const string errorMessage =  $"request body content length null";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
-                    contentResult.StatusCode = 400;
+                    contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
                 } // .if
 
@@ -84,7 +82,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                   
                     log.LogError(e.ToString());
                     contentResult.Content = JsonErrorStr(e.toString());
-                    contentResult.StatusCode = 400;
+                    contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
                 } // .catch
 
@@ -98,11 +96,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
+
                 string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
                 log.LogInformation($"ProcessMessage FHIR validation done with result: {logLogDetail}");
                 log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
-                
-                // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
@@ -125,18 +122,16 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     JsonNode messageNode = data;
 
                     PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, cleanedBearerToken, log);
-
-                    //data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
                     data = JsonNode.Parse(postResult.JsonString);
 
                     contentResult.Content = data.ToJsonString();
-                    contentResult.StatusCode = 201;
+                    contentResult.StatusCode = StatusCodes.Status201Created;
                     return contentResult;
                 }
                 else
                 {
                     contentResult.Content = validateReportingBundleResult.JsonString;
-                    contentResult.StatusCode = 422;
+                    contentResult.StatusCode = StatusCodes.Status422UnprocessableEntity;
                     return contentResult;
                 }
             }
@@ -145,13 +140,13 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 if (e is HttpRequestException httpException) // exception returned from the FHIR server call
                 {
-                    contentResult.Content = JsonErrorStr($"http error {httpException.StatusCode}");
-                    contentResult.StatusCode = (int)httpException.StatusCode;
+                    contentResult.Content = JsonErrorStr("http error");
+                    contentResult.StatusCode = httpException.StatusCode;
                 }
                 else // something else (exception) happened
                 {
                     contentResult.Content = JsonErrorStr("unexpected condition was encountered");
-                    contentResult.StatusCode = 500; // code for internal server error as exception
+                    contentResult.StatusCode = StatusCodes.Status500InternalServerError;
                 }
                 log.LogError(e.ToString());
 
@@ -225,7 +220,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             ContentResult contentResult = new ContentResult
             {
                 ContentType = "application/json",
-                StatusCode = (int) HttpStatusCode.OK  // 200
+                StatusCode = HttpStatusCode.OK
             };
 
             return contentResult;
