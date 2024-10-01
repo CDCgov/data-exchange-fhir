@@ -92,8 +92,6 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     Bundle results = await client.SearchAsync<Bundle>(searchParam);
 
-                    //int resultCount = 0;
-
                     do
                     {
                         foreach (EntryComponent entryComponent in results.Entry)
@@ -103,11 +101,6 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                         //resultCount += results.Entry.Count();
                     }
                     while ((results = await client.ContinueAsync(results)) != null);
-
-
-                    //log.LogInformation(searchParam.ToUriParamList().ToQueryString());
-                    //log.LogInformation(resultCount.ToString());
-                    //log.LogInformation(serializer.SerializeToString(results));
 
                 }
             }

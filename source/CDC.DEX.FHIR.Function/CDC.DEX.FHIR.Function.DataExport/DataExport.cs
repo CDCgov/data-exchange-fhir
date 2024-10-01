@@ -55,11 +55,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
             {
                 //EVENT SECTION
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Start");
+                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Start");
 
-                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage,httpClientFactory,configuration,log);
+                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage, httpClientFactory, configuration, log);
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Done");
+                log.LogInformation($"{LogPrefix()} ProcessFhirEvent Done");
 
                 //EXPORT SECTION
 
@@ -84,14 +84,14 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 string testDestinationConfig = configuration["Export:DestinationConfig"];
                 JObject testDestinationConfigJSON = JObject.Parse(testDestinationConfig);
 
-                if(fhirResourceToProcessJObject.ContainsKey("meta")&& fhirResourceToProcessJObject["meta"].Value<JObject>().ContainsKey("profile"))
+                if (fhirResourceToProcessJObject.ContainsKey("meta") && fhirResourceToProcessJObject["meta"].Value<JObject>().ContainsKey("profile"))
                 {
                     // potentially change how the resources are sorted
                     string validationProfile = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
 
-                    foreach(JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
+                    foreach (JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
                     {
-                        foreach(string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
+                        foreach (string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
                         {
                             if (validationProfile.Trim() == profilePath.Trim())
                             {
@@ -106,7 +106,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     }
 
                 }
- 
+
 
 
                 // get auth for SA
@@ -114,7 +114,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 log.LogInformation(LogPrefix() + "ClientSecretCredential SATenantIdConfigName " + configuration[SATenantIdConfigName]);
                 log.LogInformation(LogPrefix() + "ClientSecretCredential SAClientIdConfigName " + configuration[SAClientIdConfigName]);
-              
+
 
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
@@ -163,7 +163,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
-                    
+
                         pathToWrite += "/" + configuration["Platfom"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
                         filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                     }
@@ -179,7 +179,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     }
                 }
 
-         
+
 
 
                 // END GET FHIR RESOURCE SECTION
@@ -188,7 +188,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
 
                 log.LogInformation(LogPrefix() + "Upload Start");
-                string blobUri = "https://" + storageAccountName + ".blob.core.windows.net";
+                string blobUri = $"https://{storageAccountName}.blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
@@ -196,11 +196,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 foreach (var keyValPair in filesToWrite)
                 {
-                    BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json:");
-                    blobClient.Upload(BinaryData.FromString($"{keyValPair.Value}"), true);
+                    BlobClient blobClient = blobContainerClient.GetBlobClient(keyValPair.Key);
+                    log.LogInformation($"{LogPrefix()} Writing data to file {keyValPair.Key}");
+                    blobClient.Upload(BinaryData.FromString(keyValPair.Value), true);
                 }
-                log.LogInformation(LogPrefix() + "Upload End");
+                log.LogInformation($"{LogPrefix()} Upload End");
                 // END WRITING TO DATA LAKE SECTION
 
 
