@@ -267,3 +267,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/source/CDC.DEX.FHIR.Function/CDC.DEX.FHIR.Function.SmartAuth/patientandpopulationservices-smartonfhir-oncg10/src/SMARTCustomOperations.AzureAuth(1).UnitTests/SMARTCustomOperations.AzureAuth.UnitTests.csproj
