@@ -44,7 +44,8 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
         [FunctionName("DataPurge")]
         public async System.Threading.Tasks.Task RunAsync([TimerTrigger("%Purge:Schedule%")] TimerInfo triggerSchedule, ILogger log)
         {
-            log.LogInformation($"DataPurge Timer trigger function executed at: {DateTime.Now}");
+            string dateTime = DateTime.Now;
+            log.LogInformation"DataPurge Timer trigger function executed at: {dateTime}", dateTime);
 
             var serializer = new FhirJsonSerializer(new SerializerSettings()
             {
@@ -98,7 +99,6 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                         {
                             resourceIdsToDelete.Add(entryComponent.Resource.Id, entryComponent.Resource.TypeName);
                         }
-                        //resultCount += results.Entry.Count();
                     }
                     while ((results = await client.ContinueAsync(results)) != null);
 
@@ -112,7 +112,8 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
                 searchParams.Add("_id", resourceId);
                 searchParams.Add("hardDelete", "true");
                 await client.DeleteAsync(resourceIdsToDelete[resourceId], searchParams);
-                log.LogInformation($"Hard Delete Successful: {resourceIdsToDelete[resourceId]}/{resourceId}");
+                string resourceIdsDelete = resourceIdsToDelete[resourceId]/resourceId;
+                log.LogInformation("Hard Delete Successful: {resourceIdDeletes}", resourceIdsDelete);
             }
 
 
