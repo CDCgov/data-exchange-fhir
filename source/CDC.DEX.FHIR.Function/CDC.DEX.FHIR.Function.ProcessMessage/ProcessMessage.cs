@@ -24,7 +24,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
         private readonly IConfiguration configuration;
         /// <summary>
         /// Constructor
-        ///</summary>
+        /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedPrepFunction</param>
         /// <param name="configuration">App Configuration</param>
         public ProcessMessage(IHttpClientFactory httpClientFactory, IConfiguration configuration)
