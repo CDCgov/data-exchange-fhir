@@ -2,7 +2,6 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
-using CDC.DEX.FHIR.Function.SharedCode.Util;
 using JsonFlatten;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.DataExport
@@ -28,11 +26,11 @@ namespace CDC.DEX.FHIR.Function.DataExport
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public DataExport(IHttpClientFactory httpClientFactory, IConfiguration configuration,FhirEventProcessor fhirEventProcessor)
+        public DataExport(IHttpClientFactory httpClientFactory, IConfiguration configuration, FhirEventProcessor fhirEventProcessor)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
-            this.fhirEventProcessor =  fhirEventProcessor;
+            this.fhirEventProcessor = fhirEventProcessor;
         }
 
         /// <summary>
@@ -107,10 +105,10 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 // get auth for SA
                 log.LogInformation("{logPrefix} ClientSecretCredential Start", logPrefix);
-                string enantIdConfig = configuration[SATenantIdConfigName]
-                log.LogInformation("{logPrefix} ClientSecretCredential SATenantIdConfigName {config}", logPrefix, configenantId);
-                string clientIdConfig = configuration[SATenantIdConfigName]
-                log.LogInformation(" {logPrefix} ClientSecretCredential SAClientIdConfigName {clientIdConfig}" , logPrefix, clientIdConfig);
+                string enantIdConfig = configuration[SATenantIdConfigName];
+                log.LogInformation("{logPrefix} ClientSecretCredential SATenantIdConfigName {enantIdConfig}", logPrefix, enantIdConfig);
+                string clientIdConfig = configuration[SATenantIdConfigName];
+                log.LogInformation(" {logPrefix} ClientSecretCredential SAClientIdConfigName {clientIdConfig}", logPrefix, clientIdConfig);
 
 
                 TokenCredential credential = new ClientSecretCredential(
@@ -136,7 +134,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                             string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
                             pathToWrite += $"/{fhirResourceToProcessJObject["id"].Value<string>()}";
-                            pathToWrite += $"_{ subObject["id"].Value<string>()}";
+                            pathToWrite += $"_{subObject["id"].Value<string>()}";
                             filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
