@@ -2,7 +2,6 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
-using CDC.DEX.FHIR.Function.SharedCode.Util;
 using JsonFlatten;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
@@ -13,15 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.DataExport
 {
     public class DataExport
     {
-
-
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
         private readonly FhirEventProcessor fhirEventProcessor;
@@ -30,13 +26,12 @@ namespace CDC.DEX.FHIR.Function.DataExport
         /// </summary>
         /// <param name="httpClientFactory">Http client factory for FhirResourceCreatedExportFunction</param>
         /// <param name="configuration">App Configuration</param>
-        public DataExport(IHttpClientFactory httpClientFactory, IConfiguration configuration,FhirEventProcessor fhirEventProcessor)
+        public DataExport(IHttpClientFactory httpClientFactory, IConfiguration configuration, FhirEventProcessor fhirEventProcessor)
         {
             this.httpClientFactory = httpClientFactory;
             this.configuration = configuration;
-            this.fhirEventProcessor =  fhirEventProcessor;
+            this.fhirEventProcessor = fhirEventProcessor;
         }
-
 
         /// <summary>
         /// Function event trigger entry point
@@ -54,12 +49,13 @@ namespace CDC.DEX.FHIR.Function.DataExport
             try
             {
                 //EVENT SECTION
+                string logPrefix = "DataExport: ";
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Start");
+                log.LogInformation("{logPrefix} ProcessFhirEvent Start", logPrefix);
 
-                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage,httpClientFactory,configuration,log);
+                JObject fhirResourceToProcessJObject = await fhirEventProcessor.ProcessFhirEvent(resourceCreatedMessage, httpClientFactory, configuration, log);
 
-                log.LogInformation(LogPrefix() + "ProcessFhirEvent Done");
+                log.LogInformation("{logPrefix} ProcessFhirEvent Done", logPrefix);
 
                 //EXPORT SECTION
 
@@ -84,14 +80,14 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 string testDestinationConfig = configuration["Export:DestinationConfig"];
                 JObject testDestinationConfigJSON = JObject.Parse(testDestinationConfig);
 
-                if(fhirResourceToProcessJObject.ContainsKey("meta")&& fhirResourceToProcessJObject["meta"].Value<JObject>().ContainsKey("profile"))
+                if (fhirResourceToProcessJObject.ContainsKey("meta") && fhirResourceToProcessJObject["meta"].Value<JObject>().ContainsKey("profile"))
                 {
                     // potentially change how the resources are sorted
                     string validationProfile = fhirResourceToProcessJObject["meta"]["profile"][0].Value<string>();
 
-                    foreach(JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
+                    foreach (JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
                     {
-                        foreach(string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
+                        foreach (string profilePath in profileConfig["ProfilePathsToFilter"].Values<string>())
                         {
                             if (validationProfile.Trim() == profilePath.Trim())
                             {
@@ -106,21 +102,20 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     }
 
                 }
- 
-
 
                 // get auth for SA
-                log.LogInformation(LogPrefix() + "ClientSecretCredential Start");
+                log.LogInformation("{logPrefix} ClientSecretCredential Start", logPrefix);
+                string enantIdConfig = configuration[SATenantIdConfigName];
+                log.LogInformation("{logPrefix} ClientSecretCredential SATenantIdConfigName {enantIdConfig}", logPrefix, enantIdConfig);
+                string clientIdConfig = configuration[SATenantIdConfigName];
+                log.LogInformation(" {logPrefix} ClientSecretCredential SAClientIdConfigName {clientIdConfig}", logPrefix, clientIdConfig);
 
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SATenantIdConfigName " + configuration[SATenantIdConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential SAClientIdConfigName " + configuration[SAClientIdConfigName]);
-              
 
                 TokenCredential credential = new ClientSecretCredential(
                     configuration[SATenantIdConfigName],
                     configuration[SAClientIdConfigName],
                     configuration[SAClientSecretConfigName]);
-                log.LogInformation(LogPrefix() + "ClientSecretCredential End");
+                log.LogInformation("{logPrefix} ClientSecretCredential End", logPrefix);
 
                 // DATA EXPORT PROCESSING
 
@@ -138,8 +133,8 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                             string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            pathToWrite += "/" + fhirResourceToProcessJObject["id"].Value<string>();
-                            pathToWrite += "_" + subObject["id"].Value<string>();
+                            pathToWrite += $"/{fhirResourceToProcessJObject["id"].Value<string>()}";
+                            pathToWrite += $"_{subObject["id"].Value<string>()}";
                             filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                         }
                         else
@@ -147,7 +142,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                             //no flatten
                             string pathToWrite = subObject["resourceType"].Value<string>();
                             //get profile data for sorting bundles
-                            pathToWrite += "/" + subObject["id"].Value<string>();
+                            pathToWrite += $"/{subObject["id"].Value<string>()}";
                             filesToWrite.Add(pathToWrite, subObject.ToString());
                         }
                     }
@@ -163,23 +158,21 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
                         //get profile data for sorting bundles
-                    
-                        pathToWrite += "/" + configuration["Platfom"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
+
+                        pathToWrite += $"/{configuration["Platfom"]}/Source/{fhirResourceToProcessJObject["id"].Value<string>()}";
                         filesToWrite.Add(pathToWrite, flattenedJson.ToString());
                     }
                     else
                     {
                         string pathToWrite = fhirResourceToProcessJObject["resourceType"].Value<string>();
+
                         //get profile data for sorting bundles
-
-                        pathToWrite += "/" + configuration["Platform"] + "/Source/" + fhirResourceToProcessJObject["id"].Value<string>();
-
-
+                        pathToWrite += $"/{configuration["Platform"]}/Source/{fhirResourceToProcessJObject["id"].Value<string>()}";
                         filesToWrite.Add(pathToWrite, fhirResourceToProcessJObject.ToString());
                     }
                 }
 
-         
+
 
 
                 // END GET FHIR RESOURCE SECTION
@@ -187,8 +180,8 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 // START WRITING TO DATA LAKE SECTION
 
 
-                log.LogInformation(LogPrefix() + "Upload Start");
-                string blobUri = "https://" + storageAccountName + ".blob.core.windows.net";
+                log.LogInformation("{logPrefix} Upload Start", logPrefix);
+                string blobUri = $"https://{storageAccountName}.blob.core.windows.net";
 
                 BlobServiceClient blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
 
@@ -196,11 +189,12 @@ namespace CDC.DEX.FHIR.Function.DataExport
 
                 foreach (var keyValPair in filesToWrite)
                 {
-                    BlobClient blobClient = blobContainerClient.GetBlobClient($"{keyValPair.Key}.json");
-                    log.LogInformation(LogPrefix() + $"Writing data to file {keyValPair.Key}.json:");
-                    blobClient.Upload(BinaryData.FromString($"{keyValPair.Value}"), true);
+                    string keyValueKey = keyValPair.Key;
+                    BlobClient blobClient = blobContainerClient.GetBlobClient(keyValueKey);
+                    log.LogInformation("{logPrefix} Writing data to file {keyValueKey}", logPrefix, keyValueKey);
+                    blobClient.Upload(BinaryData.FromString(keyValPair.Value), true);
                 }
-                log.LogInformation(LogPrefix() + "Upload End");
+                log.LogInformation("{logPrefix} Upload End", logPrefix);
                 // END WRITING TO DATA LAKE SECTION
 
 
@@ -262,11 +256,5 @@ namespace CDC.DEX.FHIR.Function.DataExport
             return JsonConvert.SerializeObject(flattenedObject);
 
         }
-
-        public static string LogPrefix()
-        {
-            return $"DataExport - {DateTime.UtcNow}: ";
-        }
-
     }
 }

@@ -1,21 +1,18 @@
-using System;
-using CDC.DEX.FHIR.Function.DataExport;
-using System.Net.Http;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Hl7.Fhir.Rest;
-using System.Net.Http.Headers;
 using CDC.DEX.FHIR.Function.SharedCode;
 using CDC.DEX.FHIR.Function.SharedCode.Util;
-using System.Threading.Tasks;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Rest;
 using Hl7.Fhir.Serialization;
-using System.Linq;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using static Hl7.Fhir.Model.Bundle;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using static Hl7.Fhir.Model.Bundle;
 
 namespace CDC.DEX.FHIR.Function.ProcessExport
 {
@@ -44,7 +41,8 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
         [FunctionName("DataPurge")]
         public async System.Threading.Tasks.Task RunAsync([TimerTrigger("%Purge:Schedule%")] TimerInfo triggerSchedule, ILogger log)
         {
-            log.LogInformation($"DataPurge Timer trigger function executed at: {DateTime.Now}");
+            string dateTime = DateTime.Now.ToString();
+            log.LogInformation("DataPurge Timer trigger function executed at: {dateTime}", dateTime);
 
             var serializer = new FhirJsonSerializer(new SerializerSettings()
             {
@@ -55,7 +53,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             using (HttpClient authclient = httpClientFactory.CreateClient())
             {
                 // get auth token
-                bearerToken = await FhirServiceUtils.GetFhirServerToken(configuration, authclient,log);
+                bearerToken = await FhirServiceUtils.GetFhirServerToken(configuration, authclient, log);
             }
             var handler = new AuthorizationMessageHandler();
             handler.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
@@ -71,7 +69,7 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
             string testDestinationConfig = configuration["Export:DestinationConfig"];
             JObject testDestinationConfigJSON = JObject.Parse(testDestinationConfig);
 
-            Dictionary<string,string> resourceIdsToDelete = new Dictionary<string,string>();
+            Dictionary<string, string> resourceIdsToDelete = new Dictionary<string, string>();
 
             foreach (JObject profileConfig in testDestinationConfigJSON["Mappings"].Values<JObject>())
             {
@@ -92,34 +90,27 @@ namespace CDC.DEX.FHIR.Function.ProcessExport
 
                     Bundle results = await client.SearchAsync<Bundle>(searchParam);
 
-                    //int resultCount = 0;
-
                     do
                     {
                         foreach (EntryComponent entryComponent in results.Entry)
                         {
                             resourceIdsToDelete.Add(entryComponent.Resource.Id, entryComponent.Resource.TypeName);
                         }
-                        //resultCount += results.Entry.Count();
                     }
                     while ((results = await client.ContinueAsync(results)) != null);
-
-
-                    //log.LogInformation(searchParam.ToUriParamList().ToQueryString());
-                    //log.LogInformation(resultCount.ToString());
-                    //log.LogInformation(serializer.SerializeToString(results));
 
                 }
             }
 
             // delete the history and the resource
-            foreach(string resourceId in resourceIdsToDelete.Keys)
+            foreach (string resourceId in resourceIdsToDelete.Keys)
             {
                 SearchParams searchParams = new SearchParams();
                 searchParams.Add("_id", resourceId);
                 searchParams.Add("hardDelete", "true");
                 await client.DeleteAsync(resourceIdsToDelete[resourceId], searchParams);
-                log.LogInformation($"Hard Delete Successful: {resourceIdsToDelete[resourceId]}/{resourceId}");
+                string resourceIdsDelete = $"Hard Delete Successful: {resourceIdsToDelete[resourceId]}/{resourceId}";
+                log.LogInformation(resourceIdsDelete);
             }
 
 

@@ -14,7 +14,6 @@ namespace CDC.DEX.FHIR.Function.DataExport.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
-
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
             string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
