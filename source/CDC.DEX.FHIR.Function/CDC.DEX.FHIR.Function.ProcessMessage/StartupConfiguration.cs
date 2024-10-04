@@ -14,18 +14,17 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
-
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
             string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
             builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
-            {
-                options.Connect(cs)
-                       .ConfigureKeyVault(kv =>
-                       {
-                           kv.SetCredential(new DefaultAzureCredential());
-                       });
-            });
+        {
+            options.Connect(cs)
+                    .ConfigureKeyVault(kv =>
+                {
+                    kv.SetCredential(new DefaultAzureCredential());
+                });
+        });
         }
 
         public override void Configure(IFunctionsHostBuilder builder)
