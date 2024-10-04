@@ -1,20 +1,19 @@
 
+using CDC.DEX.FHIR.Function.SharedCode.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using CDC.DEX.FHIR.Function.SharedCode.Models;
-// using CDC.DEX.FHIR.Function.SharedCode.Util;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Net;
+using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -39,6 +38,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
+            string prefix = "ProcessMessage: ";
             DateTime startProcessMessage = DateTime.Now;
             ContentResult contentResult = new ContentResult
             {
@@ -47,52 +47,53 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             try
             {
-                log.LogInformation("ProcessMessage HTTP trigger function received a request.");
+                log.LogInformation("{prefix} ProcessMessage HTTP trigger function received a request.", prefix);
 
-                // limit log of bundles or validation result to the first 100 chars
-                const int maxLengthForLog = 500;
-
+                // limit log of bundles or validation result to the first 300 chars
+                const int maxLengthForLog = 300;
 
                 // guard for missing Authorization in Headers
                 const string authorizationKeyName = "Authorization";
-                if (!req.Headers.ContainsKey(authorizationKeyName)) 
+                if (!req.Headers.ContainsKey(authorizationKeyName))
                 {
-                    const string errorMessage =  $"Headers missing {authorizationKeyName}";
+                    const string errorMessage = $"Headers missing {authorizationKeyName}";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
-                    contentResult.StatusCode = 401;
+                    contentResult.StatusCode = StatusCodes.Status401Unauthorized;
                     return contentResult;
                 } // .if
 
                 bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
-                
+
                 // guard for empty request body, no payload
-                if (req.ContentLength == 0) {
-                    const string errorMessage =  $"request body content length null";
+                if (req.ContentLength == 0)
+                {
+                    const string errorMessage = $"request body content length null";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
-                    contentResult.StatusCode = 400;
+                    contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
                 } // .if
 
                 // try to deserialize body payload to json
                 JsonNode data;
                 string jsonString = string.Empty;
-                try 
+                try
                 {
                     data = JsonSerializer.Deserialize<JsonNode>(req.Body);
                     jsonString = data.ToString() ?? string.Empty;
                 } // .try
-                catch (JsonException  e) 
+                catch (JsonException e)
                 {
+
                     log.LogError(e.ToString());
-                    contentResult.Content = JsonErrorStr("error deserialize received JSON");
-                    contentResult.StatusCode = 400;
+                    contentResult.Content = JsonErrorStr(e.ToString());
+                    contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
                 } // .catch
 
-                log.LogInformation("ProcessMessage bundle received: " + TruncateStrForLog(data.ToJsonString(), maxLengthForLog));
-
+                string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
+                log.LogInformation("{prefix}ProcessMessage bundle received: {logJsonString}", prefix, logJsonString);
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
@@ -101,16 +102,17 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 DateTime startFHIRValidation = DateTime.Now;
                 PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-                log.LogInformation($"ProcessMessage FHIR validation done with result: " + TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
-                log.LogInformation($"ProcessMessage FHIR validation run duration ms: {durationFHIRValidation.Milliseconds}");
-                
-                // log.LogInformation("ProcessMessage validation done with result: " + validateReportingBundleResult.JsonString);
 
+                string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
+                double ms = durationFHIRValidation.Milliseconds;
+                log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
+                log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
-                    log.LogInformation("ProcessMessage Skipping FHIR Validation");
+                    string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
+                    log.LogInformation("{prefix}ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
                     isValid = true;
                 }
                 else
@@ -127,53 +129,52 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     JsonNode messageNode = data;
 
                     PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, cleanedBearerToken, log);
-
-                    //data["entry"][1]["resource"] = JsonNode.Parse(postResult.JsonString);
                     data = JsonNode.Parse(postResult.JsonString);
 
                     contentResult.Content = data.ToJsonString();
-                    contentResult.StatusCode = 201;
+                    contentResult.StatusCode = StatusCodes.Status201Created;
                     return contentResult;
                 }
                 else
                 {
                     contentResult.Content = validateReportingBundleResult.JsonString;
-                    contentResult.StatusCode = 422;
+                    contentResult.StatusCode = StatusCodes.Status422UnprocessableEntity;
                     return contentResult;
                 }
             }
             // catch (HttpRequestException e)
-            catch( Exception e)
+            catch (Exception e)
             {
                 if (e is HttpRequestException httpException) // exception returned from the FHIR server call
                 {
-                    contentResult.Content = JsonErrorStr($"http error {httpException.StatusCode}");
-                    contentResult.StatusCode = (int)httpException.StatusCode;
+                    contentResult.Content = JsonErrorStr("http error");
+                    contentResult.StatusCode = (int?)httpException.StatusCode;
                 }
-                    else // something else (exception) happened
+                else // something else (exception) happened
                 {
                     contentResult.Content = JsonErrorStr("unexpected condition was encountered");
-                    contentResult.StatusCode = 500; // code for internal server error as exception
+                    contentResult.StatusCode = StatusCodes.Status500InternalServerError;
                 }
                 log.LogError(e.ToString());
 
                 return contentResult;
 
             } // .catch
-            finally 
+            finally
             {
                 TimeSpan durationProcessMessage = DateTime.Now - startProcessMessage;
-                log.LogInformation($"ProcessMessage total run duration ms: {durationProcessMessage.Milliseconds}");
-
+                double durationPmMs = durationProcessMessage.Milliseconds;
+                log.LogInformation("{prefix}ProcessMessage total run duration ms: {durationPmMs}", prefix, durationPmMs);
             }
 
         } // .run
 
         private async Task<PostContentBundleResult> PostContentBundle(IConfiguration configuration, string bundleJson, Uri location, string bearerToken, ILogger log)
         {
+            string prefix = "ProcessMessage: ";
             PostContentBundleResult postContentResponse;
-
-            log.LogInformation($"ProcessMessage, PostContentBundle sending for validation to FHIR server endpoint: {location.AbsoluteUri}");
+            string locAbs = location.AbsoluteUri;
+            log.LogInformation("{prefix}ProcessMessage, PostContentBundle sending for validation to FHIR server endpoint: {locAbs}", prefix, locAbs);
 
             using (HttpClient client = httpClientFactory.CreateClient())
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
@@ -190,8 +191,9 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 response.EnsureSuccessStatusCode();
 
                 string jsonString = await response.Content.ReadAsStringAsync();
+                bool successCode = response.IsSuccessStatusCode;
 
-                log.LogInformation($"ProcessMessage, PostContentBundle received from FHIR server http response status code success: {response.IsSuccessStatusCode}");
+                log.LogInformation("{prefix}ProcessMessage, PostContentBundle received from FHIR server http response status code success: {successCod}", prefix, successCode);
 
                 postContentResponse = new PostContentBundleResult() { StatusCode = response.StatusCode, JsonString = jsonString };
             }
@@ -199,7 +201,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             return postContentResponse;
         }
 
-        private string CleanBearerToken(string bearerToken)
+        private static string CleanBearerToken(string bearerToken)
         {
             Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
             string cleanedBearerToken = regexString.Replace(bearerToken, "");
@@ -208,27 +210,27 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             return cleanedBearerToken;
         }
 
-        private string JsonErrorStr(string errorMessage)
+        private static string JsonErrorStr(string errorMessage)
         {
-            return (new JsonObject
+            return new JsonObject
             {
                 ["error"] = errorMessage.ToLower(),
-            }).ToJsonString();
+            }.ToJsonString();
         } // .JsonErrorStr
 
-        private string TruncateStrForLog(string jsonString, int maxLen)   
+        private static string TruncateStrForLog(string jsonString, int maxLen)
         {
             return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
         } // .TruncateStrForLog
 
         [FunctionName("Health")]
-        public async Task<IActionResult> RunHealthCheck(
+        public IActionResult RunHealthCheck(
               [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
             ContentResult contentResult = new ContentResult
             {
                 ContentType = "application/json",
-                StatusCode = (int) HttpStatusCode.OK  // 200
+                StatusCode = (int?)HttpStatusCode.OK
             };
 
             return contentResult;
