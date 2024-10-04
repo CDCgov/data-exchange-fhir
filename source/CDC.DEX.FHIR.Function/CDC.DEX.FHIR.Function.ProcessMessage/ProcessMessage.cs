@@ -1,19 +1,19 @@
 
+using CDC.DEX.FHIR.Function.SharedCode.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using CDC.DEX.FHIR.Function.SharedCode.Models;
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Net;
+using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.ProcessMessage
 {
@@ -54,9 +54,9 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 // guard for missing Authorization in Headers
                 const string authorizationKeyName = "Authorization";
-                if (!req.Headers.ContainsKey(authorizationKeyName)) 
+                if (!req.Headers.ContainsKey(authorizationKeyName))
                 {
-                    const string errorMessage =  $"Headers missing {authorizationKeyName}";
+                    const string errorMessage = $"Headers missing {authorizationKeyName}";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
                     contentResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -64,10 +64,11 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 } // .if
 
                 bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
-                
+
                 // guard for empty request body, no payload
-                if (req.ContentLength == 0) {
-                    const string errorMessage =  $"request body content length null";
+                if (req.ContentLength == 0)
+                {
+                    const string errorMessage = $"request body content length null";
                     log.LogError(errorMessage);
                     contentResult.Content = JsonErrorStr(errorMessage);
                     contentResult.StatusCode = StatusCodes.Status400BadRequest;
@@ -77,16 +78,16 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 // try to deserialize body payload to json
                 JsonNode data;
                 string jsonString = string.Empty;
-                try 
+                try
                 {
                     data = JsonSerializer.Deserialize<JsonNode>(req.Body);
                     jsonString = data.ToString() ?? string.Empty;
                 } // .try
-                catch (JsonException  e) 
+                catch (JsonException e)
                 {
-                  
+
                     log.LogError(e.ToString());
-                    contentResult.Content = JsonErrorStr(e.toString());
+                    contentResult.Content = JsonErrorStr(e.ToString());
                     contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
                 } // .catch
@@ -103,14 +104,14 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
 
                 string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
-                string ms = durationFHIRValidation.Milliseconds;
+                double ms = durationFHIRValidation.Milliseconds;
                 log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
                 log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
-                    string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog));
+                    string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
                     log.LogInformation("{prefix}ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
                     isValid = true;
                 }
@@ -142,12 +143,12 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 }
             }
             // catch (HttpRequestException e)
-            catch( Exception e)
+            catch (Exception e)
             {
                 if (e is HttpRequestException httpException) // exception returned from the FHIR server call
                 {
                     contentResult.Content = JsonErrorStr("http error");
-                    contentResult.StatusCode = httpException.StatusCode;
+                    contentResult.StatusCode = (int?)httpException.StatusCode;
                 }
                 else // something else (exception) happened
                 {
@@ -159,10 +160,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 return contentResult;
 
             } // .catch
-            finally 
+            finally
             {
                 TimeSpan durationProcessMessage = DateTime.Now - startProcessMessage;
-                string durationPmMs = durationProcessMessage.Milliseconds;
+                double durationPmMs = durationProcessMessage.Milliseconds;
                 log.LogInformation("{prefix}ProcessMessage total run duration ms: {durationPmMs}", prefix, durationPmMs);
             }
 
@@ -190,7 +191,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 response.EnsureSuccessStatusCode();
 
                 string jsonString = await response.Content.ReadAsStringAsync();
-                string successCode = response.IsSuccessStatusCod;
+                bool successCode = response.IsSuccessStatusCode;
 
                 log.LogInformation("{prefix}ProcessMessage, PostContentBundle received from FHIR server http response status code success: {successCod}", prefix, successCode);
 
@@ -211,25 +212,25 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         private static string JsonErrorStr(string errorMessage)
         {
-            return (new JsonObject
+            return new JsonObject
             {
                 ["error"] = errorMessage.ToLower(),
-            }).ToJsonString();
+            }.ToJsonString();
         } // .JsonErrorStr
 
-        private static string TruncateStrForLog(string jsonString, int maxLen)   
+        private static string TruncateStrForLog(string jsonString, int maxLen)
         {
             return jsonString.Length > maxLen ? jsonString.Substring(0, maxLen) + "..." : jsonString;
         } // .TruncateStrForLog
 
         [FunctionName("Health")]
-        public async Task<IActionResult> RunHealthCheck(
+        public IActionResult RunHealthCheck(
               [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
             ContentResult contentResult = new ContentResult
             {
                 ContentType = "application/json",
-                StatusCode = HttpStatusCode.OK
+                StatusCode = (int?)HttpStatusCode.OK
             };
 
             return contentResult;
