@@ -47,7 +47,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             try
             {
-                log.LogInformation("{prefix} ProcessMessage HTTP trigger function received a request.", prefix);
+                log.LogInformation("{prefix} HTTP trigger function received a request.", prefix);
 
                 // limit log of bundles or validation result to the first 300 chars
                 const int maxLengthForLog = 300;
@@ -62,8 +62,26 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     contentResult.StatusCode = StatusCodes.Status401Unauthorized;
                     return contentResult;
                 } // .if
-
-                bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+                public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+                {
+                    try
+                    {
+                        string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
+                        builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
+                        {
+                            options.Connect(cs)
+                            .ConfigureKeyVault(kv =>
+                            {
+                                kv.SetCredential(new DefaultAzureCredential());
+                            });
+                        });
+                    }
+                    catch(Exception ex)
+                    {
+                        log.error("Unable to connect with Configuration or Key Vault {ex}", ex)
+                    }
+                }
+        bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
 
                 // guard for empty request body, no payload
                 if (req.ContentLength == 0)
@@ -93,7 +111,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 } // .catch
 
                 string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
-                log.LogInformation("{prefix}ProcessMessage bundle received: {logJsonString}", prefix, logJsonString);
+                log.LogInformation("{prefix}bundle received: {logJsonString}", prefix, logJsonString);
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
@@ -105,14 +123,14 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
                 double ms = durationFHIRValidation.Milliseconds;
-                log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
-                log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
+                log.LogInformation("{prefix} FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
+                log.LogInformation("{prefix} FHIR validation run duration ms: {ms}", prefix, ms);
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
                     string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
-                    log.LogInformation("{prefix}ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
+                    log.LogInformation("{prefix} Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
                     isValid = true;
                 }
                 else
@@ -179,6 +197,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             using (HttpClient client = httpClientFactory.CreateClient())
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
             {
+                client.Timeout = TimeSpan.FromMinutes(10);
 
                 //passthrough the cleaned auth bearer token used
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
