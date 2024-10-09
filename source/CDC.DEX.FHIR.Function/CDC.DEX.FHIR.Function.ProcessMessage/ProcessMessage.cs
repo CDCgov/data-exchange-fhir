@@ -1,7 +1,9 @@
 
+using Azure.Identity;
 using CDC.DEX.FHIR.Function.SharedCode.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Configuration;
@@ -36,7 +38,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
         [FunctionName("ProcessMessage")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
-            ILogger log)
+            ILogger log, IFunctionsConfigurationBuilder builder)
         {
             string prefix = "ProcessMessage: ";
             DateTime startProcessMessage = DateTime.Now;
@@ -62,26 +64,25 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     contentResult.StatusCode = StatusCodes.Status401Unauthorized;
                     return contentResult;
                 } // .if
-                public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+
+                try
                 {
-                    try
+                    string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
+                    builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
                     {
-                        string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
-                        builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
+                        options.Connect(cs)
+                        .ConfigureKeyVault(kv =>
                         {
-                            options.Connect(cs)
-                            .ConfigureKeyVault(kv =>
-                            {
-                                kv.SetCredential(new DefaultAzureCredential());
-                            });
+                            kv.SetCredential(new DefaultAzureCredential());
                         });
-                    }
-                    catch(Exception ex)
-                    {
-                        log.error("Unable to connect with Configuration or Key Vault {ex}", ex)
-                    }
+                    });
                 }
-        bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+                catch (Exception ex)
+                {
+                    log.LogError("Unable to connect with Configuration or Key Vault {ex}", ex);
+                }
+
+                bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
 
                 // guard for empty request body, no payload
                 if (req.ContentLength == 0)

@@ -1,7 +1,5 @@
-﻿using Azure.Identity;
-using CDC.DEX.FHIR.Function.ProcessMessage.Config;
+﻿using CDC.DEX.FHIR.Function.ProcessMessage.Config;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
@@ -14,15 +12,12 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage.Config
 {
     public class StartupConfiguration : FunctionsStartup
     {
-
-
         public override void Configure(IFunctionsHostBuilder builder)
         {
             // http client factory
             builder.Services.AddHttpClient("RetryClientFactory")
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
                 .AddPolicyHandler(GetRetryPolicy(3));
-
         }
 
         /// <summary>
