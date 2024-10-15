@@ -22,6 +22,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration configuration;
+        private string prefix = "ProcessMessage: ";
         /// <summary>
         /// Constructor
         /// </summary>
@@ -38,7 +39,6 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            string prefix = "ProcessMessage: ";
             DateTime startProcessMessage = DateTime.Now;
             ContentResult contentResult = new ContentResult
             {
@@ -47,7 +47,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
             try
             {
-                log.LogInformation("{prefix} ProcessMessage HTTP trigger function received a request.", prefix);
+                log.LogInformation("{prefix}HTTP trigger function received a request.", prefix);
 
                 // limit log of bundles or validation result to the first 300 chars
                 const int maxLengthForLog = 300;
@@ -93,7 +93,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 } // .catch
 
                 string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
-                log.LogInformation("{prefix}ProcessMessage bundle received: {logJsonString}", prefix, logJsonString);
+                log.LogInformation("{prefix}bundle received: {logJsonString}", prefix, logJsonString);
 
                 var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
 
@@ -105,14 +105,14 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
                 string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
                 double ms = durationFHIRValidation.Milliseconds;
-                log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
-                log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
+                log.LogInformation("{prefix}FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
+                log.LogInformation("{prefix}FHIR validation run duration ms: {ms}", prefix, ms);
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
                     string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
-                    log.LogInformation("{prefix}ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
+                    log.LogInformation("{prefix}Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
                     isValid = true;
                 }
                 else
@@ -164,21 +164,21 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             {
                 TimeSpan durationProcessMessage = DateTime.Now - startProcessMessage;
                 double durationPmMs = durationProcessMessage.Milliseconds;
-                log.LogInformation("{prefix}ProcessMessage total run duration ms: {durationPmMs}", prefix, durationPmMs);
+                log.LogInformation("{prefix}total run duration ms: {durationPmMs}", prefix, durationPmMs);
             }
 
         } // .run
 
         private async Task<PostContentBundleResult> PostContentBundle(IConfiguration configuration, string bundleJson, Uri location, string bearerToken, ILogger log)
         {
-            string prefix = "ProcessMessage: ";
             PostContentBundleResult postContentResponse;
             string locAbs = location.AbsoluteUri;
-            log.LogInformation("{prefix}ProcessMessage, PostContentBundle sending for validation to FHIR server endpoint: {locAbs}", prefix, locAbs);
+            log.LogInformation("{prefix}PostContentBundle sending for validation to FHIR server endpoint: {locAbs}", prefix, locAbs);
 
             using (HttpClient client = httpClientFactory.CreateClient())
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
             {
+                client.Timeout = TimeSpan.FromMinutes(10);
 
                 //passthrough the cleaned auth bearer token used
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
@@ -193,7 +193,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 string jsonString = await response.Content.ReadAsStringAsync();
                 bool successCode = response.IsSuccessStatusCode;
 
-                log.LogInformation("{prefix}ProcessMessage, PostContentBundle received from FHIR server http response status code success: {successCod}", prefix, successCode);
+                log.LogInformation("{prefix}PostContentBundle received from FHIR server http response status code success: {successCod}", prefix, successCode);
 
                 postContentResponse = new PostContentBundleResult() { StatusCode = response.StatusCode, JsonString = jsonString };
             }
