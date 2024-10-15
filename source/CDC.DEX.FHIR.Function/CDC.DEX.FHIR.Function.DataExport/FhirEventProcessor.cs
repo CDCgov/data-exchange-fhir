@@ -4,11 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CDC.DEX.FHIR.Function.DataExport
@@ -43,7 +40,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
             using (HttpClient client = httpClientFactory.CreateClient())
             {
 
-                string token = await FhirServiceUtils.GetFhirServerToken(config, client,log);
+                string token = await FhirServiceUtils.GetFhirServerToken(config, client, log);
                 int maxLengthForLog = 500;
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));//ACCEPT header
@@ -52,12 +49,12 @@ namespace CDC.DEX.FHIR.Function.DataExport
                 using (var request = new HttpRequestMessage(HttpMethod.Get, requestUrl))
                 {
                     // get auth token
-                 
+
 
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    string requestUri = request.RequestUri;
-                    log.LogInformation("{logPrefix}. SendAsync Start {request.RequestUri}", logPrefix, );
+                    Uri requestUri = request.RequestUri;
+                    log.LogInformation("{logPrefix}SendAsync Start {request.RequestUri}", logPrefix, requestUri);
                     var response = await client.SendAsync(request);
                     log.LogInformation("{logPrefix}. SendAsync End", logPrefix);
 

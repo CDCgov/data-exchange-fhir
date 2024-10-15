@@ -18,21 +18,16 @@ namespace CDC.DEX.FHIR.Function.DataExport.Config
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
             string cs = Environment.GetEnvironmentVariable("FhirFunctionAppConfigConnectionString");
-            try
+
+            builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
             {
-                builder.ConfigurationBuilder.AddAzureAppConfiguration(options =>
+                options.Connect(cs)
+                .ConfigureKeyVault(kv =>
                 {
-                    options.Connect(cs)
-                           .ConfigureKeyVault(kv =>
-                           {
-                               kv.SetCredential(new DefaultAzureCredential());
-                           });
+                    kv.SetCredential(new DefaultAzureCredential());
                 });
-            }
-            catch (Exception e)
-            {
-                log.LogInformation("DataExport not connecting to App Configuration or Key Vault.");
-            }
+            });
+
         }
 
         public override void Configure(IFunctionsHostBuilder builder)
