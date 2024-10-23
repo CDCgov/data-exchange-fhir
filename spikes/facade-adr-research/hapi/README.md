@@ -1,4 +1,6 @@
-# HAPI FHIR Libraries 
+# HAPI FHIR 
+
+## Using HAPI FHIR Libraries
 
 https://hapifhir.io/
 
