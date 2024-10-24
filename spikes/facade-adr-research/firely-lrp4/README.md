@@ -1,5 +1,11 @@
 # Testing Firely SDK, Local Run
 
+# Summary
+1. FirelyTestApp - CLI App
+2. FirelyApiApp - Api (web) App - TODO
+
+# 1. FirelyTestApp - CLI App
+
 ## Docs Followed:
 https://docs.fire.ly/projects/Firely-NET-SDK/en/latest/
 
@@ -53,6 +59,6 @@ namespace FirelyTestApp
 
 --- 
 
-## Steps - Web App: TODO
+# 2. FirelyApiApp - Api (web) App - TODO
 
 
