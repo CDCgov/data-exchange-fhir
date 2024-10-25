@@ -4,11 +4,13 @@
 1. FirelyTestApp - CLI App
 2. FirelyApiApp - Api (web) App - TODO
 
+## Firely Docs Reference
+
+[Firely-NET-SDK](https://docs.fire.ly/projects/Firely-NET-SDK/en/latest/)
+
+![Firely-NET-SDK](firely-web-01.PNG)
+
 # 1. FirelyTestApp - CLI App
-
-## Docs Followed:
-https://docs.fire.ly/projects/Firely-NET-SDK/en/latest/
-
 
 ## Steps - Console App:
 ```
@@ -60,5 +62,18 @@ namespace FirelyTestApp
 --- 
 
 # 2. FirelyApiApp - Api (web) App - TODO
+
+Open API (Swagger): http://localhost:5215/swagger/index.html
+
+```
+$ dotnet new webapi -n FirelyApiApp
+```
+
+```
+$ dotnet add package Hl7.Fhir.R4
+```
+
+
+
 
 
