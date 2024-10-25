@@ -46,7 +46,7 @@ app.MapPost("/Patient", (Patient patient) =>
     }
 
     // Log the patient information to the console
-    Console.WriteLine($"Received Patient: Id={patient.Id}, Name={patient.Name}, Age={patient.Age}");
+    Console.WriteLine($"Received Patient: Id={patient.Id}");
 
     // Return 201 Created response
     return Results.Created($"/Patient/{patient.Id}", patient);
