@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/dotnetcore
-# Edit at https://www.toptal.com/developers/gitignore?templates=dotnetcore
+# Custom
+LocalReceivedResources
 
 ### DotnetCore ###
 # .NET Core build folders
@@ -10,4 +10,3 @@ obj/
 /node_modules
 /wwwroot/node_modules
 
-# End of https://www.toptal.com/developers/gitignore/api/dotnetcore

@@ -70,15 +70,37 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
     }
 
     // Log patient details to console
-    Console.WriteLine($"Received FHIR Patient: Id={patient.Id}, Name={(patient.Name.FirstOrDefault()?.ToString() ?? "N/A")}, BirthDate={patient.BirthDate}");
+    Console.WriteLine($"Received FHIR Patient: Id={patient.Id}");
+
+    // #####################################################
+    // Save the Patient Resource to a local folder, TODO change to AWS S3
+    // #####################################################
+        // Define the directory and file path
+    var directoryPath = Path.Combine("LocalReceivedResources", "Patient");
+    var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
+
+    // Ensure the directory exists
+    Directory.CreateDirectory(directoryPath);
+
+    // Serialize the patient to JSON and save it to a file asynchronously
+    try
+    {
+        await File.WriteAllTextAsync(filePath, patient.ToJson());
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error saving patient to file: {ex.Message}");
+    }
 
     // Return 201 Created response
     return Results.Created($"/Patient/{patient.Id}", patient);
-})
+}) 
 .WithName("CreatePatient")
 .Produces<Patient>(201)
 .ProducesProblem(400)
-.WithOpenApi();   
+.WithOpenApi(); 
+// ./ app.MapPost("/Patient"...  
+
 
 // #####################################################
 // Start the App
