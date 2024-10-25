@@ -77,7 +77,11 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
     // #####################################################
         // Define the directory and file path
     var directoryPath = Path.Combine("LocalReceivedResources", "Patient");
-    var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
+
+    // Generate a new UUID for the file name
+    // Not using the patient.id: var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
+    var fileName = $"{Guid.NewGuid()}.json";
+    var filePath = Path.Combine(directoryPath, fileName);
 
     // Ensure the directory exists
     Directory.CreateDirectory(directoryPath);
