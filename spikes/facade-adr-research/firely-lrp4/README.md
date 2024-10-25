@@ -2,7 +2,7 @@
 
 # Summary
 1. FirelyTestApp - CLI App
-2. FirelyApiApp - Api (web) App - TODO
+2. FirelyApiApp - Web App (API)
 
 ## Firely Docs Reference
 
@@ -10,13 +10,17 @@
 
 ![Firely-NET-SDK](firely-web-01.PNG)
 
-# 1. FirelyTestApp - CLI App
 
-## Steps - Console App:
+
+__These were build locally using dotnet build:__
 ```
 $ dotnet --list-sdks
 8.0.306 [C:\Program Files\dotnet\sdk]
 ```
+
+# 1. FirelyTestApp - CLI App
+
+## Build
 
 ```
 $ dotnet new console -n FirelyTestApp 
@@ -28,42 +32,17 @@ $ dotnet add package Hl7.Fhir.R4
 $ dotnet add package Newtonsoft.Json
 ```
 
-Program.cs
-```C#
-using Hl7.Fhir.Model;
-using Newtonsoft.Json;
+## Run
 
-// // See https://aka.ms/new-console-template for more information
-// Console.WriteLine("Hello, World!");
-
-namespace FirelyTestApp
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello FirelyTestApp!");
-
-            var patient = new Patient();
-            Console.WriteLine(patient);
-
-            patient.Id = "TestID";
-
-            var patientJson = JsonConvert.SerializeObject(patient);
-            Console.WriteLine(patientJson);
-
-        }// .Main
-
-    }// .Program
-
-}// .namespace
+```
+$ dotnet run
 ```
 
 --- 
 
-# 2. FirelyApiApp - Api (web) App - TODO
+# 2. FirelyApiApp - Web App (API)
 
-Open API (Swagger): http://localhost:5215/swagger/index.html
+## Build
 
 ```
 $ dotnet new webapi -n FirelyApiApp
@@ -72,6 +51,14 @@ $ dotnet new webapi -n FirelyApiApp
 ```
 $ dotnet add package Hl7.Fhir.R4
 ```
+
+## Run
+
+```
+$ dotnet run
+```
+
+Open API (Swagger): http://localhost:5215/swagger/index.html
 
 
 
