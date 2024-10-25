@@ -1,3 +1,6 @@
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization; 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,9 +19,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ##########################################
+// #####################################################
 // Define a health check endpoint at /health
-// ##########################################
+// #####################################################
 app.MapGet("/health", () =>
 {
     return Results.Json(new
@@ -29,15 +32,36 @@ app.MapGet("/health", () =>
     });
 }).WithOpenApi();
 
-// ##########################################
+// #####################################################
 // FHIR Patient resource receive, POST endpoint at /Patient
-// ##########################################
-app.MapPost("/Patient", (Patient patient) =>
+// #####################################################
+app.MapPost("/Patient", async (HttpContext httpContext) =>
 {
-    // Check if the Patient ID is null or empty
+    // Use FhirJsonParser to parse incoming JSON as FHIR Patient
+    var parser = new FhirJsonParser();
+    Patient patient;
+
+    try
+    {
+        // Read the request body as a string
+        var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+        
+        // Parse JSON string to FHIR Patient object
+        patient = parser.Parse<Patient>(requestBody);
+    }
+    catch (FormatException ex)
+    {
+        // Return 400 Bad Request if JSON is invalid
+        return Results.BadRequest(new
+        {
+            error = "Invalid payload",
+            message = $"Failed to parse FHIR Patient: {ex.Message}"
+        });
+    }
+
+    // Check if Patient ID is present
     if (string.IsNullOrWhiteSpace(patient.Id))
     {
-        // Return 400 Bad Request with an error message
         return Results.BadRequest(new
         {
             error = "Invalid payload",
@@ -45,25 +69,19 @@ app.MapPost("/Patient", (Patient patient) =>
         });
     }
 
-    // Log the patient information to the console
-    Console.WriteLine($"Received Patient: Id={patient.Id}");
+    // Log patient details to console
+    Console.WriteLine($"Received FHIR Patient: Id={patient.Id}, Name={(patient.Name.FirstOrDefault()?.ToString() ?? "N/A")}, BirthDate={patient.BirthDate}");
 
     // Return 201 Created response
     return Results.Created($"/Patient/{patient.Id}", patient);
-}).WithName("CreatePatient")  // Optional: Name the endpoint
-.Produces<Patient>(201)     // Document 201 response
-.ProducesProblem(400)       // Document 400 Bad Request response
+})
+.WithName("CreatePatient")
+.Produces<Patient>(201)
+.ProducesProblem(400)
 .WithOpenApi();   
 
-// ##########################################
+// #####################################################
 // Start the App
-// ##########################################
+// #####################################################
 app.Run();
 
-
-    public class Patient
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
-    }
