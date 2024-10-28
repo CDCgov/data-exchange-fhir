@@ -1,6 +1,9 @@
 # Custom
 LocalReceivedResources
 
+# appsettings
+appsettings.json
+
 ### DotnetCore ###
 # .NET Core build folders
 bin/
