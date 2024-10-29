@@ -73,7 +73,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     contentResult.Content = JsonErrorStr(errorMessage);
                     contentResult.StatusCode = StatusCodes.Status400BadRequest;
                     return contentResult;
-                } // .if
+                } 
 
                 // try to deserialize body payload to json
                 JsonNode data;
@@ -82,7 +82,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 {
                     data = JsonSerializer.Deserialize<JsonNode>(req.Body);
                     jsonString = data.ToString() ?? string.Empty;
-                } // .try
+                } 
                 catch (JsonException e)
                 {
 
@@ -95,54 +95,44 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
                 log.LogInformation("{prefix}ProcessMessage bundle received: {logJsonString}", prefix, logJsonString);
 
-                var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
-
-                string cleanedBearerToken = CleanBearerToken(req.Headers[authorizationKeyName]);
-
-                DateTime startFHIRValidation = DateTime.Now;
-                PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
-                TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
-
-                string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
-                double ms = durationFHIRValidation.Milliseconds;
-                log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
-                log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
+              
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
                 {
-                    string logSkippedFhirValidationLog = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
-                    log.LogInformation("{prefix}ProcessMessage Skipping FHIR Validation{logSkippedFhirValidationLog}", prefix, logSkippedFhirValidationLog);
                     isValid = true;
                 }
                 else
                 {
+                    var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle/$validate");
+                    string cleanedBearerToken = CleanBearerToken(req.Headers[authorizationKeyName]);
+                    DateTime startFHIRValidation = DateTime.Now;
+                    PostContentBundleResult validateReportingBundleResult = await PostContentBundle(configuration, jsonString, location, cleanedBearerToken, log);
+                    TimeSpan durationFHIRValidation = DateTime.Now - startFHIRValidation;
+                    string logLogDetail = TruncateStrForLog(validateReportingBundleResult.JsonString, maxLengthForLog);
+                    double ms = durationFHIRValidation.Milliseconds;
+                    log.LogInformation("{prefix}ProcessMessage FHIR validation done with result: {logLogDetail}", prefix, logLogDetail);
+                    log.LogInformation("{prefix}ProcessMessage FHIR validation run duration ms: {ms}", prefix, ms);
                     isValid = !validateReportingBundleResult.JsonString.Contains("\"severity\":\"error\"");
                 }
 
                 if (isValid)
-                {
-                    location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle");
-
-                    // Submit the entire message bundle instead of just the content bundle
-                    //JsonNode resourceNode = data["entry"][1]["resource"];
+                {                   
+                    var location = new Uri($"{configuration["BaseFhirUrl"]}/Bundle");                                   
                     JsonNode messageNode = data;
-
+                    string cleanedBearerToken = CleanBearerToken(req.Headers[authorizationKeyName]);
                     PostContentBundleResult postResult = await PostContentBundle(configuration, messageNode.ToJsonString(), location, cleanedBearerToken, log);
                     data = JsonNode.Parse(postResult.JsonString);
-
                     contentResult.Content = data.ToJsonString();
                     contentResult.StatusCode = StatusCodes.Status201Created;
                     return contentResult;
                 }
                 else
-                {
-                    contentResult.Content = validateReportingBundleResult.JsonString;
+                {              
                     contentResult.StatusCode = StatusCodes.Status422UnprocessableEntity;
                     return contentResult;
                 }
             }
-            // catch (HttpRequestException e)
             catch (Exception e)
             {
                 if (e is HttpRequestException httpException) // exception returned from the FHIR server call
