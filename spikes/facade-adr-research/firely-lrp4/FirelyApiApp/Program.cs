@@ -151,11 +151,11 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
 
         try
         {
-            Console.WriteLine($"Start write for Patient: Id={patient.Id}, fileName: {fileName}");
+            Console.WriteLine($"Start write for Patient: Id={patient.Id}, fileName: {fileName}, S3 bucket: {s3BucketName}");
             if (s3Client != null && s3BucketName != null)
             {
                 var response = await s3Client.PutObjectAsync(putRequest); 
-                Console.WriteLine($"End write for Patient: Id={patient.Id}, fileName: {fileName}, response: {response}");
+                Console.WriteLine($"End write for Patient: Id={patient.Id}, fileName: {fileName}, response: {response.HttpStatusCode}");
             }
             else
             {
