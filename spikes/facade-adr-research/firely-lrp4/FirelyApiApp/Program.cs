@@ -1,7 +1,6 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization; 
 using Amazon.S3;
-using Amazon.S3.Model;
 using Amazon;
 using Amazon.Runtime;
 
