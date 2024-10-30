@@ -2,6 +2,7 @@ package ca.uhn.fhir.example;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -18,9 +19,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 public class Example01_PatientResourceProvider implements IResourceProvider {
 
 	private Map<String, Patient> myPatients = new HashMap<String, Patient>();
+	private FhirContext ctx = FhirContext.forR4();
 
 	/**
 	 * Constructor
@@ -51,8 +53,7 @@ public class Example01_PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * Simple implementation of the "read" method
-	 * Search Patient by ID
+	 * Simple implementation of the "read" method Search Patient by ID
 	 */
 	@Read()
 	public Patient read(@IdParam IdType theId) {
@@ -64,8 +65,9 @@ public class Example01_PatientResourceProvider implements IResourceProvider {
 	}
 
 	/**
-	 * Receive a Patient bundle to process. This method prints the Patient bundle to console
-	 * and also sends to S3 bucket.
+	 * Receive a Patient bundle to process. This method prints the Patient bundle to
+	 * console and also sends to S3 bucket.
+	 * 
 	 * @param thePatient
 	 * @return MethodOutcome
 	 */
@@ -106,43 +108,50 @@ public class Example01_PatientResourceProvider implements IResourceProvider {
 		return retVal;
 	}
 
-	private void savePatientToS3(Patient thePatient) {
-		ObjectMapper objectMapper = new ObjectMapper();
+	public void savePatientToS3(Patient thePatient) {
 		ObjectMetadata omd = new ObjectMetadata();
-		Properties prop = new Properties();				
-		String clientRegion ="us-east-1";
-		String bucketName = "dexfhirbucket";		
+		// ObjectMapper objectMapper = null;
+		Properties prop = new Properties();
+		String clientRegion = "us-east-1";
+		String bucketName = "dexfhirbucket";
 		UUID anID = UUID.randomUUID();
 		String filename = anID.toString();
-        String aFile = filename + ".json";
+		String aFile = filename + ".json";
 		try {
 			FileInputStream fin = new FileInputStream("fhir.properties");
 			prop.load(fin);
-			String arn= prop.getProperty("ARN");
-			String accessKey= prop.getProperty("Accesskey");
-			String secretKey=  prop.getProperty("SecretToken");
+			System.out.println("Before GSON");
+			String arn = prop.getProperty("ARN");
+			String accessKey = prop.getProperty("Accesskey");
+			String secretKey = prop.getProperty("SecretToken");
 			File objectKey = new File(aFile);
-			Gson gson = new Gson();
-			String jsonString = gson.toJson(thePatient);
-			objectMapper.writeValue(objectKey, jsonString);
-			PutObjectRequest request = new PutObjectRequest(bucketName, aFile, objectKey);			
+			IParser parser = ctx.newJsonParser();
+			parser.setPrettyPrint(true);
+			String jsonString = parser.encodeResourceToString(thePatient);
+			try (FileWriter writer = new FileWriter(objectKey)) {
+				writer.write(jsonString);
+			}
+			PutObjectRequest request = new PutObjectRequest(bucketName, aFile, objectKey);
 			BasicAWSCredentials creds = new BasicAWSCredentials(accessKey, secretKey);
-	        AmazonS3 s3Client = AmazonS3Client.builder()
-	                .withRegion(clientRegion)
-	                .withCredentials(new AWSStaticCredentialsProvider(creds))
-	                .build();	       	       
-	        s3Client.putObject(request);
+			AmazonS3 s3Client = AmazonS3Client.builder().withRegion(clientRegion)
+					.withCredentials(new AWSStaticCredentialsProvider(creds)).build();
+			s3Client.putObject(request);
 		} catch (Exception exp) {
 			exp.printStackTrace();
 		}
 	}
 
-	private void printPatientToConsole(Patient thePatient) {
-		Gson gson = new Gson();
-		String jsonString = gson.toJson(thePatient);
-		myPatients.put(thePatient.getId(), thePatient);
-		System.out.println("Received the bundle");
-		System.out.println(jsonString);
+	public void printPatientToConsole(Patient thePatient) {
+		System.out.println("Begining of printPatientToConsole");
+		try {
+			IParser parser = ctx.newJsonParser();
+			String jsonString = parser.encodeResourceToString(thePatient);
+			myPatients.put(thePatient.getId(), thePatient);
+			System.out.println("Received the bundle");
+			System.out.println(jsonString);
+			System.out.println("End of printPatientToConsole");
+		} catch (Exception exp) {
+			exp.printStackTrace();
+		}
 	}
-
 }
