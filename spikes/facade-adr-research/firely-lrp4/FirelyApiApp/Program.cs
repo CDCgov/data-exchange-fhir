@@ -54,6 +54,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+var localReceivedFolder = "LocalReceivedResources";
+
 // #####################################################
 // Define a health check endpoint at /health
 // #####################################################
@@ -68,7 +70,7 @@ app.MapGet("/health", () =>
 }).WithOpenApi();
 
 // #####################################################
-// FHIR Patient resource receive, POST endpoint at /Patient
+// POST endpoint for Patient
 // #####################################################
 app.MapPost("/Patient", async (HttpContext httpContext) =>
 {
@@ -80,7 +82,6 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
     {
         // Read the request body as a string
         var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-        
         // Parse JSON string to FHIR Patient object
         patient = parser.Parse<Patient>(requestBody);
     }
@@ -115,63 +116,24 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
     if (UseLocalDevFolder)
     {
         // #####################################################
-        // Save the Patient Locally
+        // Save the FHIR Resource Locally
         // #####################################################
-
-        // Define the directory and file path
-        var directoryPath = Path.Combine("LocalReceivedResources", "Patient");
-
-        // Ensure the directory exists
-        Directory.CreateDirectory(directoryPath);
-
-        var filePath = Path.Combine(directoryPath, fileName);
-
-        // Serialize the patient to JSON and save it to a file asynchronously
-        try
-        {
-            await File.WriteAllTextAsync(filePath, patientJson);
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem($"Error saving patient to file: {ex.Message}");
-        }
+        return await SaveResourceLocally(localReceivedFolder, "Patient", fileName, patientJson);
 
     } // .if UseLocalDevFolder
     else
     {
         // #####################################################
-        // Save the Patient to AWS S3
+        // Save the FHIR Resource to AWS S3
         // #####################################################
-        var putRequest = new PutObjectRequest
+        if (s3Client == null || string.IsNullOrEmpty(s3BucketName))
         {
-            BucketName = s3BucketName,
-            Key = $"Patient/{fileName}",
-            ContentBody = patientJson
-        };
-
-        try
-        {
-            Console.WriteLine($"Start write for Patient: Id={patient.Id}, fileName: {fileName}, S3 bucket: {s3BucketName}");
-            if (s3Client != null && s3BucketName != null)
-            {
-                var response = await s3Client.PutObjectAsync(putRequest); 
-                Console.WriteLine($"End write for Patient: Id={patient.Id}, fileName: {fileName}, response: {response.HttpStatusCode}");
-            }
-            else
-            {
-                return Results.Problem("S3 client and bucket are not configured.");
-            }
-
-        }
-        catch (Exception ex)
-        {
-            return Results.Problem($"Error saving patient to S3: {ex.Message}");
+            return Results.Problem("S3 client and bucket are not configured.");
         }
 
+        return await SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, patientJson);
     }// .else
 
-    // Return 201 Created response
-    return Results.Created($"/Patient/{patient.Id}", patient);
 }) 
 .WithName("CreatePatient")
 .Produces<Patient>(201)
@@ -185,3 +147,60 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
 // #####################################################
 app.Run();
 
+// #####################################################
+// SaveResourceLocally
+// #####################################################
+async Task<IResult> SaveResourceLocally(string baseDirectory, string subDirectory, string fileName, string resourceJson)
+{
+    // Define the directory and file path
+    var directoryPath = Path.Combine(baseDirectory, subDirectory);
+
+    // Ensure the directory exists
+    Directory.CreateDirectory(directoryPath);
+
+    // Define the full path for the file
+    var filePath = Path.Combine(directoryPath, fileName);
+
+    // Serialize the resource to JSON and save it to a file asynchronously
+    try
+    {
+        await File.WriteAllTextAsync(filePath, resourceJson);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error saving resource to file: {ex.Message}");
+    }
+
+    return Results.Ok($"Resource saved successfully at {filePath}");
+}// .SaveResourceLocally
+
+// #####################################################
+// SaveResourceToS3
+// #####################################################
+async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string s3BucketName, string keyPrefix, string fileName, string resourceJson)
+{
+
+    // Define the S3 put request
+    var putRequest = new PutObjectRequest
+    {
+        BucketName = s3BucketName,
+        Key = $"{keyPrefix}/{fileName}",
+        ContentBody = resourceJson
+    };
+
+    // Attempt to save the resource to S3
+    try
+    {
+        Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
+
+        var response = await s3Client.PutObjectAsync(putRequest);
+        
+        Console.WriteLine($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}");
+
+        return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error saving resource to S3: {ex.Message}");
+    }
+}// .SaveResourceToS3
