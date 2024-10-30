@@ -2,9 +2,6 @@
 
 using Amazon.S3;
 using Amazon.S3.Model;
-using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 public class S3FileService
 {
