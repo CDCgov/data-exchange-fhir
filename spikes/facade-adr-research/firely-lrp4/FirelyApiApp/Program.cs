@@ -5,12 +5,17 @@ using Amazon.S3.Model;
 using Amazon;
 using Amazon.Runtime;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Create instances of LocalFileService and S3FileService
+var localFileService = new LocalFileService();
+var s3FileService = new S3FileService();
 
 // Set this via config or environment
 // #####################################################
@@ -118,7 +123,7 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
         // #####################################################
         // Save the FHIR Resource Locally
         // #####################################################
-        return await SaveResourceLocally(localReceivedFolder, "Patient", fileName, patientJson);
+        return await localFileService.SaveResourceLocally(localReceivedFolder, "Patient", fileName, patientJson);
 
     } // .if UseLocalDevFolder
     else
@@ -131,7 +136,7 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
             return Results.Problem("S3 client and bucket are not configured.");
         }
 
-        return await SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, patientJson);
+        return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, patientJson);
     }// .else
 
 }) 
@@ -147,60 +152,4 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
 // #####################################################
 app.Run();
 
-// #####################################################
-// SaveResourceLocally
-// #####################################################
-async Task<IResult> SaveResourceLocally(string baseDirectory, string subDirectory, string fileName, string resourceJson)
-{
-    // Define the directory and file path
-    var directoryPath = Path.Combine(baseDirectory, subDirectory);
 
-    // Ensure the directory exists
-    Directory.CreateDirectory(directoryPath);
-
-    // Define the full path for the file
-    var filePath = Path.Combine(directoryPath, fileName);
-
-    // Serialize the resource to JSON and save it to a file asynchronously
-    try
-    {
-        await File.WriteAllTextAsync(filePath, resourceJson);
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error saving resource to file: {ex.Message}");
-    }
-
-    return Results.Ok($"Resource saved successfully at {filePath}");
-}// .SaveResourceLocally
-
-// #####################################################
-// SaveResourceToS3
-// #####################################################
-async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string s3BucketName, string keyPrefix, string fileName, string resourceJson)
-{
-
-    // Define the S3 put request
-    var putRequest = new PutObjectRequest
-    {
-        BucketName = s3BucketName,
-        Key = $"{keyPrefix}/{fileName}",
-        ContentBody = resourceJson
-    };
-
-    // Attempt to save the resource to S3
-    try
-    {
-        Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
-
-        var response = await s3Client.PutObjectAsync(putRequest);
-        
-        Console.WriteLine($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}");
-
-        return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem($"Error saving resource to S3: {ex.Message}");
-    }
-}// .SaveResourceToS3
