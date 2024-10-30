@@ -5,7 +5,6 @@ using Amazon.S3.Model;
 using Amazon;
 using Amazon.Runtime;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -96,7 +95,7 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
         return Results.BadRequest(new
         {
             error = "Invalid payload",
-            message = $"Failed to parse FHIR Patient: {ex.Message}"
+            message = $"Failed to parse FHIR Resource: {ex.Message}"
         });
     }
 
@@ -106,7 +105,7 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
         return Results.BadRequest(new
         {
             error = "Invalid payload",
-            message = "Patient ID is required."
+            message = "Resource ID is required."
         });
     }
 
@@ -116,14 +115,14 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
     // Generate a new UUID for the file name
     // Not using the patient.id: var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
     var fileName = $"{Guid.NewGuid()}.json";
-    var patientJson = patient.ToJson();
+    var resourceJson = patient.ToJson();
 
     if (UseLocalDevFolder)
     {
         // #####################################################
         // Save the FHIR Resource Locally
         // #####################################################
-        return await localFileService.SaveResourceLocally(localReceivedFolder, "Patient", fileName, patientJson);
+        return await localFileService.SaveResourceLocally(localReceivedFolder, "Patient", fileName, resourceJson);
 
     } // .if UseLocalDevFolder
     else
@@ -136,20 +135,89 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
             return Results.Problem("S3 client and bucket are not configured.");
         }
 
-        return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, patientJson);
+        return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
     }// .else
 
 }) 
 .WithName("CreatePatient")
-.Produces<Patient>(201)
+.Produces<Patient>(200)
 .ProducesProblem(400)
 .WithOpenApi(); 
 // ./ app.MapPost("/Patient"...  
+
+// #####################################################
+// POST endpoint for Bundle
+// #####################################################
+app.MapPost("/Bundle", async (HttpContext httpContext) =>
+{
+    // Use FhirJsonParser to parse incoming JSON as FHIR Patient
+    var parser = new FhirJsonParser();
+    Bundle bundle;
+
+    try
+    {
+        // Read the request body as a string
+        var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
+        // Parse JSON string to FHIR Patient object
+        bundle = parser.Parse<Bundle>(requestBody);
+    }
+    catch (FormatException ex)
+    {
+        // Return 400 Bad Request if JSON is invalid
+        return Results.BadRequest(new
+        {
+            error = "Invalid payload",
+            message = $"Failed to parse FHIR Resource: {ex.Message}"
+        });
+    }
+
+    // Check if Patient ID is present
+    if (string.IsNullOrWhiteSpace(bundle.Id))
+    {
+        return Results.BadRequest(new
+        {
+            error = "Invalid payload",
+            message = "Resource ID is required."
+        });
+    }
+
+    // Log details to console
+    Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
+
+    // Generate a new UUID for the file name
+    var fileName = $"{Guid.NewGuid()}.json";
+    var resourceJson = bundle.ToJson();
+
+    if (UseLocalDevFolder)
+    {
+        // #####################################################
+        // Save the FHIR Resource Locally
+        // #####################################################
+        return await localFileService.SaveResourceLocally(localReceivedFolder, "Bundle", fileName, resourceJson);
+
+    } // .if UseLocalDevFolder
+    else
+    {
+        // #####################################################
+        // Save the FHIR Resource to AWS S3
+        // #####################################################
+        if (s3Client == null || string.IsNullOrEmpty(s3BucketName))
+        {
+            return Results.Problem("S3 client and bucket are not configured.");
+        }
+
+        return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
+    }// .else
+
+}) 
+.WithName("CreateBundle")
+.Produces<Bundle>(200)
+.ProducesProblem(400)
+.WithOpenApi(); 
+// ./ app.MapPost("/Bundle"...  
 
 
 // #####################################################
 // Start the App
 // #####################################################
 app.Run();
-
-
