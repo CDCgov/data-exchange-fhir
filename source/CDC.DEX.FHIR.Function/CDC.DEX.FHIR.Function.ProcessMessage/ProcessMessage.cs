@@ -63,9 +63,10 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                     return contentResult;
                 } // .if
 
-                bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+       
 
-                // guard for empty request body, no payload
+                bool flagProcessMessageFunctionSkipValidate = bool.Parse(configuration["FunctionProcessMessage:SkipValidation"]);
+               // guard for empty request body, no payload
                 if (req.ContentLength == 0)
                 {
                     const string errorMessage = $"request body content length null";
@@ -95,7 +96,8 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 string logJsonString = TruncateStrForLog(data.ToJsonString(), maxLengthForLog);
                 log.LogInformation("{prefix}ProcessMessage bundle received: {logJsonString}", prefix, logJsonString);
 
-              
+                log.LogInformation("flagProcessMessageFunctionSkipValidate {flagProcessMessageFunctionSkipValidate} ", flagProcessMessageFunctionSkipValidate);
+
 
                 bool isValid;
                 if (flagProcessMessageFunctionSkipValidate)
@@ -164,7 +166,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
             string prefix = "ProcessMessage: ";
             PostContentBundleResult postContentResponse;
             string locAbs = location.AbsoluteUri;
-            log.LogInformation("{prefix}ProcessMessage, PostContentBundle sending for validation to FHIR server endpoint: {locAbs}", prefix, locAbs);
+            log.LogInformation("{prefix}ProcessMessage, Post Bundle to FHIR server endpoint: {locAbs}", prefix, locAbs);
 
             using (HttpClient client = httpClientFactory.CreateClient())
             using (var request = new HttpRequestMessage(HttpMethod.Post, location) { Content = new StringContent(bundleJson, System.Text.Encoding.UTF8, "application/json") })
@@ -173,8 +175,9 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
                 //passthrough the cleaned auth bearer token used
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
 
-                // add the Ocp-Apim-Subscription-Key if it's configured
-                request.Headers.Add("Ocp-Apim-Subscription-Key", configuration["OcpApimSubscriptionKey"]);
+             
+
+                client.Timeout = TimeSpan.FromMinutes(configuration.GetValue<double>("FunctionProcessMessage:TimeOut", 5));
 
                 var response = await client.SendAsync(request);
 
