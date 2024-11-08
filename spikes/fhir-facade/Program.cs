@@ -1,8 +1,8 @@
-using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization; 
-using Amazon.S3;
 using Amazon;
 using Amazon.Runtime;
+using Amazon.S3;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 // Create instances of LocalFileService and S3FileService
 var localFileService = new LocalFileService();
@@ -20,7 +21,7 @@ var s3FileService = new S3FileService();
 // UseLocalDevFolder to true for Local development and Not AWS
 // UseLocalDevFolder to false will be using AWS
 // #####################################################
-var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder"); 
+var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
 var UseAWSS3 = !UseLocalDevFolder;
 
 IAmazonS3? s3Client = null; // Declare s3Client as nullable
@@ -33,7 +34,7 @@ if (UseAWSS3)
     var serviceUrl = awsSettings["ServiceURL"];
     var accessKey = awsSettings["AccessKey"];
     var secretKey = awsSettings["SecretKey"];
-    
+
     s3BucketName = awsSettings["BucketName"];
 
     var s3Config = new AmazonS3Config
@@ -137,11 +138,11 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
         return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
     }// .else
 
-}) 
+})
 .WithName("CreatePatient")
 .Produces<Patient>(200)
 .ProducesProblem(400)
-.WithOpenApi(); 
+.WithOpenApi();
 // ./ app.MapPost("/Patient"...  
 
 // #####################################################
@@ -208,13 +209,43 @@ app.MapPost("/Bundle", async (HttpContext httpContext) =>
         return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
     }// .else
 
-}) 
+})
 .WithName("CreateBundle")
 .Produces<Bundle>(200)
 .ProducesProblem(400)
-.WithOpenApi(); 
+.WithOpenApi();
 // ./ app.MapPost("/Bundle"...  
 
+// Expose the $metadata operation at the root URL
+app.MapGet("/metadata", () =>
+{
+    // Create a CapabilityStatement object with the server's metadata
+    var capabilityStatement = new CapabilityStatement
+    {
+        // Populate the CapabilityStatement with relevant details
+        FhirVersion = FHIRVersion.N4_0_1, // Specify the FHIR version
+        Description = new Markdown("This is a sample FHIR server exposing the $metadata operation."),
+        Software = new CapabilityStatement.SoftwareComponent
+        {
+            Name = "Sample FHIR Server",
+            Version = "1.0.0"
+        },
+        Implementation = new CapabilityStatement.ImplementationComponent
+        {
+            Description = "Sample implementation of a FHIR server"
+        }
+    };
+
+    // Serialize the CapabilityStatement to JSON
+    var json = new Hl7.Fhir.Serialization.FhirJsonSerializer().SerializeToString(capabilityStatement);
+    return Results.Json(capabilityStatement, contentType: "application/fhir+json");
+
+    // Return the JSON response
+    //context.Response.ContentType = "application/fhir+json";
+    //await context.Response.WriteAsync(json);
+})
+.WithName("GetMetadata")
+.WithOpenApi();
 
 // #####################################################
 // Start the App
