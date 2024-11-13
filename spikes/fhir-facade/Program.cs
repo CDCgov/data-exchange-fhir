@@ -18,10 +18,6 @@ namespace FireFacade
             builder.Services.Configure<FileStorageConfig>(
                 builder.Configuration.GetSection(FileStorageConfig.KeyName));
 
-            // Create instances of LocalFileService and S3FileService
-            var localFileService = new LocalFileService();
-            var s3FileService = new S3FileService();
-
             // Set this via config or environment
             // #####################################################
             // UseLocalDevFolder to true for Local development and Not AWS
