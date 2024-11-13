@@ -11,9 +11,9 @@ namespace FireFacade.Controllers
     public class HealthController : ControllerBase
     {
         [HttpGet(Name = "Health")]
-        public ActionResult Get()
+        public IResult Get()
         {
-            return (ActionResult)Results.Json(new
+            return Results.Json(new
             {
                 status = "Healthy",
                 timestamp = DateTime.UtcNow.ToString("o"), // ISO 8601 format for compatibility
