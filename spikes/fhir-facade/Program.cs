@@ -1,6 +1,7 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using FirelyApiApp.Configs;
 
 namespace FireFacade
 {
@@ -9,12 +10,13 @@ namespace FireFacade
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             // Add services to the container.
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
+            builder.Services.Configure<FileStorageConfig>(
+                builder.Configuration.GetSection(FileStorageConfig.KeyName));
 
             // Create instances of LocalFileService and S3FileService
             var localFileService = new LocalFileService();

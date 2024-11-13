@@ -1,4 +1,5 @@
 ﻿using Amazon.S3;
+using FirelyApiApp.Configs;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,11 @@ namespace FireFacade.Controllers
     [Route("[controller]")]
     public class PatientController : Controller
     {
+        FileStorageConfig fileStorageConfig { get; set; }
+        public PatientController(FileStorageConfig fileStorageConfig)
+        {
+            this.fileStorageConfig = fileStorageConfig;
+        }
         [HttpPost(Name = "Patient")]
         [ProducesResponseType(typeof(Patient), 200)]
         [ProducesResponseType(400)]
@@ -18,8 +24,6 @@ namespace FireFacade.Controllers
             // Use FhirJsonParser to parse incoming JSON as FHIR Patient
             var parser = new FhirJsonParser();
             Patient patient;
-            var UseLocalDevFolder = true;
-            var localReceivedFolder = "LocalReceivedResources";
             var localFileService = new LocalFileService();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
@@ -59,12 +63,12 @@ namespace FireFacade.Controllers
             var fileName = $"{Guid.NewGuid()}.json";
             var resourceJson = patient.ToJson();
 
-            if (UseLocalDevFolder)
+            if (fileStorageConfig.UseLocalDev)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                var localResult = await localFileService.SaveResourceLocally(localReceivedFolder, "Patient", fileName, resourceJson);
+                var localResult = await localFileService.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Patient", fileName, resourceJson);
                 return (IActionResult)localResult;
             } // .if UseLocalDevFolder
             else

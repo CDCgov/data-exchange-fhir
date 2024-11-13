@@ -1,4 +1,5 @@
 ﻿using Amazon.S3;
+using FirelyApiApp.Configs;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,18 +10,19 @@ namespace FirelyApiApp.Controllers
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
+        FileStorageConfig fileStorageConfig { get; set; }
+        public BundleController(FileStorageConfig fileStorageConfig)
+        {
+            this.fileStorageConfig = fileStorageConfig;
+        }
 
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post([FromBody] HttpContext httpContext)
         {
 
             var parser = new FhirJsonParser();
-            var UseLocalDevFolder = true;
-            //builder.Configuration.GetValue<bool>("UseLocalDevFolder");
-            var UseAWSS3 = !UseLocalDevFolder;
             Bundle bundle;
             var lfs = new LocalFileService();
-            var localReceivedFolder = "C:\\Users\\AC56\\Desktop\\Dev";
             var s3FileService = new S3FileService();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
@@ -59,12 +61,12 @@ namespace FirelyApiApp.Controllers
             var fileName = $"{Guid.NewGuid()}.json";
             var resourceJson = bundle.ToJson();
 
-            if (UseLocalDevFolder)
+            if (fileStorageConfig.UseLocalDev)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await lfs.SaveResourceLocally(localReceivedFolder, "Bundle", fileName, resourceJson);
+                return await lfs.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
 
             } // .if UseLocalDevFolder
             else
