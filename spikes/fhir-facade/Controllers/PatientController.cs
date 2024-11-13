@@ -69,7 +69,7 @@ namespace FireFacade.Controllers
             var fileName = $"{Guid.NewGuid()}.json";
             var resourceJson = patient.ToJson();
 
-            if (fileStorageConfig.UseLocalDev)
+            if (fileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally

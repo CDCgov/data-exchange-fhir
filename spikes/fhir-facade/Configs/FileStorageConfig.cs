@@ -3,7 +3,7 @@
     public class FileStorageConfig
     {
         public static string KeyName = "FileSettings";
-        public bool UseLocalDev { get; set; }
+        public bool UseLocalDevFolder { get; set; }
         public required string LocalDevFolder { get; set; }
     }
 }
