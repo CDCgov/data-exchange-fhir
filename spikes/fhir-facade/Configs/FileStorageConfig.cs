@@ -1,4 +1,4 @@
-﻿namespace FirelyApiApp.Configs
+﻿namespace fhirfacade.Configs
 {
     public class FileStorageConfig
     {

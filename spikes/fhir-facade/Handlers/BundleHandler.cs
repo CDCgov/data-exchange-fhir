@@ -4,47 +4,38 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace fhirfacade.Controllers
+namespace fhirfacade.Handlers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class PatientController : Controller
+    public class BundleHandler
     {
         FileStorageConfig fileStorageConfig { get; set; }
-        Patient patient { get; set; }
         FhirJsonParser fhirJsonParser { get; set; }
         LocalFileService localFileService { get; set; }
         S3FileService s3FileService { get; set; }
-
-        public PatientController(FileStorageConfig fileStorageConfig, Patient patient, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
+        public BundleHandler(FileStorageConfig fileStorageConfig, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
         {
             this.fileStorageConfig = fileStorageConfig;
-            this.patient = patient;
             this.fhirJsonParser = fhirJsonParser;
             this.localFileService = localFileService;
             this.s3FileService = s3FileService;
         }
-
-        [HttpPost(Name = "Patient")]
-        [ProducesResponseType(typeof(Patient), 200)]
-        [ProducesResponseType(400)]
-        public async Task<IActionResult?> Index()
+        public async Task<IResult> Post([FromBody] HttpContext httpContext)
         {
-            // Use FhirJsonParser to parse incoming JSON as FHIR Patient
+            Bundle bundle;
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
 
             try
             {
                 // Read the request body as a string
-                var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+                var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR Patient object
-                patient = fhirJsonParser.Parse<Patient>(requestBody);
+                bundle = fhirJsonParser.Parse<Bundle>(requestBody);
             }
             catch (FormatException ex)
             {
                 // Return 400 Bad Request if JSON is invalid
-                return BadRequest(new
+                return Results.BadRequest(new
                 {
                     error = "Invalid payload",
                     message = $"Failed to parse FHIR Resource: {ex.Message}"
@@ -52,30 +43,29 @@ namespace fhirfacade.Controllers
             }
 
             // Check if Patient ID is present
-            if (string.IsNullOrWhiteSpace(patient.Id))
+            if (string.IsNullOrWhiteSpace(bundle.Id))
             {
-                return BadRequest(new
+                return Results.BadRequest(new
                 {
                     error = "Invalid payload",
                     message = "Resource ID is required."
                 });
             }
 
-            // Log patient details to console
-            Console.WriteLine($"Received FHIR Patient: Id={patient.Id}");
+            // Log details to console
+            Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
 
             // Generate a new UUID for the file name
-            // Not using the patient.id: var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
             var fileName = $"{Guid.NewGuid()}.json";
-            var resourceJson = patient.ToJson();
+            var resourceJson = bundle.ToJson();
 
             if (fileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                var localResult = await localFileService.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Patient", fileName, resourceJson);
-                return (IActionResult)localResult;
+                return await localFileService.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
+
             } // .if UseLocalDevFolder
             else
             {
@@ -84,10 +74,10 @@ namespace fhirfacade.Controllers
                 // #####################################################
                 if (s3Client == null || string.IsNullOrEmpty(s3BucketName))
                 {
-                    return Problem("S3 client and bucket are not configured.");
+                    return Results.Problem("S3 client and bucket are not configured.");
                 }
 
-                return (IActionResult?)await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
+                return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
             }// .else
         }
     }

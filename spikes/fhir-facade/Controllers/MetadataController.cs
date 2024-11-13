@@ -1,7 +1,7 @@
 ﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FireFacade.Controllers
+namespace fhirfacade.Controllers
 {
     [ApiController]
     [Route("[controller]")]

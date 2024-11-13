@@ -1,9 +1,9 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
-using FirelyApiApp.Configs;
+using fhirfacade.Configs;
 
-namespace FireFacade
+namespace FirelyApiApp
 {
     public class Program
     {

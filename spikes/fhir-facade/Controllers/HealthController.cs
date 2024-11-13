@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace FireFacade.Controllers
+namespace fhirfacade.Controllers
 {
     // #####################################################
     // Define a health check endpoint at /health
