@@ -11,19 +11,23 @@ namespace FirelyApiApp.Controllers
     public class BundleController : ControllerBase
     {
         FileStorageConfig fileStorageConfig { get; set; }
-        public BundleController(FileStorageConfig fileStorageConfig)
+        Patient patient { get; set; }
+        FhirJsonParser fhirJsonParser { get; set; }
+        LocalFileService localFileService { get; set; }
+        S3FileService s3FileService { get; set; }
+        public BundleController(FileStorageConfig fileStorageConfig, Patient patient, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
         {
             this.fileStorageConfig = fileStorageConfig;
+            this.patient = patient;
+            this.fhirJsonParser = fhirJsonParser;
+            this.localFileService = localFileService;
+            this.s3FileService = s3FileService;
         }
 
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post([FromBody] HttpContext httpContext)
         {
-
-            var parser = new FhirJsonParser();
             Bundle bundle;
-            var lfs = new LocalFileService();
-            var s3FileService = new S3FileService();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
 
@@ -32,7 +36,7 @@ namespace FirelyApiApp.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR Patient object
-                bundle = parser.Parse<Bundle>(requestBody);
+                bundle = fhirJsonParser.Parse<Bundle>(requestBody);
             }
             catch (FormatException ex)
             {
@@ -66,7 +70,7 @@ namespace FirelyApiApp.Controllers
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await lfs.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
+                return await localFileService.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
 
             } // .if UseLocalDevFolder
             else

@@ -11,20 +11,26 @@ namespace FireFacade.Controllers
     public class PatientController : Controller
     {
         FileStorageConfig fileStorageConfig { get; set; }
-        public PatientController(FileStorageConfig fileStorageConfig)
+        Patient patient { get; set; }
+        FhirJsonParser fhirJsonParser { get; set; }
+        LocalFileService localFileService { get; set; }
+        S3FileService s3FileService { get; set; }
+
+        public PatientController(FileStorageConfig fileStorageConfig, Patient patient, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
         {
             this.fileStorageConfig = fileStorageConfig;
+            this.patient = patient;
+            this.fhirJsonParser = fhirJsonParser;
+            this.localFileService = localFileService;
+            this.s3FileService = s3FileService;
         }
+
         [HttpPost(Name = "Patient")]
         [ProducesResponseType(typeof(Patient), 200)]
         [ProducesResponseType(400)]
         public async Task<IActionResult?> Index()
         {
-
             // Use FhirJsonParser to parse incoming JSON as FHIR Patient
-            var parser = new FhirJsonParser();
-            Patient patient;
-            var localFileService = new LocalFileService();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
 
@@ -33,7 +39,7 @@ namespace FireFacade.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR Patient object
-                patient = parser.Parse<Patient>(requestBody);
+                patient = fhirJsonParser.Parse<Patient>(requestBody);
             }
             catch (FormatException ex)
             {
@@ -81,8 +87,7 @@ namespace FireFacade.Controllers
                     return Problem("S3 client and bucket are not configured.");
                 }
 
-                //return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
-                return null;
+                return (IActionResult?)await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
             }// .else
         }
     }
