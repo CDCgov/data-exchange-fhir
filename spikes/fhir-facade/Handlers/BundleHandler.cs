@@ -59,12 +59,12 @@ namespace fhirfacade.Handlers
             var fileName = $"{Guid.NewGuid()}.json";
             var resourceJson = bundle.ToJson();
 
-            if (fileStorageConfig.UseLocalDevFolder)
+            if (FileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await localFileService.SaveResourceLocally(fileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
+                return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
 
             } // .if UseLocalDevFolder
             else
