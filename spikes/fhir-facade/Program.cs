@@ -2,8 +2,9 @@ using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using fhirfacade.Configs;
+using Hl7.Fhir.Serialization;
 
-namespace FirelyApiApp
+namespace fhirfacade
 {
     public class Program
     {
@@ -15,8 +16,21 @@ namespace FirelyApiApp
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
-            builder.Services.Configure<FileStorageConfig>(
-                builder.Configuration.GetSection(FileStorageConfig.KeyName));
+
+            FileStorageConfig fileStorageConfig = new FileStorageConfig();
+            builder.Configuration.GetSection(FileStorageConfig.KeyName).Bind(fileStorageConfig);
+            builder.Services.AddSingleton(fileStorageConfig);
+
+            builder.Services.AddSingleton<LocalFileService>();
+            builder.Services.AddSingleton<S3FileService>();
+            builder.Services.AddSingleton<FhirJsonParser>();
+
+            builder.Services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    // Optional: Customize Newtonsoft.Json settings here
+                    options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                });
 
             // Set this via config or environment
             // #####################################################

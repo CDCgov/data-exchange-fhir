@@ -1,46 +1,26 @@
 ﻿using Amazon.S3;
 using fhirfacade.Configs;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization;
-using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol;
+
 
 namespace fhirfacade.Handlers
 {
     public class BundleHandler
     {
-        FileStorageConfig fileStorageConfig { get; set; }
-        FhirJsonParser fhirJsonParser { get; set; }
-        LocalFileService localFileService { get; set; }
-        S3FileService s3FileService { get; set; }
-        public BundleHandler(FileStorageConfig fileStorageConfig, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
+        LocalFileService localFileService;
+
+        S3FileService s3FileService;
+
+        public BundleHandler(LocalFileService localFileService, S3FileService s3FileService)
         {
-            this.fileStorageConfig = fileStorageConfig;
-            this.fhirJsonParser = fhirJsonParser;
             this.localFileService = localFileService;
             this.s3FileService = s3FileService;
         }
-        public async Task<IResult> Post([FromBody] HttpContext httpContext)
+        public async Task<IResult> Post(Bundle bundle)
         {
-            Bundle bundle;
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
-
-            try
-            {
-                // Read the request body as a string
-                var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-                // Parse JSON string to FHIR Patient object
-                bundle = fhirJsonParser.Parse<Bundle>(requestBody);
-            }
-            catch (FormatException ex)
-            {
-                // Return 400 Bad Request if JSON is invalid
-                return Results.BadRequest(new
-                {
-                    error = "Invalid payload",
-                    message = $"Failed to parse FHIR Resource: {ex.Message}"
-                });
-            }
 
             // Check if Patient ID is present
             if (string.IsNullOrWhiteSpace(bundle.Id))
@@ -65,8 +45,7 @@ namespace fhirfacade.Handlers
                 // Save the FHIR Resource Locally
                 // #####################################################
                 return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
-
-            } // .if UseLocalDevFolder
+            }
             else
             {
                 // #####################################################
@@ -78,7 +57,7 @@ namespace fhirfacade.Handlers
                 }
 
                 return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
-            }// .else
+            }
         }
     }
 }

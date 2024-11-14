@@ -1,6 +1,5 @@
-﻿using fhirfacade.Configs;
-using fhirfacade.Handlers;
-using Hl7.Fhir.Serialization;
+﻿using fhirfacade.Handlers;
+using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace fhirfacade.Controllers
@@ -9,24 +8,36 @@ namespace fhirfacade.Controllers
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
-        FileStorageConfig fileStorageConfig { get; set; }
-        FhirJsonParser fhirJsonParser { get; set; }
-        LocalFileService localFileService { get; set; }
-        S3FileService s3FileService { get; set; }
+        private readonly LocalFileService _localFileService;
+        private readonly S3FileService _s3FileService;
 
-        public BundleController(FileStorageConfig fileStorageConfig, FhirJsonParser fhirJsonParser, LocalFileService localFileService, S3FileService s3FileService)
+        // Use Dependency Injection to get services
+        public BundleController(LocalFileService localFileService, S3FileService s3FileService)
         {
-            this.fileStorageConfig = fileStorageConfig;
-            this.fhirJsonParser = fhirJsonParser;
-            this.localFileService = localFileService;
-            this.s3FileService = s3FileService;
+            _localFileService = localFileService;
+            _s3FileService = s3FileService;
         }
 
         [HttpPost(Name = "PostBundle")]
-        public BundleHandler Post([FromBody] HttpContext httpContext)
+        public async Task<IActionResult> Post([FromBody] Bundle bundle)
         {
-            BundleHandler handler = new BundleHandler(fileStorageConfig, fhirJsonParser, localFileService, s3FileService);
-            return handler;
+            if (bundle == null)
+            {
+                return BadRequest(new
+                {
+                    error = "Invalid payload",
+                    message = "Bundle is required."
+                });
+            }
+
+            // Create the handler with the injected dependencies
+            var handler = new BundleHandler(_localFileService, _s3FileService);
+
+            // Use the handler to process the bundle and get the result
+            var result = await handler.Post(bundle);
+
+            // Return the result from the handler
+            return (IActionResult)result;
         }
     }
 }
