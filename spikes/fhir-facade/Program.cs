@@ -1,10 +1,10 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
-using fhirfacade.Configs;
 using Hl7.Fhir.Serialization;
+using OneCDPFHIRFacade.Configs;
 
-namespace fhirfacade
+namespace OneCDPFHIRFacade
 {
     public class Program
     {

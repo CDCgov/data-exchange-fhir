@@ -1,10 +1,10 @@
 ﻿using Amazon.S3;
-using fhirfacade.Configs;
 using Hl7.Fhir.Model;
 using NuGet.Protocol;
+using OneCDPFHIRFacade.Configs;
 
 
-namespace fhirfacade.Handlers
+namespace OneCDPFHIRFacade.Handlers
 {
     public class BundleHandler
     {
