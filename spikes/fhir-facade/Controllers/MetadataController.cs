@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Handlers;
 
 namespace OneCDPFHIRFacade.Controllers
 {
@@ -7,6 +8,26 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class MetadataController : Controller
     {
+        /**
+         * Receive a Patient bundle to process. This method prints the Patient bundle to
+         * console and also sends to S3 bucket.
+         * 
+         * @param thePatient
+         * @return MethodOutcome
+         */
+        [HttpPost("{thePatient}")]
+        public ActionResult CreatePatient(Patient thePatient)
+        {
+            if (thePatient.Identifier.FirstOrDefault() == null)
+            {
+                throw new ArgumentNullException();
+            }
+            Dictionary<string, Patient> newDic = new Dictionary<string, Patient>();
+            newDic.Add("1", thePatient);
+            MetadataHandler handler = new MetadataHandler();
+            handler.PrintToConsole(thePatient, newDic);
+        }
+
 
         [HttpGet]
         public IResult Index()
