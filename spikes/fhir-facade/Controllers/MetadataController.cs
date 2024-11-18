@@ -7,6 +7,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class MetadataController : Controller
     {
+
         [HttpGet]
         public IResult Index()
         {
