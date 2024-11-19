@@ -8,16 +8,6 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class MetadataController : Controller
     {
-        /**
-         * Receive a Patient bundle to process. This method prints the Patient bundle to
-         * console and also sends to S3 bucket.
-         * 
-         * @param thePatient
-         * @return MethodOutcome
-         */
-
-
-
         [HttpGet]
         public IResult Index()
         {
@@ -27,10 +17,6 @@ namespace OneCDPFHIRFacade.Controllers
             // Serialize the CapabilityStatement to JSON
             var json = new Hl7.Fhir.Serialization.FhirJsonSerializer().SerializeToString(capabilityStatement);
             return Results.Json(capabilityStatement, contentType: "application/fhir+json");
-
-            // Return the JSON response
-            //context.Response.ContentType = "application/fhir+json";
-            //await context.Response.WriteAsync(json);
 
         }
     }

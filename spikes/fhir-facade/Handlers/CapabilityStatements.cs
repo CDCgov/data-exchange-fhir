@@ -11,11 +11,15 @@ namespace OneCDPFHIRFacade.Handlers
             CapabilityStatement capabilityStatement = new CapabilityStatement
             {
                 // Set basic information
+                Title = "Capability Statement",
+                Url = "https://onecdpfhirfacade/metadata",
+                FhirVersion = FHIRVersion.N4_0_1,
+                Name = "One CDP FHIR Facade Capability Statement",
                 Status = PublicationStatus.Active,
+                Experimental = true,
                 Date = DateTime.Now.ToString(),
                 Publisher = "CDC 1CDP FHIR Facade",
                 Kind = CapabilityStatementKind.Instance,
-                FhirVersion = FHIRVersion.N4_0_1,
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
