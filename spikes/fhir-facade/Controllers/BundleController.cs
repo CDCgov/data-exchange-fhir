@@ -1,27 +1,18 @@
-﻿using fhirfacade.Handlers;
-using Hl7.Fhir.Model;
+﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPOneCDPFHIRFacade.Handlers;
 
-namespace fhirfacade.Controllers
+namespace OneCDPFHIRFacade.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
-        private readonly LocalFileService _localFileService;
-        private readonly S3FileService _s3FileService;
-
-        // Use Dependency Injection to get services
-        public BundleController(LocalFileService localFileService, S3FileService s3FileService)
-        {
-            _localFileService = localFileService;
-            _s3FileService = s3FileService;
-        }
 
         [HttpPost(Name = "PostBundle")]
         public async Task<IActionResult> Post([FromBody] Bundle bundle)
         {
-            if (bundle == null)
+            if (HttpContext == null)
             {
                 return BadRequest(new
                 {
@@ -31,7 +22,7 @@ namespace fhirfacade.Controllers
             }
 
             // Create the handler with the injected dependencies
-            var handler = new BundleHandler(_localFileService, _s3FileService);
+            var handler = new BundleHandler();
 
             // Use the handler to process the bundle and get the result
             var result = await handler.Post(bundle);

@@ -1,29 +1,25 @@
 ﻿using Amazon.S3;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using NuGet.Protocol;
 using OneCDPFHIRFacade.Configs;
 
-
-namespace OneCDPOneCDPFHIRFacade.Handlers
+namespace OneCDPFHIRFacade.Handlers
 {
-    public class BundleHandler
+    public class PatientHandler
     {
         LocalFileService localFileService = new LocalFileService();
         S3FileService s3FileService = new S3FileService();
-        public async Task<IResult> Post(Bundle bundle)
+
+        public async Task<IResult> CreatePatient(Patient patient)
         {
+            var parser = new FhirJsonParser();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
-
-            // Use FhirJsonParser to parse incoming JSON as FHIR bundle
-            var parser = new FhirJsonParser();
 
             try
             {
                 // Read the request body as a string
-                var requestBody = await new StreamReader(bundle.ToString()).ReadToEndAsync();
-                // Parse JSON string to FHIR bundle object
+                var requestBody = await new StreamReader(patient.ToString()).ReadToEndAsync();
             }
             catch (FormatException ex)
             {
@@ -35,8 +31,8 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
                 });
             }
 
-            // Check if bundle ID is present
-            if (string.IsNullOrWhiteSpace(bundle.Id))
+            // Check if Patient ID is present
+            if (string.IsNullOrWhiteSpace(patient.Id))
             {
                 return Results.BadRequest(new
                 {
@@ -45,19 +41,20 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
                 });
             }
 
-            // Log details to console
-            Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
+            // Log patient details to console
+            Console.WriteLine($"Received FHIR Patient: Id={patient.Id}");
 
             // Generate a new UUID for the file name
+            // Not using the patient.id: var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
             var fileName = $"{Guid.NewGuid()}.json";
-            var resourceJson = bundle.ToJson();
+            var resourceJson = patient.ToJson();
 
             if (FileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
+                return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Patient", fileName, resourceJson);
 
             } // .if UseLocalDevFolder
             else
@@ -70,7 +67,7 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
 
-                return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
+                return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
             }// .else
         }
     }

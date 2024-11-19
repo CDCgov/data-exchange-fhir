@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace fhirfacade.Controllers
+namespace OneCDPFHIRFacade.Controllers
 {
     // #####################################################
     // Define a health check endpoint at /health

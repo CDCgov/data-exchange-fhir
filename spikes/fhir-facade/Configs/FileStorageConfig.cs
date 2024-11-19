@@ -1,4 +1,4 @@
-﻿namespace fhirfacade.Configs
+﻿namespace OneCDPFHIRFacade.Configs
 {
     public class FileStorageConfig
     {

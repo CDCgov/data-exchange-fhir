@@ -1,7 +1,7 @@
 ﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
 
-namespace fhirfacade.Controllers
+namespace OneCDPFHIRFacade.Controllers
 {
     [ApiController]
     [Route("[controller]")]

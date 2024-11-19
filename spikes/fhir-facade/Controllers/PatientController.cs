@@ -1,43 +1,28 @@
-﻿using fhirfacade.Handlers;
-using Hl7.Fhir.Model;
+﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Handlers;
 
-namespace fhirfacade.Controllers
+namespace OneCDPOneCDPFHIRFacade.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class PatientController : ControllerBase
     {
-        private readonly LocalFileService _localFileService;
-        private readonly S3FileService _s3FileService;
 
-        // Use Dependency Injection to get services
-        public PatientController(LocalFileService localFileService, S3FileService s3FileService)
+        [HttpPost]
+        public async Task<IResult> Post([FromBody] Patient patient)
         {
-            _localFileService = localFileService;
-            _s3FileService = s3FileService;
-        }
-
-        [HttpPost(Name = "PostPatient")]
-        public async Task<IActionResult> Post([FromBody] Bundle bundle)
-        {
-            if (bundle == null)
+            if (patient == null)
             {
-                return BadRequest(new
+                return (IResult)BadRequest(new
                 {
                     error = "Invalid payload",
                     message = "Patient is required."
                 });
             }
+            PatientHandler handler = new PatientHandler();
+            return await handler.CreatePatient(patient);
 
-            // Create the handler with the injected dependencies
-            var handler = new BundleHandler(_localFileService, _s3FileService);
-
-            // Use the handler to process the bundle and get the result
-            var result = await handler.Post(bundle);
-
-            // Return the result from the handler
-            return (IActionResult)result;
         }
     }
 }
