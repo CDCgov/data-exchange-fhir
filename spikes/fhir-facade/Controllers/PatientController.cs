@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Data;
 using OneCDPFHIRFacade.Exceptions;
 using OneCDPFHIRFacade.Handlers;
 
@@ -11,34 +12,19 @@ namespace OneCDPFHIRFacade.Controllers
     {
         private readonly LocalFileService _localFileService;
         private readonly S3FileService _s3FileService;
-        private Dictionary<String, Patient> myPatients = new Dictionary<String, Patient>();
         public PatientController(LocalFileService localFileService, S3FileService s3FileService)
         {
             _localFileService = localFileService;
             _s3FileService = s3FileService;
-
-            Patient pat1 = new Patient();
-            pat1.Id = "1";
-            Identifier identifier = new Identifier
-            {
-                System = Environment.GetEnvironmentVariable("PATIENT_IDENTIFIER_SYSTEM"),
-                Value = Environment.GetEnvironmentVariable("PATIENT_IDENTIFIER_VALUE")
-            };
-            pat1.Identifier.Add(identifier);
-            HumanName patient1 = new HumanName()
-            {
-                Family = "Simpson",
-                Given = ["Homer", " J."]
-            };
-            pat1.Name.Add(patient1);
-            myPatients.Add("1", pat1);
+            string patientId = "1";
+            PatientData newPatient = new PatientData(patientId);
         }
 
         [HttpGet("{theId}")]
         public Patient GetPatient(string theId)
         {
             Id id = new Id(theId);
-            Patient retVal = myPatients[id.Value];
+            Patient retVal = PatientDictData.PatientDictionary[id.Value];
             if (retVal == null)
             {
                 throw new ResourceNotFoundException(id.Value);

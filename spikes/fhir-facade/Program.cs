@@ -1,8 +1,11 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using OneCDPFHIRFacade.Configs;
+using OneCDPFHIRFacade.Data;
+using System.Collections.Concurrent;
 
 namespace OneCDPFHIRFacade
 {
@@ -39,6 +42,7 @@ namespace OneCDPFHIRFacade
             // #####################################################
             var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
             var UseAWSS3 = !UseLocalDevFolder;
+            PatientDictData.PatientDictionary = new ConcurrentDictionary<string, Patient>();
 
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
