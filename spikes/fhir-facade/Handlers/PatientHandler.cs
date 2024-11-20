@@ -10,16 +10,22 @@ namespace OneCDPFHIRFacade.Handlers
         LocalFileService localFileService = new LocalFileService();
         S3FileService s3FileService = new S3FileService();
 
-        public async Task<IResult> CreatePatient(Patient patient)
+        public async Task<IResult> CreatePatient(JsonType json)
         {
-            var parser = new FhirJsonParser();
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
-
+            Patient patient;
+            var parser = new FhirJsonParser();
             try
             {
+                patient = parser.Parse<Patient>(json);
+
+                if (patient == null)
+                {
+                    return Results.BadRequest(new { error = "Invalid FHIR resource." });
+                }
                 // Read the request body as a string
-                var requestBody = await new StreamReader(patient.ToString()).ReadToEndAsync();
+
             }
             catch (FormatException ex)
             {

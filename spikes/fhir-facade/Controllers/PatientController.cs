@@ -1,5 +1,4 @@
-﻿using Hl7.Fhir.Model;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Handlers;
 
 namespace OneCDPOneCDPFHIRFacade.Controllers
@@ -10,9 +9,9 @@ namespace OneCDPOneCDPFHIRFacade.Controllers
     {
 
         [HttpPost]
-        public async Task<IResult> Post([FromBody] Patient patient)
+        public async Task<IResult> Post([FromBody] string json)
         {
-            if (patient == null)
+            if (json == null)
             {
                 return (IResult)BadRequest(new
                 {
@@ -21,7 +20,7 @@ namespace OneCDPOneCDPFHIRFacade.Controllers
                 });
             }
             PatientHandler handler = new PatientHandler();
-            return await handler.CreatePatient(patient);
+            return await handler.CreatePatient(json);
 
         }
     }
