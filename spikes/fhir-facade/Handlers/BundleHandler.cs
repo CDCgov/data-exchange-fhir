@@ -11,19 +11,18 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
     {
         LocalFileService localFileService = new LocalFileService();
         S3FileService s3FileService = new S3FileService();
-        public async Task<IResult> Post(Bundle bundle)
+        public async Task<IResult> Post(string json)
         {
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
 
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
-
+            Bundle bundle;
             try
             {
-                // Read the request body as a string
-                var requestBody = await new StreamReader(bundle.ToString()).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
+                bundle = parser.Parse<Bundle>(json);
             }
             catch (FormatException ex)
             {

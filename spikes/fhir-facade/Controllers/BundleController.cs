@@ -1,5 +1,5 @@
-﻿using Hl7.Fhir.Model;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using OneCDPOneCDPFHIRFacade.Handlers;
 
 namespace OneCDPFHIRFacade.Controllers
@@ -8,16 +8,21 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
-
         [HttpPost(Name = "PostBundle")]
-        public async Task<IActionResult> Post([FromBody] Bundle bundle)
+        public async Task<IResult> Post([FromBody] JObject requestBody)
         {
-            if (HttpContext == null)
+            string bundle;
+            try
             {
-                return BadRequest(new
+                bundle = requestBody.ToString();
+            }
+            catch (FormatException ex)
+            {
+                // Return 400 Bad Request if JSON is invalid
+                return Results.BadRequest(new
                 {
                     error = "Invalid payload",
-                    message = "Bundle is required."
+                    message = $"Failed to parse FHIR Resource: {ex.Message}"
                 });
             }
 
@@ -28,7 +33,7 @@ namespace OneCDPFHIRFacade.Controllers
             var result = await handler.Post(bundle);
 
             // Return the result from the handler
-            return (IActionResult)result;
+            return result;
         }
     }
 }
