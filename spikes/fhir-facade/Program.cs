@@ -1,6 +1,3 @@
-using Amazon;
-using Amazon.Runtime;
-using Amazon.S3;
 using Hl7.Fhir.Serialization;
 using OneCDPFHIRFacade.Configs;
 
@@ -17,9 +14,18 @@ namespace OneCDPFHIRFacade
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
 
+            // Set this via config or environment
+            // #####################################################
+            // UseLocalDevFolder to true for Local development and Not AWS
+            // UseLocalDevFolder to false will be using AWS
+            // #####################################################
             FileStorageConfig fileStorageConfig = new FileStorageConfig();
             builder.Configuration.GetSection(FileStorageConfig.KeyName).Bind(fileStorageConfig);
             builder.Services.AddSingleton(fileStorageConfig);
+
+            AWSConfig awsConfig = new AWSConfig();
+            builder.Configuration.GetSection(AWSConfig.KeyName).Bind(awsConfig);
+            builder.Services.AddSingleton(awsConfig);
 
             builder.Services.AddSingleton<LocalFileService>();
             builder.Services.AddSingleton<S3FileService>();
@@ -31,37 +37,6 @@ namespace OneCDPFHIRFacade
                     // Optional: Customize Newtonsoft.Json settings here
                     options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
                 });
-
-            // Set this via config or environment
-            // #####################################################
-            // UseLocalDevFolder to true for Local development and Not AWS
-            // UseLocalDevFolder to false will be using AWS
-            // #####################################################
-            var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
-            var UseAWSS3 = !UseLocalDevFolder;
-
-            IAmazonS3? s3Client = null; // Declare s3Client as nullable
-            String? s3BucketName = null;
-
-            if (UseAWSS3)
-            {
-                var awsSettings = builder.Configuration.GetSection("AWS");
-                var region = awsSettings["Region"];
-                var serviceUrl = awsSettings["ServiceURL"];
-                var accessKey = awsSettings["AccessKey"];
-                var secretKey = awsSettings["SecretKey"];
-
-                s3BucketName = awsSettings["BucketName"];
-
-                var s3Config = new AmazonS3Config
-                {
-                    RegionEndpoint = RegionEndpoint.GetBySystemName(region), // Set region
-                    ServiceURL = serviceUrl                                  // Optional: Set custom service URL
-                };
-
-                // Initialize the client with credentials and config
-                s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), s3Config);
-            }// .if
 
             var app = builder.Build();
 
