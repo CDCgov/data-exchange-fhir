@@ -14,6 +14,8 @@ namespace OneCDPFHIRFacade.Handlers
         {
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
+
+            // Use FhirJsonParser to parse incoming JSON as FHIR patient
             Patient patient;
             var parser = new FhirJsonParser();
             try
