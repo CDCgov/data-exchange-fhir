@@ -1,7 +1,6 @@
 ﻿using Amazon.S3;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using NuGet.Protocol;
 using OneCDPFHIRFacade.Configs;
 
 
@@ -13,12 +12,13 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
         S3FileService s3FileService = new S3FileService();
         public async Task<IResult> Post(string json)
         {
-            IAmazonS3? s3Client = null; // Declare s3Client as nullable
-            String? s3BucketName = null;
+            IAmazonS3? s3Client = AWSConfig.S3Client;
+            String? s3BucketName = AWSConfig.BucketName;
 
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
             Bundle bundle;
+
             try
             {
                 // Parse JSON string to FHIR bundle object
@@ -49,14 +49,14 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
 
             // Generate a new UUID for the file name
             var fileName = $"{Guid.NewGuid()}.json";
-            var resourceJson = bundle.ToJson();
+            var resourceJson = bundle;
 
             if (FileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Bundle", fileName, resourceJson);
+                return await localFileService.SaveResourceLocally(FileStorageConfig.LocalDevFolder, "Bundle", fileName, json);
 
             } // .if UseLocalDevFolder
             else
@@ -69,7 +69,7 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
 
-                return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
+                return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, json);
             }// .else
         }
     }
