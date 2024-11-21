@@ -2,6 +2,7 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using OneCDPFHIRFacade.Configs;
+using OneCDPFHIRFacade.Handlers;
 
 
 namespace OneCDPOneCDPFHIRFacade.Handlers
@@ -10,9 +11,10 @@ namespace OneCDPOneCDPFHIRFacade.Handlers
     {
         LocalFileService localFileService = new LocalFileService();
         S3FileService s3FileService = new S3FileService();
+        AWSHandler s3Handler = new AWSHandler();
         public async Task<IResult> Post(string json)
         {
-            IAmazonS3? s3Client = AWSConfig.S3Client;
+            IAmazonS3? s3Client = s3Handler.AWSs3();
             String? s3BucketName = AWSConfig.BucketName;
 
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
