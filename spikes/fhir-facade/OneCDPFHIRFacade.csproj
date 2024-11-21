@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.405.3" />
-    <PackageReference Include="Hl7.Fhir.R4" Version="5.10.3" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="5.11.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.36" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />

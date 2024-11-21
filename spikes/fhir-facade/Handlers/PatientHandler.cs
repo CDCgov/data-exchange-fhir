@@ -12,8 +12,8 @@ namespace OneCDPFHIRFacade.Handlers
 
         public async Task<IResult> CreatePatient(JsonType json)
         {
-            IAmazonS3? s3Client = null; // Declare s3Client as nullable
-            String? s3BucketName = null;
+            IAmazonS3? s3Client = AWSConfig.S3Client;
+            String? s3BucketName = AWSConfig.BucketName;
 
             // Use FhirJsonParser to parse incoming JSON as FHIR patient
             Patient patient;
