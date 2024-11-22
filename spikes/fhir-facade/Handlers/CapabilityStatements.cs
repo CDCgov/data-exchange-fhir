@@ -12,7 +12,7 @@ namespace OneCDPFHIRFacade.Handlers
             {
                 // Set basic information
                 Title = "Capability Statement",
-                Url = "https://onecdpfhirfacade/metadata",
+                Url = "",
                 FhirVersion = FHIRVersion.N4_0_1,
                 Name = "One CDP FHIR Facade Capability Statement",
                 Status = PublicationStatus.Active,
@@ -37,18 +37,20 @@ namespace OneCDPFHIRFacade.Handlers
                                     {
                                         new Coding
                                         {
-                                            System = "http://hl7.org/fhir/restful-security-service",
-                                            Code = "oauth2",
-                                            Display = "OAuth2"
+                                            System = "",
+                                            Code = "",
+                                            Display = ""
                                         }
                                     }
                                 },
                             },
+                            Cors = false,
+                            Description = ""
                         },
                         // Add a custom extension to indicate 'Facade'
-                        Extension = new List<Hl7.Fhir.Model.Extension>
+                        Extension = new List<Extension>
                         {
-                            new Hl7.Fhir.Model.Extension
+                            new Extension
                             {
                                 // Use an example URL for the extension; replace with your system's URL
                                 Url = "https://ocioedefhirhealthtst-ocioedefhirtst.fhir.azurehealthcareapis.com/metadata",
@@ -60,12 +62,7 @@ namespace OneCDPFHIRFacade.Handlers
                             // Add information for supported resources
                             new ResourceComponent
                             {
-                                Type = "Patient",
-                                SearchParam = new List<SearchParamComponent>()
-                                {
-                                    new SearchParamComponent { Name = "family" },
-                                    new SearchParamComponent { Name = "given" }
-                                },
+                                Type = "Bundle",
                                 Interaction = new List<ResourceInteractionComponent>
                                 {
                                     new ResourceInteractionComponent
@@ -74,24 +71,34 @@ namespace OneCDPFHIRFacade.Handlers
                                     },
                                     new ResourceInteractionComponent
                                     {
-                                        Code = TypeRestfulInteraction.SearchType
-                                    },
-                                    new ResourceInteractionComponent
-                                    {
                                         Code = TypeRestfulInteraction.Create
                                     },
-                                    new ResourceInteractionComponent
-                                    {
-                                        Code = TypeRestfulInteraction.Update
-                                    },
-                                    new ResourceInteractionComponent
-                                    {
-                                        Code = TypeRestfulInteraction.Delete
-                                    }
                                 },
                             },
-
                         },
+                        Interaction = new List<SystemInteractionComponent>
+                        {
+                             new SystemInteractionComponent
+                             {
+                                 Code = SystemRestfulInteraction.HistorySystem
+                             },
+                             new SystemInteractionComponent
+                             {
+                                 Code = SystemRestfulInteraction.Batch
+                             },
+                             new SystemInteractionComponent
+                             {
+                                 Code = SystemRestfulInteraction.Transaction
+                             },
+                        },
+                        Operation = new List<OperationComponent>
+                        {
+                            new OperationComponent
+                            {
+                                Name = "export",
+                                Definition = ""
+                            }
+                        }
                     },
                 },
             };
