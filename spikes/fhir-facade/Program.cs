@@ -1,8 +1,8 @@
-using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization; 
-using Amazon.S3;
 using Amazon;
 using Amazon.Runtime;
+using Amazon.S3;
+using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 // Create instances of LocalFileService and S3FileService
 var localFileService = new LocalFileService();
@@ -20,7 +21,7 @@ var s3FileService = new S3FileService();
 // UseLocalDevFolder to true for Local development and Not AWS
 // UseLocalDevFolder to false will be using AWS
 // #####################################################
-var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder"); 
+var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
 var UseAWSS3 = !UseLocalDevFolder;
 
 IAmazonS3? s3Client = null; // Declare s3Client as nullable
@@ -33,7 +34,7 @@ if (UseAWSS3)
     var serviceUrl = awsSettings["ServiceURL"];
     var accessKey = awsSettings["AccessKey"];
     var secretKey = awsSettings["SecretKey"];
-    
+
     s3BucketName = awsSettings["BucketName"];
 
     var s3Config = new AmazonS3Config
@@ -45,6 +46,13 @@ if (UseAWSS3)
     // Initialize the client with credentials and config
     s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), s3Config);
 }// .if
+
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        // Optional: Customize Newtonsoft.Json settings here
+        options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+    });
 
 var app = builder.Build();
 
@@ -137,11 +145,11 @@ app.MapPost("/Patient", async (HttpContext httpContext) =>
         return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
     }// .else
 
-}) 
+})
 .WithName("CreatePatient")
 .Produces<Patient>(200)
 .ProducesProblem(400)
-.WithOpenApi(); 
+.WithOpenApi();
 // ./ app.MapPost("/Patient"...  
 
 // #####################################################
@@ -208,13 +216,14 @@ app.MapPost("/Bundle", async (HttpContext httpContext) =>
         return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
     }// .else
 
-}) 
+})
 .WithName("CreateBundle")
 .Produces<Bundle>(200)
 .ProducesProblem(400)
-.WithOpenApi(); 
+.WithOpenApi();
 // ./ app.MapPost("/Bundle"...  
 
+app.MapControllers();
 
 // #####################################################
 // Start the App
