@@ -16,7 +16,7 @@ namespace OneCDPFHIRFacade.Controllers
             return Results.Json(new
             {
                 status = "Healthy",
-                timestamp = DateTime.UtcNow.ToString("o"), // ISO 8601 format for compatibility
+                timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
                 description = "API is running and healthy"
             });
         }
