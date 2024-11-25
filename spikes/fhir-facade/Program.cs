@@ -6,7 +6,7 @@ using Hl7.Fhir.Serialization;
 
 namespace OneODPFHIRFacade
 {
-    public class Program
+    public static class Program
     {
 
 
