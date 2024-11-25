@@ -15,7 +15,6 @@ namespace OneODPFHIRFacade
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
@@ -29,13 +28,13 @@ namespace OneODPFHIRFacade
             // UseLocalDevFolder to true for Local development and Not AWS
             // UseLocalDevFolder to false will be using AWS
             // #####################################################
-            var UseLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
-            var UseAWSS3 = !UseLocalDevFolder;
+            var useLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
+            var useAWSS3 = !useLocalDevFolder;
 
             IAmazonS3? s3Client = null; // Declare s3Client as nullable
             String? s3BucketName = null;
 
-            if (UseAWSS3)
+            if (useAWSS3)
             {
                 var awsSettings = builder.Configuration.GetSection("AWS");
                 var region = awsSettings["Region"];
@@ -112,7 +111,7 @@ namespace OneODPFHIRFacade
                 var fileName = $"{Guid.NewGuid()}.json";
                 var resourceJson = patient.ToJson();
 
-                if (UseLocalDevFolder)
+                if (useLocalDevFolder)
                 {
                     // #####################################################
                     // Save the FHIR Resource Locally
@@ -183,7 +182,7 @@ namespace OneODPFHIRFacade
                 var fileName = $"{Guid.NewGuid()}.json";
                 var resourceJson = bundle.ToJson();
 
-                if (UseLocalDevFolder)
+                if (useLocalDevFolder)
                 {
                     // #####################################################
                     // Save the FHIR Resource Locally
