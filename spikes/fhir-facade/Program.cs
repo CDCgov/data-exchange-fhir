@@ -211,7 +211,7 @@ namespace OneODPFHIRFacade
             .WithOpenApi();
             // ./ app.MapPost("/Bundle"...  
 
-
+            app.MapControllers();
             // #####################################################
             // Start the App
             // #####################################################
