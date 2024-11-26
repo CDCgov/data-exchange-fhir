@@ -1,5 +1,4 @@
 ﻿using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using static Hl7.Fhir.Model.CapabilityStatement;
 
@@ -108,8 +107,6 @@ namespace OneCDPFHIRFacade.Controllers
                 },
             };
 
-            // Serialize the CapabilityStatement to JSON
-            var json = new FhirJsonSerializer().SerializeToString(capabilityStatement);
             return Results.Json(capabilityStatement, contentType: "application/fhir+json");
 
         }
