@@ -5,7 +5,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using OneCDPFHIRFacade.Config;
 
-namespace OneODPFHIRFacade
+namespace OneCDPFHIRFacade
 {
     public static class Program
     {
