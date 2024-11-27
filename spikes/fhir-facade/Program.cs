@@ -3,6 +3,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using OneCDPFHIRFacade.Config;
 
 namespace OneODPFHIRFacade
 {
@@ -31,27 +32,21 @@ namespace OneODPFHIRFacade
             var useLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
             var useAWSS3 = !useLocalDevFolder;
 
-            IAmazonS3? s3Client = null; // Declare s3Client as nullable
-            String? s3BucketName = null;
+            // Create new instance of awsConfig and configuration
+            AWSConfig awsConfig = new AWSConfig();
+            builder.Configuration.GetSection(AWSConfig.KeyName).Bind(awsConfig);
+            builder.Services.AddSingleton(awsConfig);
 
             if (useAWSS3)
             {
-                var awsSettings = builder.Configuration.GetSection("AWS");
-                var region = awsSettings["Region"];
-                var serviceUrl = awsSettings["ServiceURL"];
-                var accessKey = awsSettings["AccessKey"];
-                var secretKey = awsSettings["SecretKey"];
-
-                s3BucketName = awsSettings["BucketName"];
-
                 var s3Config = new AmazonS3Config
                 {
-                    RegionEndpoint = RegionEndpoint.GetBySystemName(region), // Set region
-                    ServiceURL = serviceUrl                                  // Optional: Set custom service URL
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(AWSConfig.Region), // Set region
+                    ServiceURL = AWSConfig.ServiceURL                                  // Optional: Set custom service URL
                 };
 
                 // Initialize the client with credentials and config
-                s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), s3Config);
+                AWSConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AWSConfig.AccessKey, AWSConfig.SecretKey), s3Config);
             }// .if
 
             var app = builder.Build();
@@ -124,12 +119,12 @@ namespace OneODPFHIRFacade
                     // #####################################################
                     // Save the FHIR Resource to AWS S3
                     // #####################################################
-                    if (s3Client == null || string.IsNullOrEmpty(s3BucketName))
+                    if (AWSConfig.S3Client == null || string.IsNullOrEmpty(AWSConfig.BucketName))
                     {
                         return Results.Problem("S3 client and bucket are not configured.");
                     }
 
-                    return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Patient", fileName, resourceJson);
+                    return await s3FileService.SaveResourceToS3(AWSConfig.S3Client, AWSConfig.BucketName, "Patient", fileName, resourceJson);
                 }// .else
 
             })
@@ -195,12 +190,11 @@ namespace OneODPFHIRFacade
                     // #####################################################
                     // Save the FHIR Resource to AWS S3
                     // #####################################################
-                    if (s3Client == null || string.IsNullOrEmpty(s3BucketName))
+                    if (AWSConfig.S3Client == null || string.IsNullOrEmpty(AWSConfig.BucketName))
                     {
                         return Results.Problem("S3 client and bucket are not configured.");
                     }
-
-                    return await s3FileService.SaveResourceToS3(s3Client, s3BucketName, "Bundle", fileName, resourceJson);
+                    return await s3FileService.SaveResourceToS3(AWSConfig.S3Client, AWSConfig.BucketName, "Bundle", fileName, resourceJson);
                 }// .else
 
             })
