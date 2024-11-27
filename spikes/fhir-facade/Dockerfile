@@ -23,8 +23,11 @@ WORKDIR /app
 # Copy the published application from the build image
 COPY --from=build /app/out .
 
+ENV ASPNETCORE_ENVIRONMENT=Development
+
 EXPOSE 8080
+EXPOSE 80
 
 
 # Set the entry point for the application
-ENTRYPOINT ["dotnet", "FirelyApiApp.dll"]
+ENTRYPOINT ["dotnet", "OneCDPFHIRFacade.dll"]
