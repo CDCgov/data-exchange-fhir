@@ -23,6 +23,7 @@ WORKDIR /app
 # Copy the published application from the build image
 COPY --from=build /app/out .
 
+# The following setting allows for Swagger UI - Disable when in production
 ENV ASPNETCORE_ENVIRONMENT=Development
 
 EXPOSE 8080
