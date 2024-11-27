@@ -4,6 +4,7 @@ using Amazon.S3;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using OneCDPFHIRFacade.Config;
+using OneCDPFHIRFacade.Services;
 
 namespace OneCDPFHIRFacade
 {
@@ -18,10 +19,6 @@ namespace OneCDPFHIRFacade
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
 
-            // Create instances of LocalFileService and S3FileService
-            var localFileService = new LocalFileService();
-            var s3FileService = new S3FileService();
-
             // Set this via config or environment
             // #####################################################
             // UseLocalDevFolder to true for Local development and Not AWS
@@ -29,6 +26,13 @@ namespace OneCDPFHIRFacade
             // #####################################################
             var useLocalDevFolder = builder.Configuration.GetValue<bool>("UseLocalDevFolder");
             var useAWSS3 = !useLocalDevFolder;
+
+            // Register serivces, Create instances of LocalFileService and S3FileService
+            builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
+            builder.Services.AddSingleton<IS3FileService, S3FileService>();
+            // TODO
+            // builder.Services.AddSingleton(useLocalDevFolder);
+            // builder.Services.AddSingleton(new AwsConfig());
 
             // Initialize AWS configuration
             AwsConfig.Initialize(builder.Configuration);
@@ -59,83 +63,11 @@ namespace OneCDPFHIRFacade
             var localReceivedFolder = "LocalReceivedResources";
 
             // #####################################################
-            // POST endpoint for Patient
-            // #####################################################
-            app.MapPost("/Patient", async (HttpContext httpContext) =>
-            {
-                // Use FhirJsonParser to parse incoming JSON as FHIR Patient
-                var parser = new FhirJsonParser();
-                Patient patient;
-
-                try
-                {
-                    // Read the request body as a string
-                    var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-                    // Parse JSON string to FHIR Patient object
-                    patient = parser.Parse<Patient>(requestBody);
-                }
-                catch (FormatException ex)
-                {
-                    // Return 400 Bad Request if JSON is invalid
-                    return Results.BadRequest(new
-                    {
-                        error = "Invalid payload",
-                        message = $"Failed to parse FHIR Resource: {ex.Message}"
-                    });
-                }
-
-                // Check if Patient ID is present
-                if (string.IsNullOrWhiteSpace(patient.Id))
-                {
-                    return Results.BadRequest(new
-                    {
-                        error = "Invalid payload",
-                        message = "Resource ID is required."
-                    });
-                }
-
-                // Log patient details to console
-                Console.WriteLine($"Received FHIR Patient: Id={patient.Id}");
-
-                // Generate a new UUID for the file name
-                // Not using the patient.id: var filePath = Path.Combine(directoryPath, $"{patient.Id}.json");
-                var fileName = $"{Guid.NewGuid()}.json";
-                var resourceJson = patient.ToJson();
-
-                if (useLocalDevFolder)
-                {
-                    // #####################################################
-                    // Save the FHIR Resource Locally
-                    // #####################################################
-                    return await localFileService.SaveResourceLocally(localReceivedFolder, "Patient", fileName, resourceJson);
-
-                } // .if UseLocalDevFolder
-                else
-                {
-                    // #####################################################
-                    // Save the FHIR Resource to AWS S3
-                    // #####################################################
-                    if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
-                    {
-                        return Results.Problem("S3 client and bucket are not configured.");
-                    }
-
-                    return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Patient", fileName, resourceJson);
-                }// .else
-
-            })
-            .WithName("CreatePatient")
-            .Produces<Patient>(200)
-            .ProducesProblem(400)
-            .WithOpenApi();
-            // ./ app.MapPost("/Patient"...  
-
-            // #####################################################
             // POST endpoint for Bundle
             // #####################################################
-            app.MapPost("/Bundle", async (HttpContext httpContext) =>
+            app.MapPost("/Bundle", async (HttpContext httpContext, ILocalFileService localFileService, IS3FileService s3FileService) =>
             {
-                // Use FhirJsonParser to parse incoming JSON as FHIR Patient
+
                 var parser = new FhirJsonParser();
                 Bundle bundle;
 
@@ -143,8 +75,45 @@ namespace OneCDPFHIRFacade
                 {
                     // Read the request body as a string
                     var requestBody = await new StreamReader(httpContext.Request.Body).ReadToEndAsync();
-                    // Parse JSON string to FHIR Patient object
+                    // Parse JSON string to FHIR Bundle object
                     bundle = parser.Parse<Bundle>(requestBody);
+
+                    // Check if Patient ID is present
+                    if (string.IsNullOrWhiteSpace(bundle.Id))
+                    {
+                        return Results.BadRequest(new
+                        {
+                            error = "Invalid payload",
+                            message = "Resource ID is required."
+                        });
+                    }
+
+                    // Log details to console
+                    Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
+
+                    // Generate a new UUID for the file name
+                    var fileName = $"{Guid.NewGuid()}.json";
+                    var resourceJson = bundle.ToJson();
+
+                    if (useLocalDevFolder)
+                    {
+                        // #####################################################
+                        // Save the FHIR Resource Locally
+                        // #####################################################
+                        return await localFileService.SaveResourceLocally(localReceivedFolder, "Bundle", fileName, resourceJson);
+
+                    } // .if UseLocalDevFolder
+                    else
+                    {
+                        // #####################################################
+                        // Save the FHIR Resource to AWS S3
+                        // #####################################################
+                        if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
+                        {
+                            return Results.Problem("S3 client and bucket are not configured.");
+                        }
+                        return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, resourceJson);
+                    }// .else
                 }
                 catch (FormatException ex)
                 {
@@ -155,50 +124,7 @@ namespace OneCDPFHIRFacade
                         message = $"Failed to parse FHIR Resource: {ex.Message}"
                     });
                 }
-
-                // Check if Patient ID is present
-                if (string.IsNullOrWhiteSpace(bundle.Id))
-                {
-                    return Results.BadRequest(new
-                    {
-                        error = "Invalid payload",
-                        message = "Resource ID is required."
-                    });
-                }
-
-                // Log details to console
-                Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
-
-                // Generate a new UUID for the file name
-                var fileName = $"{Guid.NewGuid()}.json";
-                var resourceJson = bundle.ToJson();
-
-                if (useLocalDevFolder)
-                {
-                    // #####################################################
-                    // Save the FHIR Resource Locally
-                    // #####################################################
-                    return await localFileService.SaveResourceLocally(localReceivedFolder, "Bundle", fileName, resourceJson);
-
-                } // .if UseLocalDevFolder
-                else
-                {
-                    // #####################################################
-                    // Save the FHIR Resource to AWS S3
-                    // #####################################################
-                    if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
-                    {
-                        return Results.Problem("S3 client and bucket are not configured.");
-                    }
-                    return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, resourceJson);
-                }// .else
-
-            })
-            .WithName("CreateBundle")
-            .Produces<Bundle>(200)
-            .ProducesProblem(400)
-            .WithOpenApi();
-            // ./ app.MapPost("/Bundle"...  
+            });
 
             app.MapControllers();
             // #####################################################
