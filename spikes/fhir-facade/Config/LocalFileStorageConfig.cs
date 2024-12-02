@@ -2,7 +2,7 @@
 {
     public static class LocalFileStorageConfig
     {
-        public static string KeyName = "FileSettings";
+        public const string KeyName = "FileSettings";
         public static bool UseLocalDevFolder { get; set; }
         public static string? LocalDevFolder { get; set; }
 

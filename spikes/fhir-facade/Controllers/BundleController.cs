@@ -25,7 +25,7 @@ namespace OneCDPFHIRFacade.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
-                bundle = parser.Parse<Bundle>(requestBody.ToString());
+                bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
             }
             catch (FormatException ex)
             {
@@ -58,7 +58,7 @@ namespace OneCDPFHIRFacade.Controllers
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, bundle.ToJson());
+                return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
 
             } // .if UseLocalDevFolder
             else
@@ -71,7 +71,7 @@ namespace OneCDPFHIRFacade.Controllers
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
 
-                return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, bundle.ToJson());
+                return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync());
             }// .else
         }
 
