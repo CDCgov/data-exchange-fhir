@@ -1,4 +1,7 @@
-﻿using Hl7.Fhir.Model;
+﻿using Amazon.CloudWatchLogs;
+using Amazon.CloudWatchLogs.Model;
+using Amazon.Runtime;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
@@ -10,6 +13,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
+        private readonly ILogger<BundleController> _logger;
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {
@@ -19,6 +23,34 @@ namespace OneCDPFHIRFacade.Controllers
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
             Bundle bundle;
+
+            //AWS CloudWatch logs instance
+            var credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
+
+            var config = new AmazonCloudWatchLogsConfig
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
+            };
+
+            var logClient = new AmazonCloudWatchLogsClient(credentials, config);
+
+            //Create log group name
+            var logGroupName = $"/aws/bundle-logs/{DateTime.UtcNow.ToString("yyyyMMdd")}";
+            var logStreamName = "BundleLogs";
+
+            //Add to a an exciting log group
+            await logClient.CreateLogGroupAsync(new CreateLogGroupRequest(logGroupName));
+            await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
+
+            await logClient.PutLogEventsAsync(new PutLogEventsRequest()
+            {
+                LogGroupName = logGroupName,
+                LogStreamName = logStreamName,
+                LogEvents = new List<InputLogEvent>()
+                {
+                    new InputLogEvent() {Message = "Get bundle request", Timestamp = DateTime.UtcNow}
+                }
+            });
 
             try
             {
@@ -40,6 +72,7 @@ namespace OneCDPFHIRFacade.Controllers
             // Check if bundle ID is present
             if (string.IsNullOrWhiteSpace(bundle.Id))
             {
+
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
