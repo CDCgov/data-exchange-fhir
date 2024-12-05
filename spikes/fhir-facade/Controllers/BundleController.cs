@@ -1,7 +1,4 @@
-﻿using Amazon.CloudWatchLogs;
-using Amazon.CloudWatchLogs.Model;
-using Amazon.Runtime;
-using Hl7.Fhir.Model;
+﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
@@ -14,6 +11,7 @@ namespace OneCDPFHIRFacade.Controllers
     public class BundleController : ControllerBase
     {
         private readonly ILogger<BundleController> _logger;
+
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {
@@ -24,33 +22,63 @@ namespace OneCDPFHIRFacade.Controllers
             var parser = new FhirJsonParser();
             Bundle bundle;
 
-            //AWS CloudWatch logs instance
-            var credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
+            ////AWS CloudWatch logs instance
+            //var credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
 
-            var config = new AmazonCloudWatchLogsConfig
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
-            };
+            //var config = new AmazonCloudWatchLogsConfig
+            //{
+            //    RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
+            //};
 
-            var logClient = new AmazonCloudWatchLogsClient(credentials, config);
+            //var logClient = new AmazonCloudWatchLogsClient(credentials, config);
+            //var logGroupName = "/aws/bundle-logs/";
+            //var logStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}";
 
-            //Create log group name
-            var logGroupName = $"/aws/bundle-logs/{DateTime.UtcNow.ToString("yyyyMMdd")}";
-            var logStreamName = "BundleLogs";
+            ////Create a new log group
+            ////await logClient.CreateLogGroupAsync(new CreateLogGroupRequest(logGroupName));
+            ////await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
+            ////await logClient.PutLogEventsAsync(new PutLogEventsRequest()
+            ////{
+            ////    LogGroupName = logGroupName,
+            ////    LogStreamName = logStreamName,
+            ////    LogEvents = new List<InputLogEvent>()
+            ////    {
+            ////        new InputLogEvent() {Message = "Get bundle request", Timestamp = DateTime.UtcNow}
+            ////    }
+            ////});
+            //var describeLogStreamsRequest = new DescribeLogStreamsRequest
+            //{
+            //    LogGroupName = logGroupName,
+            //    LogStreamNamePrefix = logStreamName
+            //};
+            //var response = await logClient.DescribeLogStreamsAsync(describeLogStreamsRequest);
+            ////Check if Logstream is there already
+            //if (!response.LogStreams.Any(ls => ls.LogStreamName == logStreamName))
+            //{
+            //    //Add to a logs group
+            //    await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
+            //}
 
-            //Add to a an exciting log group
-            await logClient.CreateLogGroupAsync(new CreateLogGroupRequest(logGroupName));
-            await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
+            ////Write to log stream
+            //var addLogEventsRequest = new PutLogEventsRequest
+            //{
+            //    LogGroupName = "/aws/bundle-logs/",
+            //    LogStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}",
+            //    LogEvents = new List<InputLogEvent>
+            //    {
+            //        new InputLogEvent
+            //        {
+            //            Message = "A new Bundle has been sent.",
+            //            Timestamp = DateTime.UtcNow
+            //        }
+            //    }
+            //};
 
-            await logClient.PutLogEventsAsync(new PutLogEventsRequest()
-            {
-                LogGroupName = logGroupName,
-                LogStreamName = logStreamName,
-                LogEvents = new List<InputLogEvent>()
-                {
-                    new InputLogEvent() {Message = "Get bundle request", Timestamp = DateTime.UtcNow}
-                }
-            });
+            //await logClient.PutLogEventsAsync(addLogEventsRequest);
+
+            //await logClient.PutLogEventsAsync(addLogEventsRequest);
+            CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
+            await logEntry.AppendLogAsync("myMessage");
 
             try
             {
