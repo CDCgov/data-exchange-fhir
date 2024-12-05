@@ -6,10 +6,14 @@ using OneCDPFHIRFacade.Services;
 
 namespace OneCDPFHIRFacade.Controllers
 {
+
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
+        //Create a cloud instance to add logs
+        CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
+
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {
@@ -20,8 +24,7 @@ namespace OneCDPFHIRFacade.Controllers
             var parser = new FhirJsonParser();
             Bundle bundle;
 
-            //Create a cloud instance to add logs
-            CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
+            //Log starts
             await logEntry.AppendLogAsync("Bundle request has started");
 
             try
@@ -77,7 +80,7 @@ namespace OneCDPFHIRFacade.Controllers
                     await logEntry.AppendLogAsync("S3 client and bucket are not configured.");
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
-                return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync());
+                return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync(), logEntry);
             }// .else
         }
 
