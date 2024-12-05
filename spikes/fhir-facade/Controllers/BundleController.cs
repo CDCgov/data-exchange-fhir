@@ -10,8 +10,6 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
-        private readonly ILogger<BundleController> _logger;
-
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {
@@ -22,63 +20,9 @@ namespace OneCDPFHIRFacade.Controllers
             var parser = new FhirJsonParser();
             Bundle bundle;
 
-            ////AWS CloudWatch logs instance
-            //var credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
-
-            //var config = new AmazonCloudWatchLogsConfig
-            //{
-            //    RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
-            //};
-
-            //var logClient = new AmazonCloudWatchLogsClient(credentials, config);
-            //var logGroupName = "/aws/bundle-logs/";
-            //var logStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}";
-
-            ////Create a new log group
-            ////await logClient.CreateLogGroupAsync(new CreateLogGroupRequest(logGroupName));
-            ////await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
-            ////await logClient.PutLogEventsAsync(new PutLogEventsRequest()
-            ////{
-            ////    LogGroupName = logGroupName,
-            ////    LogStreamName = logStreamName,
-            ////    LogEvents = new List<InputLogEvent>()
-            ////    {
-            ////        new InputLogEvent() {Message = "Get bundle request", Timestamp = DateTime.UtcNow}
-            ////    }
-            ////});
-            //var describeLogStreamsRequest = new DescribeLogStreamsRequest
-            //{
-            //    LogGroupName = logGroupName,
-            //    LogStreamNamePrefix = logStreamName
-            //};
-            //var response = await logClient.DescribeLogStreamsAsync(describeLogStreamsRequest);
-            ////Check if Logstream is there already
-            //if (!response.LogStreams.Any(ls => ls.LogStreamName == logStreamName))
-            //{
-            //    //Add to a logs group
-            //    await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
-            //}
-
-            ////Write to log stream
-            //var addLogEventsRequest = new PutLogEventsRequest
-            //{
-            //    LogGroupName = "/aws/bundle-logs/",
-            //    LogStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}",
-            //    LogEvents = new List<InputLogEvent>
-            //    {
-            //        new InputLogEvent
-            //        {
-            //            Message = "A new Bundle has been sent.",
-            //            Timestamp = DateTime.UtcNow
-            //        }
-            //    }
-            //};
-
-            //await logClient.PutLogEventsAsync(addLogEventsRequest);
-
-            //await logClient.PutLogEventsAsync(addLogEventsRequest);
+            //Create a cloud instance to add logs
             CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
-            await logEntry.AppendLogAsync("myMessage");
+            await logEntry.AppendLogAsync("Bundle request has started");
 
             try
             {
@@ -110,6 +54,7 @@ namespace OneCDPFHIRFacade.Controllers
 
             // Log details to console
             Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
+            await logEntry.AppendLogAsync($"Received FHIR Bundle: Id={bundle.Id}");
 
             // Generate a new UUID for the file name
             var fileName = $"{Guid.NewGuid()}.json";
@@ -129,9 +74,9 @@ namespace OneCDPFHIRFacade.Controllers
                 // #####################################################
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
+                    await logEntry.AppendLogAsync("S3 client and bucket are not configured.");
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
-
                 return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync());
             }// .else
         }
