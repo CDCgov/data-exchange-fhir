@@ -27,10 +27,9 @@ public class CloudWatchLoggerService
     {
         try
         {
-            //Name of Bundle log groups
-            var logGroupName = "/aws/bundle-logs/";
+            //Bundle log groups name
+            var logGroupName = AwsConfig.LogGroupName;
             var logStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}";
-
             //Get the sequence token
             var describeResponse = await logClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
             {
@@ -65,7 +64,7 @@ public class CloudWatchLoggerService
                 SequenceToken = sequenceToken // Include the sequence token
             };
 
-            var response = await logClient.PutLogEventsAsync(putLogEventsRequest);
+            await logClient.PutLogEventsAsync(putLogEventsRequest);
             Console.WriteLine("Log event appended successfully.");
         }
         catch (Exception ex)
