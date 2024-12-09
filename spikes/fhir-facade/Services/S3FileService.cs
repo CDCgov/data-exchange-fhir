@@ -29,21 +29,21 @@ namespace OneCDPFHIRFacade.Services
             // Attempt to save the resource to S3
             try
             {
-                await logEntry.AppendLogAsync($"requestID: {requestId}. Start write to S3: fileName={fileName}, " +
-                    $"bucket={s3BucketName}, keyPrefix={keyPrefix}");
+                await logEntry.AppendLogAsync($"Start write to S3: fileName={fileName}, " +
+                    $"bucket={s3BucketName}, keyPrefix={keyPrefix}", requestId);
                 Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
 
                 var response = await s3Client.PutObjectAsync(putRequest);
 
-                await logEntry.AppendLogAsync($"requestID: {requestId}. End write to S3: fileName={fileName}, " +
-                    $"response={response.HttpStatusCode}");
+                await logEntry.AppendLogAsync($"End write to S3: fileName={fileName}, " +
+                    $"response={response.HttpStatusCode}", requestId);
                 Console.WriteLine($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}");
 
                 return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
             }
             catch (Exception ex)
             {
-                await logEntry.AppendLogAsync($"requestID: {requestId}. Error saving resource to S3: {ex.Message}");
+                await logEntry.AppendLogAsync($"Error saving resource to S3: {ex.Message}", requestId);
                 return Results.Problem($"Error saving resource to S3: {ex.Message}");
             }
         }// .SaveResourceToS3

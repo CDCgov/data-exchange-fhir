@@ -2,6 +2,7 @@
 using Amazon.CloudWatchLogs.Model;
 using Amazon.Runtime;
 using OneCDPFHIRFacade.Config;
+using System.Text.Json;
 
 public class CloudWatchLoggerService
 {
@@ -23,7 +24,7 @@ public class CloudWatchLoggerService
         logClient = new AmazonCloudWatchLogsClient(credentials, config);
     }
 
-    public async Task AppendLogAsync(string message)
+    public async Task AppendLogAsync(string message, string requestId)
     {
         try
         {
@@ -47,11 +48,19 @@ public class CloudWatchLoggerService
             }
 
             var sequenceToken = logStream.UploadSequenceToken;
+            //Log message as json
+            var logMessage = new
+            {
+                RequestID = requestId,
+                Message = message,
+                Timestamp = DateTime.UtcNow,
+            };
+            var jsonLogMessage = JsonSerializer.Serialize(logMessage);
 
             // Prepare log event
             var logEvent = new InputLogEvent
             {
-                Message = message,
+                Message = jsonLogMessage,
                 Timestamp = DateTime.UtcNow
             };
 
