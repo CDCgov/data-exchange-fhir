@@ -9,10 +9,9 @@ public class CloudWatchLoggerService
     private readonly BasicAWSCredentials credentials;
     private readonly AmazonCloudWatchLogsConfig config;
     private readonly AmazonCloudWatchLogsClient logClient;
+    private readonly BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
     public CloudWatchLoggerService()
     {
-        new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
-
         //AWS CloudWatch logs instance
         credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
 

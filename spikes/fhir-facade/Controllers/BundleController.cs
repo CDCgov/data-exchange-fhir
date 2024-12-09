@@ -21,7 +21,7 @@ namespace OneCDPFHIRFacade.Controllers
             LocalFileService localFileService = new LocalFileService();
             S3FileService s3FileService = new S3FileService();
 
-            var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "");
+            var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "", RegexOptions.NonBacktracking);
 
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
