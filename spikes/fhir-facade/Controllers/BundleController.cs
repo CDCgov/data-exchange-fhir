@@ -13,7 +13,7 @@ namespace OneCDPFHIRFacade.Controllers
     public class BundleController : ControllerBase
     {
         //Create a cloud instance to add logs
-        CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
+        readonly CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
 
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
