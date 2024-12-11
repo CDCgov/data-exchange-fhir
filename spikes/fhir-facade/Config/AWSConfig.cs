@@ -12,9 +12,10 @@ namespace OneCDPFHIRFacade.Config
         public static string? BucketName { get; set; }
         public static string? LogGroupName { get; set; }
         public static AmazonS3Client? S3Client { get; set; }
+        public static string? OltpEndpoint { get; set; }
 
 
-        public static void Initialize(IConfiguration configuration)
+    public static void Initialize(IConfiguration configuration)
         {
             var section = configuration.GetSection(KeyName);
             Region = section.GetValue<string>("Region");
@@ -23,6 +24,7 @@ namespace OneCDPFHIRFacade.Config
             SecretKey = section.GetValue<string>("SecretKey");
             BucketName = section.GetValue<string>("BucketName");
             LogGroupName = section.GetValue<string>("LogGroupName");
-        }
+            OltpEndpoint = section.GetValue<string>("OltpEndpoint");
+    }
     }
 }
