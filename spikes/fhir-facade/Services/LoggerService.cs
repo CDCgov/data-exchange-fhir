@@ -4,28 +4,51 @@ using Amazon.Runtime;
 using OneCDPFHIRFacade.Config;
 using System.Text.Json;
 
+
 namespace OneCDPFHIRFacade
 {
-    public class CloudWatchLoggerService
+    public class LoggerService
     {
-        private readonly BasicAWSCredentials credentials;
-        private readonly AmazonCloudWatchLogsConfig config;
-        private readonly AmazonCloudWatchLogsClient logClient;
-        public CloudWatchLoggerService()
+        public async Task LogData(string message, string requestId)
+        {
+            if (LocalFileStorageConfig.UseLocalDevFolder)
+            {
+                ConsoleLogs(message, requestId);
+            }
+            else
+            {
+                await CloudWatchLogs(message, requestId);
+            }
+
+        }
+
+        public void ConsoleLogs(string message, string requestId)
+        {
+            using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+            ILogger logger = factory.CreateLogger("Log");
+            //Log message as json
+            var logMessage = new
+            {
+                RequestID = requestId,
+                Message = message,
+                Timestamp = DateTime.UtcNow,
+            };
+            var jsonLogMessage = JsonSerializer.Serialize(logMessage);
+            logger.LogInformation(jsonLogMessage);
+        }
+
+        public async Task CloudWatchLogs(string message, string requestId)
         {
             //AWS CloudWatch logs instance
-            credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
+            BasicAWSCredentials credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
 
-            config = new AmazonCloudWatchLogsConfig
+            AmazonCloudWatchLogsConfig config = new AmazonCloudWatchLogsConfig
             {
                 RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
             };
 
-            logClient = new AmazonCloudWatchLogsClient(credentials, config);
-        }
+            AmazonCloudWatchLogsClient logClient = new AmazonCloudWatchLogsClient(credentials, config);
 
-        public async Task AppendLogAsync(string message, string requestId)
-        {
             try
             {
                 //Bundle log groups name
@@ -48,6 +71,7 @@ namespace OneCDPFHIRFacade
                 }
 
                 var sequenceToken = logStream.UploadSequenceToken;
+
                 //Log message as json
                 var logMessage = new
                 {
