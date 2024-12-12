@@ -36,7 +36,7 @@ namespace OneCDPFHIRFacade
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
 
-            if (runEnvironment == "aws")
+            if (runEnvironment == "AWS")
             {
                 var s3Config = new AmazonS3Config
                 {
