@@ -2,7 +2,9 @@
 using Amazon.CloudWatchLogs.Model;
 using Amazon.Runtime;
 using OneCDPFHIRFacade.Config;
+using Serilog;
 using System.Text.Json;
+using DateTime = System.DateTime;
 
 
 namespace OneCDPFHIRFacade
@@ -24,8 +26,6 @@ namespace OneCDPFHIRFacade
 
         public void ConsoleLogs(string message, string requestId)
         {
-            using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-            ILogger logger = factory.CreateLogger("Log");
             //Log message as json
             var logMessage = new
             {
@@ -34,7 +34,9 @@ namespace OneCDPFHIRFacade
                 Timestamp = DateTime.UtcNow,
             };
             var jsonLogMessage = JsonSerializer.Serialize(logMessage);
-            logger.LogInformation(jsonLogMessage);
+
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+            Log.Information(jsonLogMessage);
         }
 
         public async Task CloudWatchLogs(string message, string requestId)
