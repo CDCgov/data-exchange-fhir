@@ -82,7 +82,7 @@ namespace OneCDPFHIRFacade
                         .AddHttpClientInstrumentation() // Collect HTTP client metrics
                         .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
                         {
-                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint); // "http://localhost:4317");                   
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
                         }).AddConsoleExporter();  // Custom metrics              
                 });
             }
@@ -106,7 +106,7 @@ namespace OneCDPFHIRFacade
             // #####################################################
             // Start the App
             // #####################################################
-            app.Run();
+            await app.RunAsync();
 
         }
     }
