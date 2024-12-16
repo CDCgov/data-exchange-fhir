@@ -40,6 +40,8 @@ namespace OneCDPFHIRFacade
             AwsConfig.Initialize(builder.Configuration);
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
+            //Initailize loggerService
+            LoggerService loggerService = new LoggerService();
 
             if (runEnvironment == "AWS")
             {
@@ -57,7 +59,7 @@ namespace OneCDPFHIRFacade
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
-                //logEntry.AppendLogAsync(AwsConfig.OltpEndpoint, " ProgramOLTP ");
+                Task task = loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
                {
                    tracerProviderBuilder
@@ -88,7 +90,7 @@ namespace OneCDPFHIRFacade
             }
             else
             {
-                //logEntry.AppendLogAsync("No OLTP", " ProgramOLTP ");
+                Task task = loggerService.LogData("No OLTP", " ProgramOLTP ");
             }
 
             var app = builder.Build();
