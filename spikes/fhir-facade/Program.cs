@@ -12,7 +12,7 @@ namespace OneCDPFHIRFacade
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
@@ -57,7 +57,7 @@ namespace OneCDPFHIRFacade
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
-                Task task = loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
+                await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
                {
                    tracerProviderBuilder
@@ -68,7 +68,7 @@ namespace OneCDPFHIRFacade
                        .AddConsoleExporter()
                        .AddOtlpExporter(options =>
                        {
-                           options.Endpoint = new Uri(AwsConfig.OltpEndpoint); // "http://localhost:4317");
+                           options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                        });
                });
@@ -88,7 +88,7 @@ namespace OneCDPFHIRFacade
             }
             else
             {
-                Task task = loggerService.LogData("No OLTP", " ProgramOLTP ");
+                await loggerService.LogData("No OLTP", " ProgramOLTP ");
             }
 
             var app = builder.Build();
