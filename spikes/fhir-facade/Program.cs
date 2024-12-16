@@ -55,8 +55,6 @@ namespace OneCDPFHIRFacade
                 AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
             }// .if
 
-            //CloudWatchLoggerService logEntry = new CloudWatchLoggerService();
-
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
                 Task task = loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");

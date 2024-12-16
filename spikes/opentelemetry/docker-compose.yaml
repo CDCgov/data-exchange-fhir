@@ -16,8 +16,8 @@ services:
       #
 
       - AWS_PROFILE=myprofile
-      - AWS_ACCESS_KEY_ID=<<KEYHERE>>
-      - AWS_SECRET_ACCESS_KEY=<<ACCESSHERE>>
+      - AWS_ACCESS_KEY_ID=***
+      - AWS_SECRET_ACCESS_KEY=***
       #
       # Or define a profile available in your shared credentials file
       #
@@ -32,22 +32,22 @@ services:
       - "55679:55679" # zpages extension
       - "13133"       # health_check
 
-  # Sample web application which will generate Metrics and Traces data if the enable API is called
-  # src - https://github.com/aws-observability/aws-otel-test-framework/tree/terraform/sample-apps/spark
-  ot-sample-app:
-    image: public.ecr.aws/aws-otel-test/aws-otel-java-spark:latest
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://aws-ot-collector:4317
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=AOCDockerDemo,service.name=AOCDockerDemoService
-      - AWS_REGION=us-east-1
-      - OTEL_METRICS_EXPORTER=otlp
-      - LISTEN_ADDRESS=0.0.0.0:4567 # web server endpoint
-    volumes:
-      - ~/.aws:/root/.aws # test auto generated trace on S3 access
-    ports:
-      - "4567:4567"   # http sample requests
-    depends_on:
-      - aws-ot-collector
+  # # Sample web application which will generate Metrics and Traces data if the enable API is called
+  # # src - https://github.com/aws-observability/aws-otel-test-framework/tree/terraform/sample-apps/spark
+  # ot-sample-app:
+  #   image: public.ecr.aws/aws-otel-test/aws-otel-java-spark:latest
+  #   environment:
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://aws-ot-collector:4317
+  #     - OTEL_RESOURCE_ATTRIBUTES=service.namespace=AOCDockerDemo,service.name=AOCDockerDemoService
+  #     - AWS_REGION=us-east-1
+  #     - OTEL_METRICS_EXPORTER=otlp
+  #     - LISTEN_ADDRESS=0.0.0.0:4567 # web server endpoint
+  #   volumes:
+  #     - ~/.aws:/root/.aws # test auto generated trace on S3 access
+  #   ports:
+  #     - "4567:4567"   # http sample requests
+  #   depends_on:
+  #     - aws-ot-collector
 
   # Traffic generator will make HTTP requests to ot-sample-app that sends OTel Metrics and Traces
  # traffic-generator:
