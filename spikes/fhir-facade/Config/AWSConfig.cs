@@ -10,6 +10,7 @@ namespace OneCDPFHIRFacade.Config
         public static string? AccessKey { get; private set; }
         public static string? SecretKey { get; set; }
         public static string? BucketName { get; set; }
+        public static string? LogGroupName { get; set; }
         public static string? OltpEndpoint { get; set; }
         public static AmazonS3Client? S3Client { get; set; }
 
@@ -23,6 +24,7 @@ namespace OneCDPFHIRFacade.Config
             SecretKey = section.GetValue<string>("SecretKey");
             BucketName = section.GetValue<string>("BucketName");
             OltpEndpoint = section.GetValue<string>("OltpEndpoint");
+            LogGroupName = section.GetValue<string>("LogGroupName");
         }
     }
 }

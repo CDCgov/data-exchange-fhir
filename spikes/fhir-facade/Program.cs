@@ -27,8 +27,7 @@ namespace OneCDPFHIRFacade
             // UseLocalDevFolder to true for Local development and Not AWS
             // UseLocalDevFolder to false will be using AWS
             // #####################################################
-            var useLocalDevFolder = LocalFileStorageConfig.UseLocalDevFolder;
-            var useAWSS3 = !useLocalDevFolder;
+            string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
             // Register serivces, Create instances of LocalFileService and S3FileService
             builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
@@ -42,7 +41,7 @@ namespace OneCDPFHIRFacade
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
 
-            if (useAWSS3)
+            if (runEnvironment == "AWS")
             {
                 var s3Config = new AmazonS3Config
                 {
