@@ -78,7 +78,7 @@ def does_bucket_exists(bucket_name ):
         bucket_exists_status['error_message'] = str(f"Bucket '{bucket_name}' does not exist.")
     return bucket_exists_status
 
-def get_cloudwatch_log_groups(global_vars):
+def get_cloudwatch_log_groups():
     #Get the list of Cloudwatch Log groups
 
     resp_data = { 'status': False, 'log_groups':[], 'error_message': ''}
@@ -204,9 +204,9 @@ def lambda_handler(event, context):
         resp_data['error_message'] = global_vars.get('error_message')
         return resp_data
 
-    lgs = get_cloudwatch_log_groups(global_vars)
+    lgs = get_cloudwatch_log_groups()
     if not lgs.get('status'):
-        logger.error(f"Unable to get list of cloudwatch Logs.")
+        logger.error("Unable to get list of cloudwatch Logs.")
         resp_data['error_message'] = lgs.get('error_message')
         return resp_data
 
@@ -215,7 +215,7 @@ def lambda_handler(event, context):
         logger.debug(f"Global variables initialized: {global_vars}")
         logger.debug(f"Retrieved log groups: {lgs}")
         logger.debug(f"Filtered log groups: {f_lgs}")
-        err = f"There are no log group matching the filter or Unable to get a filtered list of cloudwatch Logs."
+        err = "There are no log group matching the filter or Unable to get a filtered list of cloudwatch Logs."
         logger.error(err)
         resp_data['error_message'] = f"{err} ERROR:{f_lgs.get('error_message')}"
         resp_data['lgs'] = { 'all_logs':lgs, 'cw_logs_to_export':global_vars.get('cw_logs_to_export'), 'filtered_logs':f_lgs}
