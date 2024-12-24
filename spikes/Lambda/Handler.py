@@ -74,13 +74,8 @@ def does_bucket_exists(bucket_name ):
 
         bucket_exists_status['status'] = True
     except ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            bucket_exists_status['status'] = False
-            bucket_exists_status['error_message'] = str(e)
-        else:
-            # logger.error('ERROR: {0}'.format( str(e) ) )
-            bucket_exists_status['status'] = False
-            bucket_exists_status['error_message'] = str(e)
+        bucket_exists_status['status'] = False
+        bucket_exists_status['error_message'] = str(e)
     return bucket_exists_status
 
 def get_cloudwatch_log_groups(global_vars):
