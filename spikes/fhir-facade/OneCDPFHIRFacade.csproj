@@ -7,11 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Lambda\Handler.py" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Lambda\Handler.py" />
+    <Compile Remove="Lambda\**" />
+    <Content Remove="Lambda\**" />
+    <EmbeddedResource Remove="Lambda\**" />
+    <None Remove="Lambda\**" />
   </ItemGroup>
 
   <ItemGroup>
