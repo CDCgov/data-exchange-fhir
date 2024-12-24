@@ -33,7 +33,6 @@ def set_global_vars():
         global_vars["tag_name"] = "cloudwatch_logs_exporter"
         global_vars["retention_days"] = 5
         global_vars["cw_logs_to_export"] = ["/aws/bundle-logs"]
-        global_vars["log_dest_bkt"] = "/aws/bundle-logs"
         global_vars["time_out"] = 300
         global_vars["tsk_back_off"] = 2
         global_vars["status"] = True
@@ -54,7 +53,7 @@ def gen_ymd_from_epoch(t):
    #Generates a string of the format "YYYY-MM-DD" from the given epoch time
 
     t = t / 1000
-    ymd = datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%d")
+    ymd = datetime.utcnow(t).strftime("%Y-%m-%d")
     return ymd
 
 def gen_ymd(t, d) -> str:
@@ -68,14 +67,15 @@ def does_bucket_exists(bucket_name ):
     #Check if a given S3 Bucket exists and return a boolean value. The S3 'HEAD' operations are cost effective
 
     bucket_exists_status = { 'status':False, 'error_message':'' }
-    try:
-        s3 = boto3.resource('s3')
-        #s3.meta.client.head_bucket( Bucket = bucket_name )
-
+    s3 = boto3.resource('s3')
+    #s3.meta.client.head_bucket( Bucket = bucket_name )
+    #response = s3.list_buckets()
+    bucket_exists = any(bucket.name == bucket_name for bucket in s3.buckets.all())
+    if(bucket_exists):
         bucket_exists_status['status'] = True
-    except ClientError as e:
+    else:
         bucket_exists_status['status'] = False
-        bucket_exists_status['error_message'] = str(e)
+        bucket_exists_status['error_message'] = str(f"Bucket '{bucket_name}' does not exist.")
     return bucket_exists_status
 
 def get_cloudwatch_log_groups(global_vars):
@@ -106,7 +106,7 @@ def filter_logs_to_export(global_vars, lgs):
     resp_data = { 'status': False, 'log_groups':[], 'error_message': ''}
     # Lets filter for the logs of interest
     for lg in lgs.get('log_groups'):
-        if lg.get('logGroupName') in global_vars.get('log_dest_bkt'):
+        if lg.get('logGroupName') in global_vars.get('log_group_name'):
             resp_data['log_groups'].append(lg)
             resp_data['status'] = True
 
