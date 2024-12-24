@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Lambda\Handler.py" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Lambda\Handler.py" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.CloudWatch" Version="3.7.402.16" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.408.1" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.405.3" />
     <PackageReference Include="Hl7.Fhir.R4" Version="5.10.3" />
