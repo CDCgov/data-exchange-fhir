@@ -10,6 +10,15 @@ The pilot consists of three .NET Function Applications, Processs Message, Data E
 
 The ProcessMessage application is an Azure Function that processes FHIR (Fast Healthcare Interoperability Resources) FHIR messages. It includes the main Run method that handles HTTP requests to process FHIR bundles, validating them against a FHIR server, and creating FHIR resources on the FHIR Server for further downstream processing. 
 
+$process-message https://www.hl7.org/fhir/messageheader-operation-process-message.html is FHIR standard operation that support the ability to expose message paradigm posts operations
+
+This operation accepts a message, processes it according to the definition of the event in the message header, and returns one or more response messages.
+
+In addition to processing the message event, a **server may choose to retain all or some the resources** and make them available on a RESTful interface, but is **not required to do so**.
+
+Within this pilot, we retain the resources for a configurable period of time  but we do not make them available via a RESTful interface.
+
+
 This function is designed for handling FHIR resource bundles in healthcare systems, ensuring validation and secure forwarding to a FHIR-compliant server. It provides robust error handling and detailed logging for debugging and monitoring. 
 
 The ProcessMessage function ensures the Authorization header exists, checks that the request body is not empty and attempts to deserialize the body into JSON. 
