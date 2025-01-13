@@ -3,6 +3,8 @@ name: fhir-facade docker image workflow for CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'spikes/fhir-facade/**'
   pull_request:
     branches: [ "main" ]
     paths:
