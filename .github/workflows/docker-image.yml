@@ -38,8 +38,8 @@ jobs:
       working-directory: spikes/fhir-facade
 
     - name: Push Docker image
+      # docker tag my-docker-image:latest
       run: |
-        # docker tag my-docker-image:latest
         docker push my-docker-image:latest
 
       
