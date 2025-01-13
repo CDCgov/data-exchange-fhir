@@ -1,5 +1,4 @@
 using Amazon;
-using Amazon.Runtime;
 using Amazon.S3;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
@@ -51,7 +50,7 @@ namespace OneCDPFHIRFacade
                 };
 
                 // Initialize the client with credentials and config
-                AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
+                AwsConfig.S3Client = new AmazonS3Client(s3Config);
             }// .if
 
             var app = builder.Build();
