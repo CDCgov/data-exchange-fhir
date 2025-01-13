@@ -39,7 +39,7 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag my-docker-image:latest
+        # docker tag my-docker-image:latest
         docker push my-docker-image:latest
 
       
