@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: fhir-facade docker image workflow for CI
 
 on:
   push:
