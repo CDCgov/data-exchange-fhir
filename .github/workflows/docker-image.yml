@@ -13,6 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Set DNS to Google
+      run: | 
+       echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+
+    - name: Check DNS resolution
+      run: cat /etc/resolv.conf
+
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
