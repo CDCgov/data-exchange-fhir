@@ -59,8 +59,7 @@ namespace OneCDPFHIRFacade.Controllers
                 });
             }
 
-            // Log details to console
-            //Console.WriteLine($"Received FHIR Bundle: Id={bundle.Id}");
+            // Log details 
             await logEntry.LogData($"Received FHIR Bundle: Id={bundle.Id}", requestId);
 
             // Generate a new UUID for the file name

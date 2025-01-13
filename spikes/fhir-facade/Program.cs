@@ -2,12 +2,16 @@ using Amazon;
 using Amazon.S3;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace OneCDPFHIRFacade
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
 
             //Instrument logging to add context and set format+
@@ -16,6 +20,7 @@ namespace OneCDPFHIRFacade
             // Log an informational message with additional context
             //logging.info("Application started", "app_version: 1.2.3, env: production");
             var builder = WebApplication.CreateBuilder(args);
+            var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
 
             // Add services to the container.
             builder.Services.AddEndpointsApiExplorer();
@@ -40,6 +45,8 @@ namespace OneCDPFHIRFacade
             AwsConfig.Initialize(builder.Configuration);
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
+            //Initailize loggerService
+            LoggerService loggerService = new LoggerService();
 
             if (runEnvironment == "AWS")
             {
@@ -52,6 +59,42 @@ namespace OneCDPFHIRFacade
                 // Initialize the client with credentials and config
                 AwsConfig.S3Client = new AmazonS3Client(s3Config);
             }// .if
+
+            if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
+            {
+                await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
+                builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
+               {
+                   tracerProviderBuilder
+                       .SetResourceBuilder(resourceBuilder)
+                       .AddAspNetCoreInstrumentation() // Instruments ASP.NET Core (HTTP request handling)
+                       .AddHttpClientInstrumentation() // Instruments outgoing HTTP client requests
+                       .AddAWSInstrumentation()
+                       .AddConsoleExporter()
+                       .AddOtlpExporter(options =>
+                       {
+                           options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                           options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                       });
+               });
+
+
+                builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
+                {
+                    metricsProviderBuilder
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
+                        .AddHttpClientInstrumentation() // Collect HTTP client metrics
+                        .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                        }).AddConsoleExporter();  // Custom metrics              
+                });
+            }
+            else
+            {
+                await loggerService.LogData("No OLTP", " ProgramOLTP ");
+            }
 
             var app = builder.Build();
 
@@ -68,7 +111,7 @@ namespace OneCDPFHIRFacade
             // #####################################################
             // Start the App
             // #####################################################
-            app.Run();
+            await app.RunAsync();
 
         }
     }
