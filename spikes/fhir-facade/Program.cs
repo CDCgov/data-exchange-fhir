@@ -13,12 +13,6 @@ namespace OneCDPFHIRFacade
     {
         public static async Task Main(string[] args)
         {
-
-            //Instrument logging to add context and set format+
-            //LoggingInstrumentor().instrument(set_logging_format = True);
-
-            // Log an informational message with additional context
-            //logging.info("Application started", "app_version: 1.2.3, env: production");
             var builder = WebApplication.CreateBuilder(args);
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
 
