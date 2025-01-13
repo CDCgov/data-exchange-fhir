@@ -1,10 +1,12 @@
-﻿# DEX FHIR Pilot
+﻿# Data Exchange (DEX) FHIR 
 
-Data Exchange FHIR pilot implements the MedMorph Reference Architecture and authentication on a CDC FHIR server for clinical data.​
+DEX FHIR solution as part of the DEX platform/ingest solution.
+
+This was build in the Azure cloud infrastructute and it has been decomissioned.
 ​
-The first use case is NCHS Health Care Surveys
+DEX FHIR first use case was NCHS Health Care Surveys which uses $process-message ingest as detailed by respective FHIR Implementation Guide (IG).
 
-The pilot consists of three .NET Function Applications, Processs Message, Data Export and Data Purge
+DEX FHIR, Azure build, consists of three .NET Function Applications: Processs Message, Data Export, and Data Purge and other used Azure resources: Azure Health Data Services (FHIR Service), Azure Message Bus, and Microsoft open sourced .NET function [Azure ONC (g)(10) SMART on FHIR Sample](https://github.com/Azure-Samples/azure-health-data-and-ai-samples/tree/9e8204dd58a6d4415f93dca1f3ab53d18dfd954e/samples/Patient%20and%20Population%20Services%20G10).
 
 ## ProcessMessage
 
@@ -16,7 +18,7 @@ This operation accepts a message, processes it according to the definition of th
 
 In addition to processing the message event, a **server may choose to retain all or some the resources** and make them available on a RESTful interface, but is **not required to do so**.
 
-Within this pilot, we retain the resources for a configurable period of time  but we do not make them available via a RESTful interface.
+The resources is retained for a configurable period of time but it is not available via a RESTful interface.
 
 
 This function is designed for handling FHIR resource bundles in healthcare systems, ensuring validation and secure forwarding to a FHIR-compliant server. It provides robust error handling and detailed logging for debugging and monitoring. 
