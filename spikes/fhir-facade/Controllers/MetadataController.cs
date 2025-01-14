@@ -24,6 +24,7 @@ namespace OneCDPFHIRFacade.Controllers
                 Date = DateTime.Now.ToString(),
                 Publisher = "CDC 1CDP FHIR Facade",
                 Kind = CapabilityStatementKind.Instance,
+                Format = ["json+fhir", "json"],
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
