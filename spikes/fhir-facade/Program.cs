@@ -31,9 +31,6 @@ namespace OneCDPFHIRFacade
             // Register serivces, Create instances of LocalFileService and S3FileService
             builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
             builder.Services.AddSingleton<IS3FileService, S3FileService>();
-            // TODO
-            // builder.Services.AddSingleton(useLocalDevFolder);
-            // builder.Services.AddSingleton(new AwsConfig());
 
             // Initialize AWS configuration
             AwsConfig.Initialize(builder.Configuration);
