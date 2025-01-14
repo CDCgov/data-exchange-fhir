@@ -29,13 +29,14 @@ namespace OneCDPFHIRFacade.Controllers
             Bundle bundle;
 
             // Generate a new UUID for the file name
-            var fileName = $"{Guid.NewGuid()}.json";
+            var randomID = $"{Guid.NewGuid()}";
+            string fileName = $"{randomID}.json";
+            string logFileName = $"{randomID}+{requestId}.json";
 
             //Log starts
             await logEntry.LogData("Bundle request has started.", requestId);
             List<string> logString = new List<string>();
-            logString.Add("Bundle request has started.");
-            string date = DateTime.Now.ToString("yyyyMMdd");
+            logToS3FileService.JsonResult("Bundle request has started.", requestId);
 
             try
             {
@@ -47,8 +48,8 @@ namespace OneCDPFHIRFacade.Controllers
             catch (FormatException ex)
             {
                 await logEntry.LogData($"Failed to parse FHIR Resource: {ex.Message}", requestId);
-                logString.Add($"Failed to parse FHIR Resource: {ex.Message}");
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, date, fileName, logString, requestId);
+                logToS3FileService.JsonResult($"Failed to parse FHIR Resource: {ex.Message}", requestId);
+                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
 
                 // Return 400 Bad Request if JSON is invalid
                 return Results.BadRequest(new
@@ -62,8 +63,8 @@ namespace OneCDPFHIRFacade.Controllers
             if (string.IsNullOrWhiteSpace(bundle.Id))
             {
                 await logEntry.LogData($"Error: Invalid Payload. Message: Resource ID is required.", requestId);
-                logString.Add("Error: Invalid Payload. Message: Resource ID is required.");
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, date, fileName, logString, requestId);
+                logToS3FileService.JsonResult("Error: Invalid Payload. Message: Resource ID is required.", requestId);
+                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
@@ -73,7 +74,7 @@ namespace OneCDPFHIRFacade.Controllers
 
             // Log details 
             await logEntry.LogData($"Received FHIR Bundle: Id={bundle.Id}", requestId);
-            logString.Add($"Received FHIR Bundle: Id={bundle.Id}");
+            logToS3FileService.JsonResult($"Received FHIR Bundle: Id={bundle.Id}", requestId);
 
             if (LocalFileStorageConfig.UseLocalDevFolder)
             {
@@ -91,13 +92,16 @@ namespace OneCDPFHIRFacade.Controllers
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
                     await logEntry.LogData("S3 client and bucket are not configured.", requestId);
-                    logString.Add("S3 client and bucket are not configured.");
-                    await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, date, fileName, logString, requestId);
+                    logToS3FileService.JsonResult("S3 client and bucket are not configured.", requestId);
+
+                    await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
                     return Results.Problem("S3 client and bucket are not configured.");
                 }
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, date, fileName, logString, requestId);
+
                 return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync(), logEntry, requestId);
             }// .else
+
+
 
         }
 
