@@ -25,6 +25,7 @@ namespace OneCDPFHIRFacade.Controllers
                 Publisher = "CDC 1CDP FHIR Facade",
                 Kind = CapabilityStatementKind.Instance,
                 Format = ["json+fhir", "json"],
+                PatchFormat = ["json-patch+json"],
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
