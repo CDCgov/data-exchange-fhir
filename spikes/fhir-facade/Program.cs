@@ -3,6 +3,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -70,7 +71,8 @@ namespace OneCDPFHIRFacade
                        {
                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                       });
+                       })
+                       .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter()));
                });
 
 
