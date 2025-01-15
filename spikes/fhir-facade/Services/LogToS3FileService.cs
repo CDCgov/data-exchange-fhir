@@ -11,15 +11,15 @@ namespace OneCDPFHIRFacade.Services
     }
     public class LogToS3FileService : ILogToS3FileService
     {
-        List<string> resultList = new List<string>();
-        public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string s3BucketName, string fileName, string requestId)
+        readonly List<string> resultList = new List<string>();
+        public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId)
         {
             string result = String.Join(",", resultList);
 
             // Define the S3 put request
             var putRequest = new PutObjectRequest
             {
-                BucketName = s3BucketName,
+                BucketName = bucketName,
                 Key = $"Logs/{fileName}",
                 ContentBody = result
             };
@@ -27,8 +27,8 @@ namespace OneCDPFHIRFacade.Services
             // Attempt to save the resource to S3
             try
             {
-                Console.WriteLine($"Writing logs to S3: fileName=Logs/{fileName}, bucket={s3BucketName}");
-                var response = await s3Client.PutObjectAsync(putRequest);
+                Console.WriteLine($"Writing logs to S3: fileName=Logs/{fileName}, bucket={bucketName}");
+                await s3Client.PutObjectAsync(putRequest);
                 return Results.Ok($"Logs saved successfully to S3 at Logs/{fileName}");
             }
             catch (Exception ex)

@@ -35,7 +35,6 @@ namespace OneCDPFHIRFacade.Controllers
 
             //Log starts
             await logEntry.LogData("Bundle request has started.", requestId);
-            List<string> logString = new List<string>();
             logToS3FileService.JsonResult("Bundle request has started.", requestId);
 
             try
