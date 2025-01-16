@@ -21,9 +21,7 @@ namespace OneCDPFHIRFacade
             {
                 await CloudWatchLogs(message, requestId);
             }
-
         }
-
         public void ConsoleLogs(string message, string requestId)
         {
             //Log message as json
@@ -41,7 +39,7 @@ namespace OneCDPFHIRFacade
 
         public async Task CloudWatchLogs(string message, string requestId)
         {
-            //AWS CloudWatch logs instance
+            //AWS CloudWatch logs inst
             BasicAWSCredentials credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
 
             AmazonCloudWatchLogsConfig config = new AmazonCloudWatchLogsConfig
