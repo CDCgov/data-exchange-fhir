@@ -53,7 +53,13 @@ namespace OneCDPFHIRFacade
                 };
 
                 // Initialize the client with credentials and config
-                AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
+                if (string.IsNullOrEmpty(AwsConfig.AccessKey))
+                {
+                    AwsConfig.S3Client = new AmazonS3Client(s3Config);                   
+                } else
+                {
+                    AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
+                }
             }// .if
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
