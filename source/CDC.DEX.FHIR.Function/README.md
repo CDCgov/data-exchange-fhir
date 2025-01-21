@@ -69,8 +69,3 @@ Process Message logic is contained in the respective C Sharp components
 Process message listens in on rest services and can validate FHIR bundle if so configured then push the Bundle to the AZURE FHIR services
 
 StartupConfiguration is the logic to read configurations from various azure components
-
-## CDC.DEX.FHIR.Function.SharedCode
-
-Contains some general shared utilities including FhirServiceUtils which is used to capture token for processing
-
