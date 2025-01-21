@@ -6,19 +6,9 @@ Code Repository for the CDC Data Exchange FHIR solution
 
 ## Content
 
-`/source` - source code for DEX FHIR solution on Microsoft Azure
-- Functions
-  - Process Message Function (validate and process FHIR message bundles)
-  - Data Export Function (export FHIR message bundles to EDAV data lake)
-  - Shared Code
-- Utilities
-  - IG Loader (load HL7 IG validation profiles into FHIR server instance)
+`/source` - source code for - FHIR Facade implementation for AWS
 
 `/spikes`
-- FHIR solution Logic App (archived)
-- Connectathon 33 artifacts
-- FHIR Facade ADR research
-- FHIR Facade implementation for AWS
 - OpenTelemetry research
   
 ## Public Domain Standard Notice
