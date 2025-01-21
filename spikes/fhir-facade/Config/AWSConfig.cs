@@ -7,6 +7,8 @@ namespace OneCDPFHIRFacade.Config
         public const string KeyName = "AWS";
         public static string? Region { get; private set; }
         public static string? ServiceURL { get; private set; }
+        public static string? AccessKey { get; private set; }
+        public static string? SecretKey { get; set; }
         public static string? BucketName { get; set; }
         public static string? LogGroupName { get; set; }
         public static string? OltpEndpoint { get; set; }
@@ -18,6 +20,8 @@ namespace OneCDPFHIRFacade.Config
             var section = configuration.GetSection(KeyName);
             Region = section.GetValue<string>("Region");
             ServiceURL = section.GetValue<string>("ServiceURL");
+            AccessKey = section.GetValue<string>("AccessKey");
+            SecretKey = section.GetValue<string>("SecretKey");
             BucketName = section.GetValue<string>("BucketName");
             OltpEndpoint = section.GetValue<string>("OltpEndpoint");
             LogGroupName = section.GetValue<string>("LogGroupName");

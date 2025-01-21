@@ -1,5 +1,6 @@
 ﻿using Amazon.CloudWatchLogs;
 using Amazon.CloudWatchLogs.Model;
+using Amazon.Runtime;
 using OneCDPFHIRFacade.Config;
 using Serilog;
 using System.Text.Json;
@@ -38,13 +39,15 @@ namespace OneCDPFHIRFacade
 
         public async Task CloudWatchLogs(string message, string requestId)
         {
+            //AWS CloudWatch logs inst
+            BasicAWSCredentials credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
 
             AmazonCloudWatchLogsConfig config = new AmazonCloudWatchLogsConfig
             {
                 RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
             };
 
-            AmazonCloudWatchLogsClient logClient = new AmazonCloudWatchLogsClient(config);
+            AmazonCloudWatchLogsClient logClient = new AmazonCloudWatchLogsClient(credentials, config);
 
             try
             {

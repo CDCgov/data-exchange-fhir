@@ -5,6 +5,7 @@
 
 using Amazon.S3;
 using Amazon.S3.Model;
+using OneCDPFHIRFacade.Config;
 
 namespace OneCDPFHIRFacade.Services
 {
@@ -25,20 +26,26 @@ namespace OneCDPFHIRFacade.Services
                 Key = $"{keyPrefix}/{fileName}",
                 ContentBody = resourceJson
             };
+            LogToS3FileService logToS3FileService = new LogToS3FileService();
 
             // Attempt to save the resource to S3
             try
             {
                 await logEntry.CloudWatchLogs($"Start write to S3: fileName={fileName}, " +
                     $"bucket={s3BucketName}, keyPrefix={keyPrefix}", requestId);
+                logToS3FileService.JsonResult($"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}", requestId);
+
                 Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
 
                 var response = await s3Client.PutObjectAsync(putRequest);
 
                 await logEntry.CloudWatchLogs($"End write to S3: fileName={fileName}, " +
                     $"response={response.HttpStatusCode}", requestId);
+                logToS3FileService.JsonResult($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}", requestId);
+
                 Console.WriteLine($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}");
 
+                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, fileName, requestId);
                 return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
             }
             catch (Exception ex)

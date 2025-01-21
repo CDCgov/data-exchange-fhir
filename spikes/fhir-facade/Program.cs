@@ -1,7 +1,9 @@
 using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -48,7 +50,14 @@ namespace OneCDPFHIRFacade
                 };
 
                 // Initialize the client with credentials and config
-                AwsConfig.S3Client = new AmazonS3Client(s3Config);
+                if (string.IsNullOrEmpty(AwsConfig.AccessKey))
+                {
+                    AwsConfig.S3Client = new AmazonS3Client(s3Config);
+                }
+                else
+                {
+                    AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
+                }
             }// .if
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
@@ -66,7 +75,8 @@ namespace OneCDPFHIRFacade
                        {
                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                       });
+                       })
+                       .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter()));
                });
 
 
