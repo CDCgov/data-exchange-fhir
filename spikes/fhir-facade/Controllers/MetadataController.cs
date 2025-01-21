@@ -24,6 +24,8 @@ namespace OneCDPFHIRFacade.Controllers
                 Date = DateTime.Now.ToString(),
                 Publisher = "CDC 1CDP FHIR Facade",
                 Kind = CapabilityStatementKind.Instance,
+                Format = ["json+fhir", "json"],
+                PatchFormat = ["json-patch+json"],
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
@@ -78,7 +80,20 @@ namespace OneCDPFHIRFacade.Controllers
                                         Code = TypeRestfulInteraction.Create
                                     },
                                 },
+                                Versioning = ResourceVersionPolicy.VersionedUpdate,
+                                ConditionalRead = ConditionalReadStatus.FullSupport,
+                                ConditionalDelete = ConditionalDeleteStatus.Multiple,
+                                ReferencePolicy = [],
+                                SearchParam = new List<SearchParamComponent>()
+                                {
+                                    new SearchParamComponent
+                                    {
+                                        Type = SearchParamType.String
+                                    }
+                                }
                             },
+
+
                         },
                         Interaction = new List<SystemInteractionComponent>
                         {
@@ -105,6 +120,34 @@ namespace OneCDPFHIRFacade.Controllers
                         }
                     },
                 },
+                Messaging = new List<MessagingComponent>
+                {
+                    new MessagingComponent
+                    {
+                        SupportedMessage = new List<SupportedMessageComponent>
+                        {
+                            new SupportedMessageComponent
+                            {
+                                Mode = EventCapabilityMode.Receiver
+                            },
+                            new SupportedMessageComponent
+                            {
+                                Mode = EventCapabilityMode.Sender
+                            }
+                        }
+                    }
+                },
+                Document = new List<DocumentComponent>
+                {
+                    new DocumentComponent
+                    {
+                        Mode = DocumentMode.Consumer
+                    },
+                    new DocumentComponent
+                    {
+                        Mode = DocumentMode.Producer
+                    }
+                }
             };
 
             return Results.Json(capabilityStatement, contentType: "application/fhir+json");
