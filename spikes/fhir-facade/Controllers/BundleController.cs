@@ -19,8 +19,8 @@ namespace OneCDPFHIRFacade.Controllers
         public async Task<IResult> Post()
         {
             LocalFileService localFileService = new LocalFileService();
-            S3FileService s3FileService = new S3FileService();
             LogToS3FileService logToS3FileService = new LogToS3FileService();
+            S3FileService s3FileService = new S3FileService(logToS3FileService);
 
             var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "", RegexOptions.NonBacktracking);
 

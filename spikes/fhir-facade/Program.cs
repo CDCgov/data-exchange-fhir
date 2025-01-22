@@ -30,10 +30,6 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Register serivces, Create instances of LocalFileService and S3FileService
-            builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
-            builder.Services.AddSingleton<IS3FileService, S3FileService>();
-
             // Initialize AWS configuration
             AwsConfig.Initialize(builder.Configuration);
             // Initialize Local file storage configuration

@@ -14,7 +14,8 @@ namespace OneCDPFHIRFacade.Services
             using var scope = SuppressInstrumentationScope.Begin();
 
             LoggerService logEntry = new LoggerService();
-            S3FileService s3FileService = new S3FileService();
+            LogToS3FileService logToS3FileService = new LogToS3FileService();
+            S3FileService s3FileService = new S3FileService(logToS3FileService);
 
             // Iterate through each activity in the batch and upload to S3
             foreach (var activity in batch)

@@ -12,10 +12,15 @@ namespace OneCDPFHIRFacade.Services
     public interface IS3FileService
     {
         Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string folderName, string fileName, string content, LoggerService logEntry, string requestId);
-        // TODO: should this be IActionResult? vs. IResult 
     }
     public class S3FileService : IS3FileService
     {
+        LogToS3FileService logToS3FileService;
+
+        public S3FileService(LogToS3FileService logToS3FileService)
+        {
+            this.logToS3FileService = logToS3FileService;
+        }
         public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string s3BucketName, string keyPrefix, string fileName, string resourceJson, LoggerService logEntry, string requestId)
         {
 
@@ -26,14 +31,14 @@ namespace OneCDPFHIRFacade.Services
                 Key = $"{keyPrefix}/{fileName}",
                 ContentBody = resourceJson
             };
-            LogToS3FileService logToS3FileService = new LogToS3FileService();
 
             // Attempt to save the resource to S3
+
             try
             {
-                await logEntry.CloudWatchLogs($"Start write to S3: fileName={fileName}, " +
+                await logEntry.CloudWatchLogs($"Start writing to S3: fileName={fileName}, " +
                     $"bucket={s3BucketName}, keyPrefix={keyPrefix}", requestId);
-                logToS3FileService.JsonResult($"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}", requestId);
+                logToS3FileService.JsonResult($"Start writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}", requestId);
 
                 Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
 

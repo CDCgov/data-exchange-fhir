@@ -4,14 +4,10 @@ using System.Text.Json;
 
 namespace OneCDPFHIRFacade.Services
 {
+    public class LogToS3FileService
+    {
+        public List<string> resultList = new List<string>();
 
-    public interface ILogToS3FileService
-    {
-        Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId);
-    }
-    public class LogToS3FileService : ILogToS3FileService
-    {
-        readonly List<string> resultList = new List<string>();
         public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId)
         {
             string result = String.Join(",", resultList);
@@ -36,6 +32,7 @@ namespace OneCDPFHIRFacade.Services
                 return Results.Problem($"Error saving logs to S3: {ex.Message}");
             }
         }// .SaveResourceToS3
+
         public void JsonResult(string logs, string requestId)
         {
             //Log message as json
