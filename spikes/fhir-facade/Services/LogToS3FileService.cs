@@ -6,11 +6,11 @@ namespace OneCDPFHIRFacade.Services
 {
     public class LogToS3FileService
     {
-        public List<string> resultList = new List<string>();
+        public List<Object> resultList = new List<Object>();
 
         public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId)
         {
-            string result = String.Join(",", resultList);
+            var result = JsonSerializer.Serialize(resultList, new JsonSerializerOptions { WriteIndented = true });
 
             // Define the S3 put request
             var putRequest = new PutObjectRequest
@@ -40,11 +40,10 @@ namespace OneCDPFHIRFacade.Services
             {
                 RequestID = requestId,
                 Message = logs,
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             };
-            var jsonLogMessage = JsonSerializer.Serialize(logMessage);
 
-            resultList.Add(jsonLogMessage);
+            resultList.Add(logMessage);
         }
     }
 }
