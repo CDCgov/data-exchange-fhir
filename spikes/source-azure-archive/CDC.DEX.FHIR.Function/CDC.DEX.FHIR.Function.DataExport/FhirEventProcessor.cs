@@ -53,7 +53,7 @@ namespace CDC.DEX.FHIR.Function.DataExport
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                     string requestUri = request.RequestUri.ToString();
-                    log.LogInformation("{logPrefix}. SendAsync Start {request.RequestUri}", logPrefix, requestUri);
+                    log.LogInformation("{logPrefix}. SendAsync Start {requestUri}", logPrefix, requestUri);
                     var response = await client.SendAsync(request);
                     log.LogInformation("{logPrefix}. SendAsync End", logPrefix);
 
