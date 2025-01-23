@@ -196,7 +196,7 @@ namespace CDC.DEX.FHIR.Function.ProcessMessage
 
         private static string CleanBearerToken(string bearerToken)
         {
-            Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]");
+            Regex regexString = new Regex("[^a-zA-Z0-9\\.\\-_ ]",RegexOptions.None, TimeSpan.FromMilliseconds(100));
             string cleanedBearerToken = regexString.Replace(bearerToken, "");
             cleanedBearerToken = cleanedBearerToken.Replace("Bearer ", "");
 
