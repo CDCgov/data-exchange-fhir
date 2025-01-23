@@ -3,6 +3,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OneCDPFHIRFacade.Utilities;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -30,16 +31,14 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Register serivces, Create instances of LocalFileService and S3FileService
-            builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
-            builder.Services.AddSingleton<IS3FileService, S3FileService>();
-
             // Initialize AWS configuration
             AwsConfig.Initialize(builder.Configuration);
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
             //Initailize loggerService
             LoggerService loggerService = new LoggerService();
+            LoggingUtility loggingUtility = new LoggingUtility();
+
 
             if (runEnvironment == "AWS")
             {
@@ -62,7 +61,7 @@ namespace OneCDPFHIRFacade
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
-                await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
+                await loggerService.LogData("ProgramOLTP");
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
                {
                    tracerProviderBuilder
@@ -76,7 +75,7 @@ namespace OneCDPFHIRFacade
                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
                        })
-                       .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter()));
+                       .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility)));
                });
 
 
@@ -94,7 +93,7 @@ namespace OneCDPFHIRFacade
             }
             else
             {
-                await loggerService.LogData("No OLTP", " ProgramOLTP ");
+                await loggerService.LogData("No OLTP, ProgramOLTP ");
             }
 
             var app = builder.Build();

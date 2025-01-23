@@ -3,54 +3,58 @@
 // SaveResourceToS3
 // #####################################################
 
-using Amazon.S3;
 using Amazon.S3.Model;
 using OneCDPFHIRFacade.Config;
+using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Services
 {
     public interface IS3FileService
     {
-        Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string folderName, string fileName, string content, LoggerService logEntry, string requestId);
+        Task<IResult> SaveResourceToS3(string folderName, string fileName, string content, LoggerService logEntry, string requestId);
         // TODO: should this be IActionResult? vs. IResult 
     }
     public class S3FileService : IS3FileService
     {
-        public async Task<IResult> SaveResourceToS3(IAmazonS3 s3Client, string s3BucketName, string keyPrefix, string fileName, string resourceJson, LoggerService logEntry, string requestId)
-        {
+        public LoggingUtility LoggingUtility;
 
+        public S3FileService(LoggingUtility loggingUtility)
+        {
+            this.LoggingUtility = loggingUtility;
+        }
+        public async Task<IResult> SaveResourceToS3(string keyPrefix, string fileName, string resourceJson, LoggerService logEntry, string requestId)
+        {
             // Define the S3 put request
             var putRequest = new PutObjectRequest
             {
-                BucketName = s3BucketName,
+                BucketName = AwsConfig.BucketName,
                 Key = $"{keyPrefix}/{fileName}",
                 ContentBody = resourceJson
             };
-            LogToS3FileService logToS3FileService = new LogToS3FileService();
 
             // Attempt to save the resource to S3
             try
             {
-                await logEntry.CloudWatchLogs($"Start write to S3: fileName={fileName}, " +
-                    $"bucket={s3BucketName}, keyPrefix={keyPrefix}", requestId);
-                logToS3FileService.JsonResult($"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}", requestId);
+                string logMessage = $"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}, requestId={requestId}";
 
-                Console.WriteLine($"Start write to S3: fileName={fileName}, bucket={s3BucketName}, keyPrefix={keyPrefix}");
+                LoggingUtility.Logging(logMessage, requestId);
+                Console.WriteLine(logMessage);
 
-                var response = await s3Client.PutObjectAsync(putRequest);
+                var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
 
-                await logEntry.CloudWatchLogs($"End write to S3: fileName={fileName}, " +
-                    $"response={response.HttpStatusCode}", requestId);
-                logToS3FileService.JsonResult($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}", requestId);
+                string logString = $"End write to S3: fileName={fileName}, response={response.HttpStatusCode}, requestId: {requestId}";
+                LoggingUtility.Logging(logString, requestId);
 
-                Console.WriteLine($"End write to S3: fileName={fileName}, response={response.HttpStatusCode}");
+                Console.WriteLine(logString);
 
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, fileName, requestId);
+                LoggingUtility.SaveLogS3(requestId);
                 return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
             }
             catch (Exception ex)
             {
-                await logEntry.CloudWatchLogs($"Error saving resource to S3: {ex.Message}", requestId);
+                string logMessage = $"Error saving resource to S3: {ex.Message}";
+                LoggingUtility.Logging(logMessage, requestId);
+                LoggingUtility.SaveLogS3(requestId);
                 return Results.Problem($"Error saving resource to S3: {ex.Message}");
             }
         }// .SaveResourceToS3

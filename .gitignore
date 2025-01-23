@@ -2,3 +2,4 @@
 /spikes/fhir-facade/appsettings.json
 /.vs/data-exchange-fhir/v17
 /.vs
+/source/fhir-facade/appsettings.json

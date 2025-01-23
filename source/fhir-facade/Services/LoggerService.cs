@@ -11,33 +11,26 @@ namespace OneCDPFHIRFacade
 {
     public class LoggerService
     {
-        public async Task LogData(string message, string requestId)
+        public async Task LogData(string logMessage)
         {
             if (LocalFileStorageConfig.UseLocalDevFolder)
             {
-                ConsoleLogs(message, requestId);
+                ConsoleLogs(logMessage);
             }
             else
             {
-                await CloudWatchLogs(message, requestId);
+                await CloudWatchLogs(logMessage);
             }
         }
-        public void ConsoleLogs(string message, string requestId)
+        public void ConsoleLogs(string logMessage)
         {
-            //Log message as json
-            var logMessage = new
-            {
-                RequestID = requestId,
-                Message = message,
-                Timestamp = DateTime.UtcNow,
-            };
             var jsonLogMessage = JsonSerializer.Serialize(logMessage);
 
             Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
             Log.Information(jsonLogMessage);
         }
 
-        public async Task CloudWatchLogs(string message, string requestId)
+        public async Task CloudWatchLogs(string logMessage)
         {
             //AWS CloudWatch logs inst
             BasicAWSCredentials credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
@@ -72,19 +65,10 @@ namespace OneCDPFHIRFacade
 
                 var sequenceToken = logStream.UploadSequenceToken;
 
-                //Log message as json
-                var logMessage = new
-                {
-                    RequestID = requestId,
-                    Message = message,
-                    Timestamp = DateTime.UtcNow,
-                };
-                var jsonLogMessage = JsonSerializer.Serialize(logMessage);
-
                 // Prepare log event
                 var logEvent = new InputLogEvent
                 {
-                    Message = jsonLogMessage,
+                    Message = logMessage,
                     Timestamp = DateTime.UtcNow
                 };
 

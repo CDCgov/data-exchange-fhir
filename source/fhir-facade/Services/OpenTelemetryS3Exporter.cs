@@ -1,4 +1,5 @@
 ﻿using OneCDPFHIRFacade.Config;
+using OneCDPFHIRFacade.Utilities;
 using OpenTelemetry;
 using System.Diagnostics;
 using System.Text.Json;
@@ -8,13 +9,18 @@ namespace OneCDPFHIRFacade.Services
     public class OpenTelemetryS3Exporter : BaseExporter<Activity>
     {
         private readonly string name = "OpenTelemetryS3Exporter";
+        public LoggingUtility loggingUtility;
 
+        public OpenTelemetryS3Exporter(LoggingUtility loggingUtility)
+        {
+            this.loggingUtility = loggingUtility;
+        }
         public override ExportResult Export(in Batch<Activity> batch)
         {
             using var scope = SuppressInstrumentationScope.Begin();
 
             LoggerService logEntry = new LoggerService();
-            S3FileService s3FileService = new S3FileService();
+            S3FileService s3FileService = new S3FileService(loggingUtility);
 
             // Iterate through each activity in the batch and upload to S3
             foreach (var activity in batch)
@@ -26,7 +32,7 @@ namespace OneCDPFHIRFacade.Services
 
                     // Save the serialized JSON string to S3
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName!, "Activity", activity.Id + ".json", jsonString, logEntry, activity.Id);
+                    s3FileService.SaveResourceToS3("Activity", activity.Id + ".json", jsonString, logEntry, activity.Id);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }

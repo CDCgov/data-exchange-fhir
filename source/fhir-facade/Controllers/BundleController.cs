@@ -3,6 +3,7 @@ using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OneCDPFHIRFacade.Utilities;
 using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade.Controllers
@@ -19,7 +20,8 @@ namespace OneCDPFHIRFacade.Controllers
         public async Task<IResult> Post()
         {
             LocalFileService localFileService = new LocalFileService();
-            S3FileService s3FileService = new S3FileService();
+            LoggingUtility loggingUtility = new LoggingUtility();
+            S3FileService s3FileService = new S3FileService(loggingUtility);
             LogToS3FileService logToS3FileService = new LogToS3FileService();
 
             var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "", RegexOptions.NonBacktracking);
@@ -31,11 +33,10 @@ namespace OneCDPFHIRFacade.Controllers
             // Generate a new UUID for the file name
             var randomID = $"{Guid.NewGuid()}";
             string fileName = $"{randomID}.json";
-            string logFileName = $"{randomID}+{requestId}.json";
 
             //Log starts
-            await logEntry.LogData("Bundle request has started.", requestId);
-            logToS3FileService.JsonResult("Bundle request has started.", requestId);
+            string logMessage = "Bundle request has started.";
+            loggingUtility.Logging(logMessage, requestId);
 
             try
             {
@@ -46,9 +47,9 @@ namespace OneCDPFHIRFacade.Controllers
             }
             catch (FormatException ex)
             {
-                await logEntry.LogData($"Failed to parse FHIR Resource: {ex.Message}", requestId);
-                logToS3FileService.JsonResult($"Failed to parse FHIR Resource: {ex.Message}", requestId);
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
+                logMessage = $"Failed to parse FHIR Resource: {ex.Message}";
+                loggingUtility.Logging(logMessage, requestId);
+                loggingUtility.SaveLogS3(fileName);
 
                 // Return 400 Bad Request if JSON is invalid
                 return Results.BadRequest(new
@@ -61,9 +62,9 @@ namespace OneCDPFHIRFacade.Controllers
             // Check if bundle ID is present
             if (string.IsNullOrWhiteSpace(bundle.Id))
             {
-                await logEntry.LogData($"Error: Invalid Payload. Message: Resource ID is required.", requestId);
-                logToS3FileService.JsonResult("Error: Invalid Payload. Message: Resource ID is required.", requestId);
-                await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
+                logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
+                loggingUtility.Logging(logMessage, requestId);
+                loggingUtility.SaveLogS3(requestId);
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
@@ -72,8 +73,8 @@ namespace OneCDPFHIRFacade.Controllers
             }
 
             // Log details 
-            await logEntry.LogData($"Received FHIR Bundle: Id={bundle.Id}", requestId);
-            logToS3FileService.JsonResult($"Received FHIR Bundle: Id={bundle.Id}", requestId);
+            logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
+            loggingUtility.Logging(logMessage, requestId);
 
             if (LocalFileStorageConfig.UseLocalDevFolder)
             {
@@ -90,14 +91,14 @@ namespace OneCDPFHIRFacade.Controllers
                 // #####################################################
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
-                    await logEntry.LogData("S3 client and bucket are not configured.", requestId);
-                    logToS3FileService.JsonResult("S3 client and bucket are not configured.", requestId);
+                    logMessage = "S3 client and bucket are not configured.";
+                    loggingUtility.Logging(logMessage, requestId);
+                    loggingUtility.SaveLogS3(requestId);
 
-                    await logToS3FileService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, logFileName, requestId);
-                    return Results.Problem("S3 client and bucket are not configured.");
+                    return Results.Problem(logMessage);
                 }
 
-                return await s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName, "Bundle", fileName, await bundle.ToJsonAsync(), logEntry, requestId);
+                return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync(), logEntry, requestId);
             }// .else
 
 
