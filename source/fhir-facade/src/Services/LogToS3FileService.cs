@@ -1,4 +1,4 @@
-﻿using Amazon.S3.Model;
+using Amazon.S3.Model;
 using OneCDPFHIRFacade.Config;
 
 namespace OneCDPFHIRFacade.Services

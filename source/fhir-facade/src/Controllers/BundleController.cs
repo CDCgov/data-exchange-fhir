@@ -1,4 +1,4 @@
-﻿using Hl7.Fhir.Model;
+using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
@@ -100,10 +100,6 @@ namespace OneCDPFHIRFacade.Controllers
 
                 return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync(), logEntry, requestId);
             }// .else
-
-
-
         }
-
     }
 }

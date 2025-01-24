@@ -12,7 +12,6 @@ namespace OneCDPFHIRFacade.Services
     public interface IS3FileService
     {
         Task<IResult> SaveResourceToS3(string folderName, string fileName, string content, LoggerService logEntry, string requestId);
-        // TODO: should this be IActionResult? vs. IResult 
     }
     public class S3FileService : IS3FileService
     {

@@ -29,7 +29,7 @@ namespace OneCDPFHIRFacade
             Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
             Log.Information(jsonLogMessage);
         }
-
+      
         public async Task CloudWatchLogs(string logMessage)
         {
             //AWS CloudWatch logs inst

@@ -1,4 +1,4 @@
-﻿using OneCDPFHIRFacade.Config;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 using OpenTelemetry;
 using System.Diagnostics;

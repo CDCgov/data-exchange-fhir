@@ -39,7 +39,6 @@ namespace OneCDPFHIRFacade
             LoggerService loggerService = new LoggerService();
             LoggingUtility loggingUtility = new LoggingUtility();
 
-
             if (runEnvironment == "AWS")
             {
                 var s3Config = new AmazonS3Config
