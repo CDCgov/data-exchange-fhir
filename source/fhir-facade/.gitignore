@@ -3,3 +3,16 @@
 /.vs/data-exchange-fhir/v17
 /.vs
 /source/fhir-facade/appsettings.json
+# appsettings
+appsettings.json
+
+### DotnetCore ###
+# .NET Core build folders
+bin/
+obj/
+
+# Common node modules locations
+/node_modules
+/wwwroot/node_modules
+
+.vs/
