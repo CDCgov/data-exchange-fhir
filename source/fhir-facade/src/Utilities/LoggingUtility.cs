@@ -5,9 +5,9 @@ namespace OneCDPFHIRFacade.Utilities
 {
     public class LoggingUtility
     {
-        public List<Object> resultList = new List<Object>();
+        private readonly List<Object> resultList = new List<Object>();
 
-        public void Logging(string message, string requestId)
+        public async Task Logging(string message, string requestId)
         {
             //Log message as json
             var logMessage = new
@@ -17,17 +17,17 @@ namespace OneCDPFHIRFacade.Utilities
                 Timestamp = DateTime.UtcNow,
             };
 
-            CloudWatchLogger(logMessage);
+            await CloudWatchLogger(logMessage);
             AddLogForS3(logMessage);
         }
 
-        public async void CloudWatchLogger(Object logMessage)
+        public static async Task CloudWatchLogger(Object logMessage)
         {
             string jsonString = JsonSerializer.Serialize(logMessage);
             LoggerService loggerService = new LoggerService();
             await loggerService.LogData(jsonString);
         }
-        public async void SaveLogS3(string requestId)
+        public async Task SaveLogS3(string requestId)
         {
             var jsonLogMessage = JsonSerializer.Serialize(resultList);
             LogToS3FileService logToS3FileService = new LogToS3FileService();

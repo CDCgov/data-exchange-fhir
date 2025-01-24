@@ -22,14 +22,14 @@ namespace OneCDPFHIRFacade
                 await CloudWatchLogs(logMessage);
             }
         }
-        public void ConsoleLogs(string logMessage)
+        public static void ConsoleLogs(string logMessage)
         {
             var jsonLogMessage = JsonSerializer.Serialize(logMessage);
 
             Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
             Log.Information(jsonLogMessage);
         }
-      
+
         public async Task CloudWatchLogs(string logMessage)
         {
             //AWS CloudWatch logs inst

@@ -15,7 +15,7 @@ namespace OneCDPFHIRFacade.Services
     }
     public class S3FileService : IS3FileService
     {
-        public LoggingUtility LoggingUtility;
+        private readonly LoggingUtility LoggingUtility;
 
         public S3FileService(LoggingUtility loggingUtility)
         {
@@ -34,15 +34,14 @@ namespace OneCDPFHIRFacade.Services
 
             try
             {
-                var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
-                LoggingUtility.Logging(logEntry.ToString()!, requestId);
+                await LoggingUtility.Logging(logEntry.ToString()!, requestId);
                 return Results.Ok($"Telemtry Saved to S3 bucket {fileName}");
             }
             catch (Exception ex)
             {
                 string logMessage = $"Error saving resource to S3: {ex.Message}";
-                LoggingUtility.Logging(logMessage, requestId);
-                LoggingUtility.SaveLogS3(requestId);
+                await LoggingUtility.Logging(logMessage, requestId);
+                await LoggingUtility.SaveLogS3(requestId);
                 return Results.Problem($"Error saving resource to S3: {ex.Message}");
             }
         }
@@ -61,24 +60,24 @@ namespace OneCDPFHIRFacade.Services
             {
                 string logMessage = $"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}, requestId={requestId}";
 
-                LoggingUtility.Logging(logMessage, requestId);
+                await LoggingUtility.Logging(logMessage, requestId);
                 Console.WriteLine(logMessage);
 
                 var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
 
                 string logString = $"End write to S3: fileName={fileName}, response={response.HttpStatusCode}, requestId: {requestId}";
-                LoggingUtility.Logging(logString, requestId);
+                await LoggingUtility.Logging(logString, requestId);
 
                 Console.WriteLine(logString);
 
-                LoggingUtility.SaveLogS3(requestId);
+                await LoggingUtility.SaveLogS3(requestId);
                 return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
             }
             catch (Exception ex)
             {
                 string logMessage = $"Error saving resource to S3: {ex.Message}";
-                LoggingUtility.Logging(logMessage, requestId);
-                LoggingUtility.SaveLogS3(requestId);
+                await LoggingUtility.Logging(logMessage, requestId);
+                await LoggingUtility.SaveLogS3(requestId);
                 return Results.Problem($"Error saving resource to S3: {ex.Message}");
             }
         }// .SaveResourceToS3
