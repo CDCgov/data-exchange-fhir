@@ -36,7 +36,7 @@ namespace OneCDPFHIRFacade.Services
             try
             {
                 var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
-                LoggingUtility.Logging(logEntry.ToString(), requestId);
+                LoggingUtility.Logging(logEntry.ToString()!, requestId);
                 return Results.Ok($"Telemtry Saved to S3 bucket {fileName}");
             }
             catch (Exception ex)
