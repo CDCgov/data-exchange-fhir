@@ -77,7 +77,6 @@ namespace OneCDPFHIRFacade
                        .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility)));
                });
 
-
                 builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
                 {
                     metricsProviderBuilder

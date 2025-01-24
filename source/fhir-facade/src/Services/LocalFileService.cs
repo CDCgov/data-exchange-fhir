@@ -36,8 +36,8 @@ namespace OneCDPFHIRFacade.Services
             }
 
             LoggingUtility logger = new LoggingUtility();
-            
-            logger.Logging($"Resource saved successfully at {filePath}", requestId);
+
+            await logger.Logging($"Resource saved successfully at {filePath}", requestId);
             return Results.Ok($"Resource saved successfully at {filePath}");
         }// .SaveResourceLocally
     }// .LocalFileService

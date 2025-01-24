@@ -22,20 +22,21 @@ namespace OneCDPFHIRFacade.Services
             this.LoggingUtility = loggingUtility;
         }
 
-        public async Task<IResult> SaveOpenTelemetryToS3(string keyPrefix, string fileName, string resourceJson, LoggerService logEntry, string requestId)
+        public async Task<IResult> SaveOpenTelemetryToS3(string folderName, string fileName, string content, LoggerService logEntry, string requestId)
         {
             // Define the S3 put request
             var putRequest = new PutObjectRequest
             {
                 BucketName = AwsConfig.BucketName,
-                Key = $"{keyPrefix}/{fileName}",
-                ContentBody = resourceJson
+                Key = $"{folderName}/{fileName}",
+                ContentBody = content
             };
 
             try
             {
                 await LoggingUtility.Logging(logEntry.ToString()!, requestId);
-                return Results.Ok($"Telemtry Saved to S3 bucket {fileName}");
+                var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
+                return Results.Ok($"Telemtry saved successfully to S3 at {folderName}");
             }
             catch (Exception ex)
             {
@@ -45,14 +46,14 @@ namespace OneCDPFHIRFacade.Services
                 return Results.Problem($"Error saving resource to S3: {ex.Message}");
             }
         }
-        public async Task<IResult> SaveResourceToS3(string keyPrefix, string fileName, string resourceJson, LoggerService logEntry, string requestId)
+        public async Task<IResult> SaveResourceToS3(string folderName, string fileName, string content, LoggerService logEntry, string requestId)
         {
             // Define the S3 put request
             var putRequest = new PutObjectRequest
             {
                 BucketName = AwsConfig.BucketName,
-                Key = $"{keyPrefix}/{fileName}",
-                ContentBody = resourceJson
+                Key = $"{folderName}/{fileName}",
+                ContentBody = content
             };
 
             // Attempt to save the resource to S3
@@ -71,7 +72,7 @@ namespace OneCDPFHIRFacade.Services
                 Console.WriteLine(logString);
 
                 await LoggingUtility.SaveLogS3(requestId);
-                return Results.Ok($"Resource saved successfully to S3 at {keyPrefix}/{fileName}");
+                return Results.Ok($"Resource saved successfully to S3 at {folderName}/{fileName}");
             }
             catch (Exception ex)
             {
