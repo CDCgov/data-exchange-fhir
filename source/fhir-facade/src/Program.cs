@@ -100,18 +100,16 @@ namespace OneCDPFHIRFacade
                 await loggerService.LogData("No OLTP", " ProgramOLTP ");
             }
 
-            string jwksUrl = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_jdPAgQ6LM";
-
             // Configure JwtBearer authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     // Specify the authority and audience
-                    options.Authority = jwksUrl;
+                    options.Authority = AwsConfig.AuthValidateURL;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = jwksUrl,
+                        ValidIssuer = AwsConfig.AuthValidateURL,
                         ValidateAudience = false,
                         ValidateLifetime = true,
                     };
