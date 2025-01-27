@@ -121,7 +121,7 @@ namespace OneCDPFHIRFacade
             {
                 options.AddPolicy("RequiredScope", policy =>
                 {
-                    policy.RequireAssertion(context =>
+                    policy.RequireAssertion(async context =>
                     {
                         // Instantiate the validator with required suffixes
                         var scopeValidator = new ScopeValidator(".read", ".write");
@@ -130,7 +130,7 @@ namespace OneCDPFHIRFacade
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
 
                         // Validate the scopes
-                        return scopeValidator.Validate(scopeClaim);
+                        return await scopeValidator.Validate(scopeClaim);
                     });
                 });
             });
@@ -139,15 +139,17 @@ namespace OneCDPFHIRFacade
             {
                 options.Events = new JwtBearerEvents
                 {
-                    OnAuthenticationFailed = context =>
+                    OnAuthenticationFailed = async context =>
                     {
                         Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-                        return Task.CompletedTask;
+                        await loggerService.LogData($"Authentication failed: {context.Exception.Message}", "Validator");
+                        //Todo: add logs to S3
                     },
-                    OnTokenValidated = context =>
+                    OnTokenValidated = async context =>
                     {
                         Console.WriteLine("Token validated successfully.");
-                        return Task.CompletedTask;
+                        await loggerService.LogData("Token validated successfully.", "Validator");
+                        //Todo: add logs to S3
                     },
                 };
             });
