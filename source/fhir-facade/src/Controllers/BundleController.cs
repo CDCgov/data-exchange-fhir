@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
@@ -7,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade.Controllers
 {
-
+    [Authorize(Policy = "RequiredScope")]
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase

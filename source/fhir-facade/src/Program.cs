@@ -1,6 +1,9 @@
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OpenTelemetry;
@@ -96,6 +99,59 @@ namespace OneCDPFHIRFacade
             {
                 await loggerService.LogData("No OLTP", " ProgramOLTP ");
             }
+
+            string jwksUrl = "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_jdPAgQ6LM";
+
+            // Configure JwtBearer authentication
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // Specify the authority and audience
+                    options.Authority = jwksUrl;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwksUrl,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                    };
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequiredScope", policy =>
+                {
+                    policy.RequireAssertion(context =>
+                    {
+                        // Instantiate the validator with required suffixes
+                        var scopeValidator = new ScopeValidator(".read", ".write");
+
+                        // Get the scope claim
+                        var scopeClaim = context.User.FindFirst("scope")?.Value;
+
+                        // Validate the scopes
+                        return scopeValidator.Validate(scopeClaim);
+                    });
+                });
+            });
+
+            builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        Console.WriteLine("Token validated successfully.");
+                        return Task.CompletedTask;
+                    },
+                };
+            });
+
 
             var app = builder.Build();
 
