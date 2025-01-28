@@ -122,7 +122,7 @@ namespace OneCDPFHIRFacade
                     policy.RequireAssertion(async context =>
                     {
                         // Instantiate the validator with required suffixes
-                        var scopeValidator = new ScopeValidator(".read", ".write");
+                        var scopeValidator = new ScopeValidator("patient/bundle.*");
 
                         // Get the scope claim
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
