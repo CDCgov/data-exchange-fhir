@@ -26,7 +26,7 @@ namespace OneCDPFHIRFacade.Services
 
                     // Save the serialized JSON string to S3
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-                    s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName!, "Activity", activity.Id + ".json", jsonString, logEntry, activity.Id);
+                    s3FileService.SaveResourceToS3(AwsConfig.S3Client, AwsConfig.BucketName!, "Activity", activity.Id + ".json", jsonString, logEntry, activity.Id!);
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
