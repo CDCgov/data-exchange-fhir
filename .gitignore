@@ -2,3 +2,10 @@
 /spikes/fhir-facade/appsettings.json
 /.vs/data-exchange-fhir/v17
 /.vs
+/spikes/Authentication/.vs/Authentication
+/spikes/Authentication/Authentication/obj/Debug/net8.0
+/spikes/Authentication/Authentication/obj/Authentication.csproj.nuget.dgspec.json
+/spikes/Authentication/Authentication/obj/Authentication.csproj.nuget.g.props
+/spikes/Authentication/Authentication/obj/Authentication.csproj.nuget.g.targets
+/spikes/Authentication/Authentication/obj/project.assets.json
+/spikes/Authentication/Authentication/obj/project.nuget.cache
