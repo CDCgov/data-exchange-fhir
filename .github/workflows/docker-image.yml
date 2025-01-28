@@ -1,18 +1,77 @@
-name: Docker Image CI
+name: fhir-facade docker image workflow for CI
 
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'source/fhir-facade/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'source/fhir-facade/**'
+
+
 
 jobs:
 
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: source/fhir-facade
+    - name: Build
+      run: dotnet build  --no-restore 
+      # /logger:FileLogger, Microsoft.Build.CentralLogger 
+      working-directory: source/fhir-facade
+    - name: Test
+      run: dotnet test --no-build --verbosity normal --logger trx --results-directory "TestResults"
+      working-directory: source/fhir-facade
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v4
+      with:
+       name: dotnet-results
+       working-directory: source/fhir-facade
+       path: source/fhir-facade/TestResults
+       # Use always() to always run this step to publish test results when there are test failures
+      if: ${{ always() }}   
+
+  build-docker-image:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Set DNS to Google
+      run: | 
+       echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+
+    - name: Check DNS resolution
+      run: cat /etc/resolv.conf
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+       # un comment to use with imagehub
+       # imagehub.cdc.gov:6989
+       # registry: ${{ secrets.DOCKER_REGISTRY }}
+       username: ${{ secrets.DOCKER_USERNAME }}
+       password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      run: docker build . --file Dockerfile --tag  ${{ vars.DOCKER_PREFIX }}/${{ vars.DOCKER_IMAGE }}:latest
+      working-directory: source/fhir-facade/src
+
+    - name: Push Docker image
+      # docker tag my-docker-image:latest
+      run: |
+        docker push  ${{ vars.DOCKER_PREFIX }}/${{ vars.DOCKER_IMAGE }}:latest
+
+      
