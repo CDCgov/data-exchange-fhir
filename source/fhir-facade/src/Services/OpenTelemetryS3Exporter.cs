@@ -8,7 +8,7 @@ namespace OneCDPFHIRFacade.Services
 {
     public class OpenTelemetryS3Exporter : BaseExporter<Activity>
     {
-        private LoggingUtility _loggingUtility;
+        private readonly LoggingUtility _loggingUtility;
 
         public OpenTelemetryS3Exporter(LoggingUtility loggingUtility)
         {
