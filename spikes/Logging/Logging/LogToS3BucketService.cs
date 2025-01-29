@@ -7,23 +7,22 @@ namespace OneCDP.Logging
 {
     public interface ILogToS3BucketService
     {
-        Task<IActionResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId);
-        void JsonResult(string logs, string requestId);
+        Task<IActionResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName);
+        void JsonResult(object logs);
     }
 
     public class LogToS3BucketService : ILogToS3BucketService
     {
-        private readonly List<string> _resultList = new();
+        private readonly List<object> _resultList = new();
 
-        public async Task<IActionResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName, string requestId)
+        public async Task<IActionResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName)
         {
-            string result = string.Join(",", _resultList);
-
+            var jsonResult = JsonSerializer.Serialize(_resultList);
             var putRequest = new PutObjectRequest
             {
                 BucketName = bucketName,
                 Key = $"Logs/{fileName}",
-                ContentBody = result
+                ContentBody = jsonResult
             };
 
             try
@@ -41,17 +40,9 @@ namespace OneCDP.Logging
             }
         }
 
-        public void JsonResult(string logs, string requestId)
+        public void JsonResult(object logs)
         {
-            var logMessage = new
-            {
-                RequestID = requestId,
-                Message = logs,
-                Timestamp = DateTime.UtcNow,
-            };
-            var jsonLogMessage = JsonSerializer.Serialize(logMessage);
-
-            _resultList.Add(jsonLogMessage);
+            _resultList.Add(logs);
         }
     }
 

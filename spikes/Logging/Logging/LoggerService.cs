@@ -3,19 +3,18 @@ using Amazon.CloudWatchLogs.Model;
 using Serilog;
 using System.Text.Json;
 
-namespace Authentication
+namespace OneCDP.Logging
 {
-    internal class LoggerService
+    public class LoggerService
     {
-        private readonly AmazonCloudWatchLogsClient _logClient;
-        private readonly string _logGroupName;
+        AmazonCloudWatchLogsClient _logClient = new AmazonCloudWatchLogsClient();
+        public readonly string _logGroupName;
 
-        public LoggerService(AmazonCloudWatchLogsClient logClient, string logGroupName)
+        public LoggerService(AmazonCloudWatchLogsClient logsClient, string logGroupName)
         {
-            _logClient = logClient;
-            _logGroupName = logGroupName;
+            this._logClient = logsClient;
+            this._logGroupName = logGroupName;
         }
-
         public async Task LogData(string message, string requestId, bool env)
         {
             if (env)
@@ -56,7 +55,7 @@ namespace Authentication
                 });
 
                 var logStream = describeResponse.LogStreams.FirstOrDefault(ls => ls.LogStreamName == logStreamName);
-                string sequenceToken = null;
+                string? sequenceToken = null;
 
                 if (logStream == null)
                 {
