@@ -37,7 +37,7 @@ namespace OneCDPFHIRFacade.Services
             try
             {
                 await LoggingUtility.Logging(jsonString, requestId);
-                var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
+                await AwsConfig.S3Client!.PutObjectAsync(putRequest);
                 return Results.Ok($"Telemtry saved successfully to S3 at {folderName}");
             }
             catch (Exception ex)

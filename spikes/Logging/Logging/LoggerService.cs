@@ -7,7 +7,7 @@ namespace OneCDP.Logging
 {
     public class LoggerService
     {
-        AmazonCloudWatchLogsClient _logClient = new AmazonCloudWatchLogsClient();
+        public readonly AmazonCloudWatchLogsClient _logClient;
         public readonly string _logGroupName;
 
         public LoggerService(AmazonCloudWatchLogsClient logsClient, string logGroupName)
