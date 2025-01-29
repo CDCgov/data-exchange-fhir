@@ -2,3 +2,10 @@
 /spikes/fhir-facade/appsettings.json
 /.vs/data-exchange-fhir/v17
 /.vs
+/spikes/Authentication/.vs/Authentication
+/spikes/Authentication/Authentication/obj
+/spikes/Logging/.vs
+/spikes/Logging/Logging/.vs
+/spikes/Logging/Logging/bin/Debug/net8.0
+/spikes/Logging/Logging/obj
+/spikes/Logging/Logging/obj/Debug/net8.0/ref/Authentication.dll

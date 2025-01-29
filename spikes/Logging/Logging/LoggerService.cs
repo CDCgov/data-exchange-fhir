@@ -1,19 +1,23 @@
 ﻿using Amazon.CloudWatchLogs;
 using Amazon.CloudWatchLogs.Model;
-using Amazon.Runtime;
-using OneCDPFHIRFacade.Config;
 using Serilog;
 using System.Text.Json;
-using DateTime = System.DateTime;
 
-
-namespace OneCDPFHIRFacade
+namespace OneCDP.Logging
 {
     public class LoggerService
     {
-        public async Task LogData(string message, string requestId)
+        public readonly AmazonCloudWatchLogsClient _logClient;
+        public readonly string _logGroupName;
+
+        public LoggerService(AmazonCloudWatchLogsClient logsClient, string logGroupName)
         {
-            if (LocalFileStorageConfig.UseLocalDevFolder)
+            this._logClient = logsClient;
+            this._logGroupName = logGroupName;
+        }
+        public async Task LogData(string message, string requestId, bool env)
+        {
+            if (env)
             {
                 ConsoleLogs(message, requestId);
             }
@@ -22,9 +26,9 @@ namespace OneCDPFHIRFacade
                 await CloudWatchLogs(message, requestId);
             }
         }
+
         public void ConsoleLogs(string message, string requestId)
         {
-            //Log message as json
             var logMessage = new
             {
                 RequestID = requestId,
@@ -39,40 +43,29 @@ namespace OneCDPFHIRFacade
 
         public async Task CloudWatchLogs(string message, string requestId)
         {
-            //AWS CloudWatch logs inst
-            BasicAWSCredentials credentials = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
-
-            AmazonCloudWatchLogsConfig config = new AmazonCloudWatchLogsConfig
-            {
-                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(AwsConfig.Region)
-            };
-
-            AmazonCloudWatchLogsClient logClient = new AmazonCloudWatchLogsClient(credentials, config);
-
             try
             {
-                //Bundle log groups name
-                var logGroupName = AwsConfig.LogGroupName;
-                var logStreamName = $"{DateTime.UtcNow.ToString("yyyyMMdd")}";
-                //Get the sequence token
-                var describeResponse = await logClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
+                var logStreamName = $"{DateTime.UtcNow:yyyyMMdd}";
+
+                // Fetch or create the log stream
+                var describeResponse = await _logClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
                 {
-                    LogGroupName = logGroupName,
+                    LogGroupName = _logGroupName,
                     LogStreamNamePrefix = logStreamName
                 });
 
                 var logStream = describeResponse.LogStreams.FirstOrDefault(ls => ls.LogStreamName == logStreamName);
+                string? sequenceToken = null;
 
                 if (logStream == null)
                 {
-                    //Add to a logs group
-                    await logClient.CreateLogStreamAsync(new CreateLogStreamRequest(logGroupName, logStreamName));
-                    return;
+                    await _logClient.CreateLogStreamAsync(new CreateLogStreamRequest(_logGroupName, logStreamName));
+                }
+                else
+                {
+                    sequenceToken = logStream.UploadSequenceToken;
                 }
 
-                var sequenceToken = logStream.UploadSequenceToken;
-
-                //Log message as json
                 var logMessage = new
                 {
                     RequestID = requestId,
@@ -81,23 +74,21 @@ namespace OneCDPFHIRFacade
                 };
                 var jsonLogMessage = JsonSerializer.Serialize(logMessage);
 
-                // Prepare log event
                 var logEvent = new InputLogEvent
                 {
                     Message = jsonLogMessage,
                     Timestamp = DateTime.UtcNow
                 };
 
-                // Write log event
                 var putLogEventsRequest = new PutLogEventsRequest
                 {
-                    LogGroupName = logGroupName,
+                    LogGroupName = _logGroupName,
                     LogStreamName = logStreamName,
                     LogEvents = new List<InputLogEvent> { logEvent },
-                    SequenceToken = sequenceToken // Include the sequence token
+                    SequenceToken = sequenceToken
                 };
 
-                await logClient.PutLogEventsAsync(putLogEventsRequest);
+                await _logClient.PutLogEventsAsync(putLogEventsRequest);
                 Console.WriteLine("Log event appended successfully.");
             }
             catch (Exception ex)
