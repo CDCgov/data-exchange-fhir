@@ -1,33 +1,31 @@
-﻿namespace OneCDPFHIRFacade.Authentication
+﻿using OneCDPFHIRFacade.Utilities;
+
+namespace OneCDPFHIRFacade.Authentication
 {
-    public class ScopeValidator(params string[] requiredSuffixes)
+    public class ScopeValidator
     {
+        private readonly LoggingUtility loggingUtility;
 
-        private readonly string[] _requiredSuffixes = requiredSuffixes;
-
-        public bool HasValidScope(IEnumerable<string> scopes)
+        public ScopeValidator(LoggingUtility loggingUtility)
         {
-            // Check if any scope matches the required suffixes
-            return scopes.Any(scope => _requiredSuffixes.Any(suffix => scope.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)));
+            this.loggingUtility = loggingUtility;
         }
 
-        public async Task<bool> Validate(string? scopeClaim)
+        public async Task<bool> Validate(string? scopeClaim, string[] requiredScopes)
         {
-            LoggerService loggerService = new LoggerService();
-            if (string.IsNullOrWhiteSpace(scopeClaim))
+            if (string.IsNullOrEmpty(scopeClaim))
             {
                 Console.WriteLine("Missing or empty 'scope' claim.");
-                await loggerService.LogData("Missing or empty 'scope' claim.", "Scope Validator");
-                //Todo: add logs to S3
+                await loggingUtility.Logging("Missing or empty 'scope' claim.", "Scope Validator");
+                await loggingUtility.SaveLogS3("ScopeError");
                 return false;
             }
 
             var scopes = scopeClaim.Split(' ');
-            var isValid = HasValidScope(scopes);
+            var isValid = requiredScopes.Any(required => scopes.Any(scope => scope.StartsWith(required)));
 
             Console.WriteLine($"Scope claim: {scopeClaim}, Valid scope: {isValid}");
-            await loggerService.LogData($"Scope claim: {scopeClaim}, Valid scope: {isValid}", "Scope Validator");
-            //Todo: add logs to S3 
+            await loggingUtility.Logging($"Scope claim: {scopeClaim}, Valid scope: {isValid}", "Scope Validator");
             return isValid;
         }
     }

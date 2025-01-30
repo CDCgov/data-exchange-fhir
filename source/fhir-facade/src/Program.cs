@@ -2,6 +2,10 @@ using Amazon;
 using Amazon.CloudWatchLogs;
 using Amazon.Runtime;
 using Amazon.S3;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using OneCDP.Logging;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
@@ -69,6 +73,64 @@ namespace OneCDPFHIRFacade
             builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
             builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
             builder.Services.AddSingleton<LoggingUtility>();
+            builder.Services.AddSingleton<ScopeValidator>();
+
+            // Configure JwtBearer authentication
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // Specify the authority and audience
+                    options.Authority = AwsConfig.AuthValidateURL;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AwsConfig.AuthValidateURL,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                    };
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequiredScope", policy =>
+                {
+                    policy.RequireAssertion(async context =>
+                    {
+                        // Instantiate the validator with required suffixes
+                        var httpContext = context.Resource as HttpContext;
+                        if (httpContext == null) return false;
+
+                        var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
+
+                        // Get the scope claim
+                        var scopeClaim = context.User.FindFirst("scope")?.Value;
+
+                        // Validate the scopes
+                        return await scopeValidator.Validate(scopeClaim, ["org/fhir-dev-appclient1", "system/*.*"]);
+                    });
+                });
+            });
+
+            builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = async context =>
+                    {
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+
+                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}", "Validator");
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        Console.WriteLine("Token validated successfully.");
+
+                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                        await loggingUtility.Logging("Token validated successfully.", "Validator");
+                    },
+                };
+            });
 
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
@@ -96,7 +158,6 @@ namespace OneCDPFHIRFacade
                            .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility)));
                    });
 
-
                     builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
                     {
                         metricsProviderBuilder
@@ -109,14 +170,13 @@ namespace OneCDPFHIRFacade
                             }).AddConsoleExporter();  // Custom metrics              
                     });
                 }
-
                 else
                 {
                     await loggingUtility.Logging("No OLTP", " ProgramOLTP ");
                 }
-            }
 
-            var app = builder.Build();
+
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
