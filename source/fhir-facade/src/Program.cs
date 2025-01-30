@@ -98,15 +98,26 @@ namespace OneCDPFHIRFacade
                     {
                         // Instantiate the validator with required suffixes
                         var httpContext = context.Resource as HttpContext;
-                        if (httpContext == null) return false;
-
+                        if (httpContext == null)
+                        {
+                            Console.WriteLine("Authentication URL not provided");
+                            return false;
+                        }
+                        // Instantiate the validator with required scope
                         var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
+                        if (AwsConfig.ClientScope.IsNullOrEmpty())
+                        {
+                            Console.WriteLine("Scope not provided");
+                            return false;
+                        }
+
+                        var clientScope = AwsConfig.ClientScope;
 
                         // Get the scope claim
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
 
                         // Validate the scopes
-                        return await scopeValidator.Validate(scopeClaim, ["org/fhir-dev-appclient1", "system/*.*"]);
+                        return await scopeValidator.Validate(scopeClaim, clientScope!);
                     });
                 });
             });
