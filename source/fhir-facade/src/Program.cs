@@ -1,11 +1,10 @@
 using Amazon;
+using Amazon.CloudWatchLogs;
 using Amazon.Runtime;
 using Amazon.S3;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
+using OneCDPFHIRFacade.Utilities;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -33,16 +32,11 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Register serivces, Create instances of LocalFileService and S3FileService
-            builder.Services.AddSingleton<ILocalFileService, LocalFileService>();
-            builder.Services.AddSingleton<IS3FileService, S3FileService>();
-
             // Initialize AWS configuration
             AwsConfig.Initialize(builder.Configuration);
+
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
-            //Initailize loggerService
-            LoggerService loggerService = new LoggerService();
 
             if (runEnvironment == "AWS")
             {
@@ -52,106 +46,75 @@ namespace OneCDPFHIRFacade
                     ServiceURL = AwsConfig.ServiceURL                                  // Optional: Set custom service URL
                 };
 
+                var logClient = new AmazonCloudWatchLogsConfig
+                {
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(AwsConfig.Region)
+                };
+
                 // Initialize the client with credentials and config
                 if (string.IsNullOrEmpty(AwsConfig.AccessKey))
                 {
                     AwsConfig.S3Client = new AmazonS3Client(s3Config);
+                    AwsConfig.logsClient = new AmazonCloudWatchLogsClient(logClient);
                 }
                 else
                 {
-                    AwsConfig.S3Client = new AmazonS3Client(new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey), s3Config);
+                    var basicCred = new BasicAWSCredentials(AwsConfig.AccessKey, AwsConfig.SecretKey);
+                    AwsConfig.S3Client = new AmazonS3Client(basicCred, s3Config);
+                    AwsConfig.logsClient = new AmazonCloudWatchLogsClient(basicCred, logClient);
                 }
             }// .if
 
-            if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
+            // Register serivces, Create instances of Logging
+            builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
+            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
+            builder.Services.AddSingleton<LoggingUtility>();
+
+            var app = builder.Build();
+            using (var scope = app.Services.CreateScope())
             {
-                await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ");
-                builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
-               {
-                   tracerProviderBuilder
-                       .SetResourceBuilder(resourceBuilder)
-                       .AddAspNetCoreInstrumentation() // Instruments ASP.NET Core (HTTP request handling)
-                       .AddHttpClientInstrumentation() // Instruments outgoing HTTP client requests
-                       .AddAWSInstrumentation()
-                       .AddConsoleExporter()
-                       .AddOtlpExporter(options =>
-                       {
-                           options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
-                           options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                       })
-                       .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter()));
-               });
-
-
-                builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
+                var loggerService = scope.ServiceProvider.GetRequiredService<LoggerService>();
+                var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
+                if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
                 {
-                    metricsProviderBuilder
-                        .SetResourceBuilder(resourceBuilder)
-                        .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
-                        .AddHttpClientInstrumentation() // Collect HTTP client metrics
-                        .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
-                        {
-                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
-                        }).AddConsoleExporter();  // Custom metrics              
-                });
-            }
-            else
-            {
-                await loggerService.LogData("No OLTP", " ProgramOLTP ");
-            }
+                    bool runLocal = LocalFileStorageConfig.UseLocalDevFolder;
+                    await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ", runLocal);
 
-            // Configure JwtBearer authentication
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    // Specify the authority and audience
-                    options.Authority = AwsConfig.AuthValidateURL;
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
+                   {
+                       tracerProviderBuilder
+                           .SetResourceBuilder(resourceBuilder)
+                           .AddAspNetCoreInstrumentation() // Instruments ASP.NET Core (HTTP request handling)
+                           .AddHttpClientInstrumentation() // Instruments outgoing HTTP client requests
+                           .AddAWSInstrumentation()
+                           .AddConsoleExporter()
+                           .AddOtlpExporter(options =>
+                           {
+                               options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                               options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                           })
+                           .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility)));
+                   });
+
+
+                    builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = AwsConfig.AuthValidateURL,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                    };
-                });
-
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("RequiredScope", policy =>
-                {
-                    policy.RequireAssertion(async context =>
-                    {
-                        // Instantiate the validator with required suffixes
-                        var scopeValidator = new ScopeValidator("patient/bundle.*");
-
-                        // Get the scope claim
-                        var scopeClaim = context.User.FindFirst("scope")?.Value;
-
-                        // Validate the scopes
-                        return await scopeValidator.Validate(scopeClaim);
+                        metricsProviderBuilder
+                            .SetResourceBuilder(resourceBuilder)
+                            .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
+                            .AddHttpClientInstrumentation() // Collect HTTP client metrics
+                            .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
+                            {
+                                options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                            }).AddConsoleExporter();  // Custom metrics              
                     });
-                });
-            });
+                }
 
-            builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.Events = new JwtBearerEvents
+                else
                 {
-                    OnAuthenticationFailed = async context =>
-                    {
-                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-                        await loggerService.LogData($"Authentication failed: {context.Exception.Message}", "Validator");
-                        //Todo: add logs to S3
-                    },
-                    OnTokenValidated = async context =>
-                    {
-                        Console.WriteLine("Token validated successfully.");
-                        await loggerService.LogData("Token validated successfully.", "Validator");
-                        //Todo: add logs to S3
-                    },
-                };
-            });
-
+                    await loggingUtility.Logging("No OLTP", " ProgramOLTP ");
+                }
+            }
 
             var app = builder.Build();
 

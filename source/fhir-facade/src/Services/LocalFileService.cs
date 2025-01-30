@@ -3,6 +3,8 @@
 // SaveResourceLocally
 // #####################################################
 
+using OneCDPFHIRFacade.Utilities;
+
 namespace OneCDPFHIRFacade.Services
 {
     public interface ILocalFileService
@@ -12,6 +14,11 @@ namespace OneCDPFHIRFacade.Services
     }
     public class LocalFileService : ILocalFileService
     {
+        private readonly LoggingUtility _loggingUtility;
+        public LocalFileService(LoggingUtility loggingUtility)
+        {
+            this._loggingUtility = loggingUtility;
+        }
         public async Task<IResult> SaveResourceLocally(string baseDirectory, string subDirectory, string fileName, string resourceJson, string requestId)
         {
             // Define the directory and file path
@@ -33,8 +40,7 @@ namespace OneCDPFHIRFacade.Services
                 return Results.Problem($"Error saving resource to file: {ex.Message}");
             }
 
-            LoggerService logger = new LoggerService();
-            await logger.LogData($"Resource saved successfully at {filePath}", requestId);
+            await _loggingUtility.Logging($"Resource saved successfully at {filePath}", requestId);
             return Results.Ok($"Resource saved successfully at {filePath}");
         }// .SaveResourceLocally
     }// .LocalFileService
