@@ -116,7 +116,8 @@ namespace OneCDPFHIRFacade
                         // Get the scope claim
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
 
-                        // Validate the scopes
+                        // Validate the scopes claim from JWT token are scopes from config
+                        // checks sent scopes are onboarded scopes in config
                         return await scopeValidator.Validate(scopeClaim, clientScope!);
                     });
                 });

@@ -11,6 +11,7 @@ namespace OneCDPFHIRFacade.Authentication
             this.loggingUtility = loggingUtility;
         }
 
+        // check the scope claim from the JTW token are valid scopes from config scopes
         public async Task<bool> Validate(string? scopeClaim, string[] requiredScopes)
         {
             if (string.IsNullOrEmpty(scopeClaim))
