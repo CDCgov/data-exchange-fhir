@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Moq;
-using OneCDPFHIRFacade.Services;
+using OneCDP.Logging;
 
 namespace fhir_facade_tests.Services
 {
@@ -25,10 +25,10 @@ namespace fhir_facade_tests.Services
                     HttpStatusCode = System.Net.HttpStatusCode.OK
                 });
 
-            var logToS3FileService = new LogToS3FileService();
+            var logToS3FileService = new LogToS3BucketService();
 
-            var response = await logToS3FileService.SaveResourceToS3(mockS3Client.Object,"bucket","filename","id");
-           Console.WriteLine("response here" + response);
+            var response = await logToS3FileService.SaveResourceToS3(mockS3Client.Object, "bucket", "filename");
+            Console.WriteLine("response here" + response);
 
             Assert.Pass();
         }
