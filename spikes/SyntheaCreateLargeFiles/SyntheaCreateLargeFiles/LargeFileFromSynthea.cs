@@ -4,8 +4,11 @@
     {
         public LargeFileFromSynthea(string folderPath, string outputFolder, string fileName)
         {
+
             try
             {
+                string outputFile = outputFolder;
+
                 if (Directory.Exists(folderPath))
                 {
                     string[] files = Directory.GetFiles(folderPath, "*.json"); // Get all JSON files
@@ -39,17 +42,20 @@
                             string destinationFolder = Path.Combine(outputFolder, subFolder);
                             Directory.CreateDirectory(destinationFolder); // Ensure directory exists
 
-                            string outputFile = Path.Combine(destinationFolder, inputFileName);
+                            outputFile = Path.Combine(destinationFolder, inputFileName);
                             File.Copy(files[i], outputFile, true);
 
                             Console.WriteLine($"Copied {inputFileName} to {outputFile}");
                         }
                     }
+
                 }
                 else
                 {
                     Console.WriteLine("ERROR: Source folder does not exist.");
                 }
+                Console.WriteLine($"Finish writing file to {outputFile}");
+
             }
             catch (UnauthorizedAccessException)
             {
