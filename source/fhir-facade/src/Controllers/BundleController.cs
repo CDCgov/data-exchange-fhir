@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
-using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade.Controllers
 {
@@ -26,8 +25,6 @@ namespace OneCDPFHIRFacade.Controllers
             LocalFileService localFileService = new LocalFileService(_loggingUtility);
             S3FileService s3FileService = new S3FileService(_loggingUtility);
 
-            var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "", RegexOptions.NonBacktracking);
-
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
             Bundle bundle;
@@ -38,7 +35,7 @@ namespace OneCDPFHIRFacade.Controllers
 
             //Log starts
             string logMessage = "Bundle request has started.";
-            await _loggingUtility.Logging(logMessage, requestId);
+            await _loggingUtility.Logging(logMessage);
 
             try
             {
@@ -50,7 +47,7 @@ namespace OneCDPFHIRFacade.Controllers
             catch (FormatException ex)
             {
                 logMessage = $"Failed to parse FHIR Resource: {ex.Message}";
-                await _loggingUtility.Logging(logMessage, requestId);
+                await _loggingUtility.Logging(logMessage);
                 await _loggingUtility.SaveLogS3(fileName);
 
                 // Return 400 Bad Request if JSON is invalid
@@ -65,7 +62,7 @@ namespace OneCDPFHIRFacade.Controllers
             if (string.IsNullOrWhiteSpace(bundle.Id))
             {
                 logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
-                await _loggingUtility.Logging(logMessage, requestId);
+                await _loggingUtility.Logging(logMessage);
                 await _loggingUtility.SaveLogS3(fileName);
                 return Results.BadRequest(new
                 {
@@ -76,14 +73,14 @@ namespace OneCDPFHIRFacade.Controllers
 
             // Log details 
             logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
-            await _loggingUtility.Logging(logMessage, requestId);
+            await _loggingUtility.Logging(logMessage);
 
             if (LocalFileStorageConfig.UseLocalDevFolder)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
                 // #####################################################
-                return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync(), requestId);
+                return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
 
             } // .if UseLocalDevFolder
             else
@@ -94,12 +91,12 @@ namespace OneCDPFHIRFacade.Controllers
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
                     logMessage = "S3 client and bucket are not configured.";
-                    await _loggingUtility.Logging(logMessage, requestId);
+                    await _loggingUtility.Logging(logMessage);
                     await _loggingUtility.SaveLogS3(fileName);
                     return Results.Problem(logMessage);
                 }
 
-                return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync(), requestId);
+                return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
             }// .else
 
 
