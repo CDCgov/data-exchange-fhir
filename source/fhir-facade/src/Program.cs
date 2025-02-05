@@ -2,7 +2,10 @@ using Amazon;
 using Amazon.CloudWatchLogs;
 using Amazon.Runtime;
 using Amazon.S3;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using OneCDP.Logging;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
@@ -75,6 +78,76 @@ namespace OneCDPFHIRFacade
             );
 
             builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
+            builder.Services.AddSingleton<ScopeValidator>();
+
+            // Configure JwtBearer authentication
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    // Specify the authority and audience
+                    options.Authority = AwsConfig.AuthValidateURL;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AwsConfig.AuthValidateURL,
+                        ValidateAudience = false,
+                        ValidateLifetime = true,
+                    };
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequiredScope", policy =>
+                {
+                    policy.RequireAssertion(async context =>
+                    {
+                        // Instantiate the validator with required suffixes
+                        var httpContext = context.Resource as HttpContext;
+                        if (httpContext == null)
+                        {
+                            Console.WriteLine("Authentication URL not provided");
+                            return false;
+                        }
+                        // Instantiate the validator with required scope
+                        var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
+                        if (AwsConfig.ClientScope.IsNullOrEmpty())
+                        {
+                            Console.WriteLine("Scope not provided");
+                            return false;
+                        }
+
+                        var clientScope = AwsConfig.ClientScope;
+
+                        // Get the scope claim
+                        var scopeClaim = context.User.FindFirst("scope")?.Value;
+
+                        // Validate the scopes claim from JWT token are scopes from config
+                        // checks sent scopes are onboarded scopes in config
+                        return await scopeValidator.Validate(scopeClaim, clientScope!);
+                    });
+                });
+            });
+
+            builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = async context =>
+                    {
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+
+                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}");
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        Console.WriteLine("Token validated successfully.");
+
+                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                        await loggingUtility.Logging("Token validated successfully.");
+                    },
+                };
+            });
 
             // Register LoggingUtility properly, ensuring dependencies are injected
             builder.Services.AddSingleton<LoggingUtility>(sp =>
@@ -84,6 +157,7 @@ namespace OneCDPFHIRFacade
 
                 return new LoggingUtility(loggerService, logToS3BucketService, requestId);
             });
+
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
@@ -108,6 +182,18 @@ namespace OneCDPFHIRFacade
                 builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
                 {
                     metricsProviderBuilder
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
+                        .AddHttpClientInstrumentation() // Collect HTTP client metrics
+                        .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                        }).AddConsoleExporter();  // Custom metrics              
+                });
+
+                builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
+                {
+                    metricsProviderBuilder
                         .AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddMeter("OneCDPFHIRFacadeMeter")
@@ -118,6 +204,7 @@ namespace OneCDPFHIRFacade
                         .AddConsoleExporter();
                 });
             }
+
 
             // Now Build the App
             var app = builder.Build();
@@ -140,26 +227,28 @@ namespace OneCDPFHIRFacade
                 }
                 else
                 {
-                    // Log message synchronously
-                    loggingUtility.Logging("No OLTP").GetAwaiter().GetResult();
+                    await loggingUtility.Logging("No OLTP");
                 }
 
-                // Configure the HTTP request pipeline.
-                if (app.Environment.IsDevelopment())
-                {
-                    app.UseSwagger();
-                    app.UseSwaggerUI();
-                }
-
-                app.UseHttpsRedirection();
-
-                app.MapControllers();
-                // #####################################################
-                // Start the App
-                // #####################################################
-                await app.RunAsync();
 
             }
+
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.MapControllers();
+            // #####################################################
+            // Start the App
+            // #####################################################
+            await app.RunAsync();
+
         }
     }
 }

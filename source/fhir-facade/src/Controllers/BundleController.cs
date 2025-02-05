@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
@@ -7,7 +8,7 @@ using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Controllers
 {
-
+    [Authorize(Policy = "RequiredScope")]
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
@@ -70,6 +71,10 @@ namespace OneCDPFHIRFacade.Controllers
                     message = "Resource ID is required."
                 });
             }
+
+            // TODO Check if the bundle Type is in line with the sender client scope 
+            // TODO Example bundle type eICR, sender scope should system/eICR/bundle.c  -> how to insert eICR <-
+            // TODO checkBundleTypeAgainstScope(bundle.Type, scopeClaim) 
 
             // Log details 
             logMessage = $"Received FHIR Bundle: Id={bundle.Id}";

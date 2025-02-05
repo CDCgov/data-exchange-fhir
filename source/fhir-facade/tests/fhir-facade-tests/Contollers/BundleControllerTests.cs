@@ -1,34 +1,20 @@
-﻿using Moq;
-using NUnit.Framework;
-
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using OneCDPFHIRFacade.Controllers;
-using Microsoft.AspNetCore.Http;
-using System.Text;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using OneCDPFHIRFacade.Config;
-using OneCDPFHIRFacade.Services;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
-using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.Diagnostics;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
+using Moq;
+using OneCDPFHIRFacade.Controllers;
+using OneCDPFHIRFacade.Utilities;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace fhir_facade_tests.Tests
 {
     [TestFixture]
     public class ExampleControllerTests
     {
-      //  private Mock<BundleController> _mockBundeService;
+        //  private Mock<BundleController> _mockBundeService;
         private BundleController _controller;
 
         [SetUp]
@@ -43,10 +29,10 @@ namespace fhir_facade_tests.Tests
 
             string token = GenerateJwtToken(secretKey, issuer, audience, expirationDate);
 
-        
+
             // Create the mock HttpContext
             var mockHttpContext = new Mock<HttpContext>();
-           
+
 
             var mockHeaders = new Mock<IHeaderDictionary>();
 
@@ -87,8 +73,11 @@ namespace fhir_facade_tests.Tests
             // Set up the mock HttpContext.Request to return the mock request
             mockHttpContext.Setup(ctx => ctx.Request).Returns(mockRequest.Object);
 
+            var mockLogger = new Mock<LoggingUtility>();
+
+
             // Create the controller
-            _controller = new BundleController()
+            _controller = new BundleController(mockLogger.Object)
             {
                 ControllerContext = new ControllerContext()
                 {
@@ -96,7 +85,7 @@ namespace fhir_facade_tests.Tests
                 }
             };
 
-         
+
 
             mockRequest.Setup(req => req.Headers.Authorization).Returns(token);
 
@@ -109,10 +98,10 @@ namespace fhir_facade_tests.Tests
             var result = _controller.Post();
 
             // Assert
-         //   var okResult = result as OkObjectResult;
-         //   Assert.IsNotNull(okResult);
-         //   Assert.AreEqual(200, okResult.StatusCode); // HTTP 200 OK
-         //   Assert.AreEqual("{\"name\": \"John Doe\", \"age\": 30}", okResult.Value); // Ensure the body content is returned correctly
+            //   var okResult = result as OkObjectResult;
+            //   Assert.IsNotNull(okResult);
+            //   Assert.AreEqual(200, okResult.StatusCode); // HTTP 200 OK
+            //   Assert.AreEqual("{\"name\": \"John Doe\", \"age\": 30}", okResult.Value); // Ensure the body content is returned correctly
         }
 
 
@@ -130,7 +119,7 @@ namespace fhir_facade_tests.Tests
             new System.Security.Claims.Claim(ClaimTypes.Name, "userName"), // Add more claims as needed
             new System.Security.Claims.Claim(ClaimTypes.Role, "admin"),
             new System.Security.Claims.Claim("client_id", "7bojglo66k83fe8gugojugitao")
-            
+
         };
 
             // Create the token descriptor

@@ -18,7 +18,8 @@
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.409.21" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.412.5" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
-    <PackageReference Include="Hl7.Fhir.R4" Version="5.11.2" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="5.10.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="Serilog" Version="4.2.0" />
