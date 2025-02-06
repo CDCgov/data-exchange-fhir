@@ -146,16 +146,16 @@ namespace OneCDPFHIRFacade
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
                         string requestId = context.HttpContext.TraceIdentifier;
 
-                        Console.WriteLine($"[{requestId}] Authentication failed: {context.Exception.Message}");
-                        await loggingUtility.Logging($"[{requestId}] Authentication failed: {context.Exception.Message}");
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}");
                     },
                     OnTokenValidated = async context =>
                     {
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
                         string requestId = context.HttpContext.TraceIdentifier; // Ensure request ID consistency
 
-                        Console.WriteLine($"[{requestId}] Token validated successfully.");
-                        await loggingUtility.Logging($"[{requestId}] Token validated successfully.");
+                        Console.WriteLine($"Token validated successfully.");
+                        await loggingUtility.Logging($"Token validated successfully.");
                     },
                 };
             });
@@ -240,9 +240,8 @@ namespace OneCDPFHIRFacade
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
-            app.UseHttpsRedirection();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
             // #####################################################
             // Start the App

@@ -57,14 +57,14 @@ namespace OneCDPFHIRFacade.Services
             // Attempt to save the resource to S3
             try
             {
-                string logMessage = $"End writing to S3: fileName={fileName}, bucket={AwsConfig.BucketName}";
+                string logMessage = $"End writing bundle to S3: fileName={fileName}, bucket={AwsConfig.BucketName}/Bucket";
 
                 await LoggingUtility.Logging(logMessage);
                 Console.WriteLine(logMessage);
 
                 var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
 
-                string logString = $"End write to S3: fileName={fileName}, response={response.HttpStatusCode}";
+                string logString = $"Logs saved to S3: fileName={fileName},bucket={AwsConfig.BucketName}/Logs, response={response.HttpStatusCode}";
                 await LoggingUtility.Logging(logString);
 
                 Console.WriteLine(logString);
