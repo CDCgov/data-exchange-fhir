@@ -1,22 +1,24 @@
 ﻿using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using static Hl7.Fhir.Model.CapabilityStatement;
 
 namespace OneCDPFHIRFacade.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("metadata")]
     public class MetadataController : Controller
     {
-        [HttpGet]
-        public IResult Index()
+        [HttpGet]      
+        public IActionResult Index()
         {
             // Create a CapabilityStatement object with the server's metadata
             CapabilityStatement capabilityStatement = new CapabilityStatement
             {
                 // Set basic information
                 Title = "Capability Statement",
-                Url = "",
+                Id=  "0565560f-016a-4473-82a7-cb44d3447f3c",
+                Url = "https://localhost:7216/metadata",
                 FhirVersion = FHIRVersion.N4_0_1,
                 Name = "One CDP FHIR Facade Capability Statement",
                 Status = PublicationStatus.Active,
@@ -150,8 +152,8 @@ namespace OneCDPFHIRFacade.Controllers
                 }
             };
 
-            return Results.Json(capabilityStatement, contentType: "application/fhir+json");
-
+            var jsonSerializer = new FhirJsonSerializer();
+            return Content(jsonSerializer.SerializeToString(capabilityStatement), "application/fhir+json");
         }
     }
 }
