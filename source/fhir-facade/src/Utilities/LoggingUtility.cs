@@ -8,11 +8,11 @@ namespace OneCDPFHIRFacade.Utilities
     public class LoggingUtility
     {
         private readonly bool runEnv = LocalFileStorageConfig.UseLocalDevFolder;
-
         // Inject the dependencies via constructor
         private readonly LoggerService _loggerService;
         private readonly ILogToS3BucketService _logToS3BucketService;
         private readonly string requestId;
+
 
         public LoggingUtility(LoggerService loggerService, ILogToS3BucketService logToS3BucketService, string requestId)
         {

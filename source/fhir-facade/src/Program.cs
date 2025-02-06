@@ -14,7 +14,6 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade
 {
@@ -43,8 +42,6 @@ namespace OneCDPFHIRFacade
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
 
-            var requestId = Regex.Replace(Convert.ToBase64String(Guid.NewGuid().ToByteArray()), "[/+=]", "", RegexOptions.NonBacktracking);
-
             if (runEnvironment == "AWS")
             {
                 var s3Config = new AmazonS3Config
@@ -72,13 +69,25 @@ namespace OneCDPFHIRFacade
                 }
             }// .if
 
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddScoped<LoggingUtility>(sp =>
+            {
+                var loggerService = sp.GetRequiredService<LoggerService>();
+                var logToS3BucketService = sp.GetRequiredService<ILogToS3BucketService>();
+                var httpContext = sp.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
+
+                var requestId = httpContext?.TraceIdentifier ?? Guid.NewGuid().ToString();
+
+                return new LoggingUtility(loggerService, logToS3BucketService, requestId);
+            });
+
+            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
+            builder.Services.AddScoped<ScopeValidator>();
             // Register serivces, Create instances of Logging
             builder.Services.AddSingleton<LoggerService>(sp =>
                 new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!)
             );
-
-            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
-            builder.Services.AddSingleton<ScopeValidator>();
 
             // Configure JwtBearer authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -101,6 +110,7 @@ namespace OneCDPFHIRFacade
                 {
                     policy.RequireAssertion(async context =>
                     {
+                        //Create request ID
                         // Instantiate the validator with required suffixes
                         var httpContext = context.Resource as HttpContext;
                         if (httpContext == null)
@@ -116,13 +126,12 @@ namespace OneCDPFHIRFacade
                             return false;
                         }
 
-                        var clientScope = AwsConfig.ClientScope;
+                        string requestId = httpContext.TraceIdentifier;
+                        Console.WriteLine($"[{requestId}] Validating scopes...");
 
-                        // Get the scope claim
+                        var clientScope = AwsConfig.ClientScope;
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
 
-                        // Validate the scopes claim from JWT token are scopes from config
-                        // checks sent scopes are onboarded scopes in config
                         return await scopeValidator.Validate(scopeClaim, clientScope!);
                     });
                 });
@@ -134,28 +143,21 @@ namespace OneCDPFHIRFacade
                 {
                     OnAuthenticationFailed = async context =>
                     {
-                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}");
+                        string requestId = context.HttpContext.TraceIdentifier;
+
+                        Console.WriteLine($"[{requestId}] Authentication failed: {context.Exception.Message}");
+                        await loggingUtility.Logging($"[{requestId}] Authentication failed: {context.Exception.Message}");
                     },
                     OnTokenValidated = async context =>
                     {
-                        Console.WriteLine("Token validated successfully.");
-
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging("Token validated successfully.");
+                        string requestId = context.HttpContext.TraceIdentifier; // Ensure request ID consistency
+
+                        Console.WriteLine($"[{requestId}] Token validated successfully.");
+                        await loggingUtility.Logging($"[{requestId}] Token validated successfully.");
                     },
                 };
-            });
-
-            // Register LoggingUtility properly, ensuring dependencies are injected
-            builder.Services.AddSingleton<LoggingUtility>(sp =>
-            {
-                var loggerService = sp.GetRequiredService<LoggerService>();
-                var logToS3BucketService = sp.GetRequiredService<ILogToS3BucketService>();
-
-                return new LoggingUtility(loggerService, logToS3BucketService, requestId);
             });
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
@@ -174,7 +176,8 @@ namespace OneCDPFHIRFacade
                         })
                         .AddProcessor(sp =>
                         {
-                            var loggingUtility = sp.GetRequiredService<LoggingUtility>();
+                            using var scope = sp.CreateScope();
+                            var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
                             return new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility));
                         });
                 });
@@ -222,17 +225,14 @@ namespace OneCDPFHIRFacade
                     bool runLocal = LocalFileStorageConfig.UseLocalDevFolder;
 
                     // Call LogData synchronously
-                    loggerService.LogData(AwsConfig.OltpEndpoint, requestId, runLocal)
+                    loggerService.LogData(AwsConfig.OltpEndpoint, "OLTP", runLocal)
                         .GetAwaiter().GetResult();
                 }
                 else
                 {
                     await loggingUtility.Logging("No OLTP");
                 }
-
-
             }
-
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
