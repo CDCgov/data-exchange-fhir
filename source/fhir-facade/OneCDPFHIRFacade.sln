@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OneCDPFHIRFacade", "src\One
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fhir-facade-tests", "tests\fhir-facade-tests\fhir-facade-tests.csproj", "{BB49E950-CD06-49DC-AA40-7B5F85EE9483}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "..\..\spikes\Logging\Logging\Logging.csproj", "{8A540A1A-3B61-48ED-B015-6301709AD87A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{BB49E950-CD06-49DC-AA40-7B5F85EE9483}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB49E950-CD06-49DC-AA40-7B5F85EE9483}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB49E950-CD06-49DC-AA40-7B5F85EE9483}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A540A1A-3B61-48ED-B015-6301709AD87A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A540A1A-3B61-48ED-B015-6301709AD87A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8A540A1A-3B61-48ED-B015-6301709AD87A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8A540A1A-3B61-48ED-B015-6301709AD87A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
