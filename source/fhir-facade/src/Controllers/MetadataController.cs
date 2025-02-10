@@ -35,7 +35,7 @@ namespace OneCDPFHIRFacade.Controllers
                 },
                 Instantiates =
                 [
-                    "http://hl7.org/fhir/us/core/CapabilityStatement/us-core-server"
+                    "https://hl7.org/fhir/us/core/CapabilityStatement/us-core-server"
                 ],
 
                 // Add Rest details
