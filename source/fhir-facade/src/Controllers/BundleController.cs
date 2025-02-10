@@ -8,13 +8,16 @@ using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Controllers
 {
+#if !runLocal
     [Authorize(Policy = "RequiredScope")]
+#endif
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
         //Create a cloud instance to add logs
         private readonly LoggingUtility _loggingUtility;
+        bool runLocal = LocalFileStorageConfig.UseLocalDevFolder;
         public BundleController(LoggingUtility loggingUtility)
         {
             _loggingUtility = loggingUtility;
@@ -64,7 +67,8 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
                 await _loggingUtility.Logging(logMessage);
-                await _loggingUtility.SaveLogS3(fileName);
+                if (!runLocal)
+                    await _loggingUtility.SaveLogS3(fileName);
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
@@ -80,7 +84,7 @@ namespace OneCDPFHIRFacade.Controllers
             logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
             await _loggingUtility.Logging(logMessage);
 
-            if (LocalFileStorageConfig.UseLocalDevFolder)
+            if (runLocal)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally
