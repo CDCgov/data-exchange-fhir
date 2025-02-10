@@ -20,7 +20,7 @@ namespace OneCDPFHIRFacade.Controllers
                 Id = "0565560f-016a-4473-82a7-cb44d3447f3c",
                 Url = "https://localhost:7216/metadata",
                 FhirVersion = FHIRVersion.N4_0_1,
-                Name = "One CDP FHIR Facade Capability Statement",
+                Name = "OneCDPFHIRFacadeCapabilityStatement",
                 Status = PublicationStatus.Active,
                 Experimental = true,
                 Date = "2015/02", //Year and month it was last updated
