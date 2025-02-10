@@ -30,7 +30,10 @@ namespace OneCDPFHIRFacade.Utilities
             string jsonString = JsonSerializer.Serialize(logMessage);
 
             await _loggerService.LogData(jsonString, requestId, runEnv);
-            AddLogForS3(logMessage);
+            if (!runEnv)
+            {
+                AddLogForS3(logMessage);
+            }
         }
         public async Task SaveLogS3(string fileName)
         {

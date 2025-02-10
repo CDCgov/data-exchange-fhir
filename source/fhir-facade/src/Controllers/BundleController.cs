@@ -1,6 +1,5 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
@@ -9,18 +8,22 @@ using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade.Controllers
 {
-    [Authorize(Policy = "RequiredScope")]
+
+
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
     {
         //Create a cloud instance to add logs
         private readonly LoggingUtility _loggingUtility;
+        bool runLocal = LocalFileStorageConfig.UseLocalDevFolder;
         public BundleController(LoggingUtility loggingUtility)
         {
             _loggingUtility = loggingUtility;
         }
-
+#if runLocal
+    [Authorize(Policy = "RequiredScope")]
+#endif
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {
@@ -52,7 +55,8 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 logMessage = $"Failed to parse FHIR Resource: {ex.Message}";
                 await _loggingUtility.Logging(logMessage, requestId);
-                await _loggingUtility.SaveLogS3(fileName);
+                if (!runLocal)
+                    await _loggingUtility.SaveLogS3(fileName);
 
                 // Return 400 Bad Request if JSON is invalid
                 return Results.BadRequest(new
@@ -67,7 +71,8 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
                 await _loggingUtility.Logging(logMessage, requestId);
-                await _loggingUtility.SaveLogS3(fileName);
+                if (!runLocal)
+                    await _loggingUtility.SaveLogS3(fileName);
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
@@ -83,7 +88,7 @@ namespace OneCDPFHIRFacade.Controllers
             logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
             await _loggingUtility.Logging(logMessage, requestId);
 
-            if (LocalFileStorageConfig.UseLocalDevFolder)
+            if (runLocal)
             {
                 // #####################################################
                 // Save the FHIR Resource Locally

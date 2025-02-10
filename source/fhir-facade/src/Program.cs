@@ -67,82 +67,85 @@ namespace OneCDPFHIRFacade
                     AwsConfig.S3Client = new AmazonS3Client(basicCred, s3Config);
                     AwsConfig.logsClient = new AmazonCloudWatchLogsClient(basicCred, logClient);
                 }
-            }// .if
-
-            // Register serivces, Create instances of Logging
-            builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
-            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
-            builder.Services.AddSingleton<LoggingUtility>();
-            builder.Services.AddSingleton<ScopeValidator>();
-
-            // Configure JwtBearer authentication
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    // Specify the authority and audience
-                    options.Authority = AwsConfig.AuthValidateURL;
-                    options.TokenValidationParameters = new TokenValidationParameters
+                builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
+                // Configure JwtBearer authentication
+                builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
                     {
-                        ValidateIssuer = true,
-                        ValidIssuer = AwsConfig.AuthValidateURL,
-                        ValidateAudience = false,
-                        ValidateLifetime = true,
-                    };
-                });
+                        // Specify the authority and audience
+                        options.Authority = AwsConfig.AuthValidateURL;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = AwsConfig.AuthValidateURL,
+                            ValidateAudience = false,
+                            ValidateLifetime = true,
+                        };
+                    });
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("RequiredScope", policy =>
+                builder.Services.AddAuthorization(options =>
                 {
-                    policy.RequireAssertion(async context =>
+                    options.AddPolicy("RequiredScope", policy =>
                     {
-                        // Instantiate the validator with required suffixes
-                        var httpContext = context.Resource as HttpContext;
-                        if (httpContext == null)
+                        policy.RequireAssertion(async context =>
                         {
-                            Console.WriteLine("Authentication URL not provided");
-                            return false;
-                        }
-                        // Instantiate the validator with required scope
-                        var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
-                        if (AwsConfig.ClientScope.IsNullOrEmpty())
-                        {
-                            Console.WriteLine("Scope not provided");
-                            return false;
-                        }
+                            // Instantiate the validator with required suffixes
+                            var httpContext = context.Resource as HttpContext;
+                            if (httpContext == null)
+                            {
+                                Console.WriteLine("Authentication URL not provided");
+                                return false;
+                            }
+                            // Instantiate the validator with required scope
+                            var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
+                            if (AwsConfig.ClientScope.IsNullOrEmpty())
+                            {
+                                Console.WriteLine("Scope not provided");
+                                return false;
+                            }
 
-                        var clientScope = AwsConfig.ClientScope;
+                            var clientScope = AwsConfig.ClientScope;
 
-                        // Get the scope claim
-                        var scopeClaim = context.User.FindFirst("scope")?.Value;
+                            // Get the scope claim
+                            var scopeClaim = context.User.FindFirst("scope")?.Value;
 
-                        // Validate the scopes claim from JWT token are scopes from config
-                        // checks sent scopes are onboarded scopes in config
-                        return await scopeValidator.Validate(scopeClaim, clientScope!);
+                            // Validate the scopes claim from JWT token are scopes from config
+                            // checks sent scopes are onboarded scopes in config
+                            return await scopeValidator.Validate(scopeClaim, clientScope!);
+                        });
                     });
                 });
-            });
 
-            builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.Events = new JwtBearerEvents
+                builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
-                    OnAuthenticationFailed = async context =>
+                    options.Events = new JwtBearerEvents
                     {
-                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        OnAuthenticationFailed = async context =>
+                        {
+                            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
 
-                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}", "Validator");
-                    },
-                    OnTokenValidated = async context =>
-                    {
-                        Console.WriteLine("Token validated successfully.");
+                            var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                            await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}", "Validator");
+                        },
+                        OnTokenValidated = async context =>
+                        {
+                            Console.WriteLine("Token validated successfully.");
 
-                        var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging("Token validated successfully.", "Validator");
-                    },
-                };
-            });
+                            var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
+                            await loggingUtility.Logging("Token validated successfully.", "Validator");
+                        },
+                    };
+                });
+                builder.Services.AddSingleton<ScopeValidator>();
+            }// .if
+
+            else
+            {
+                builder.Services.AddSingleton(new LoggerService());
+            }
+            // Register serivces, Create instances of Logging
+            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
+            builder.Services.AddSingleton<LoggingUtility>();
 
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
@@ -198,13 +201,17 @@ namespace OneCDPFHIRFacade
             }
 
             app.UseHttpsRedirection();
+            if (!LocalFileStorageConfig.UseLocalDevFolder)
+            {
+                app.UseAuthentication();
+                app.UseAuthorization();
+            }
 
             app.MapControllers();
             // #####################################################
             // Start the App
             // #####################################################
             await app.RunAsync();
-
         }
     }
 }
