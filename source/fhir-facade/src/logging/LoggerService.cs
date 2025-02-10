@@ -7,13 +7,19 @@ namespace OneCDP.Logging
 {
     public class LoggerService
     {
-        public readonly AmazonCloudWatchLogsClient _logClient;
-        public readonly string _logGroupName;
+        public readonly AmazonCloudWatchLogsClient? _logClient;
+        public readonly string? _logGroupName;
 
         public LoggerService(AmazonCloudWatchLogsClient logsClient, string logGroupName)
         {
             this._logClient = logsClient;
             this._logGroupName = logGroupName;
+        }
+
+        public LoggerService()
+        {
+            _logClient = null;
+            _logGroupName = null;
         }
         public async Task LogData(string message, string requestId, bool env)
         {
@@ -48,7 +54,7 @@ namespace OneCDP.Logging
                 var logStreamName = $"{DateTime.UtcNow:yyyyMMdd}";
 
                 // Fetch or create the log stream
-                var describeResponse = await _logClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
+                var describeResponse = await _logClient!.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
                 {
                     LogGroupName = _logGroupName,
                     LogStreamNamePrefix = logStreamName
