@@ -1,5 +1,6 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
@@ -8,8 +9,9 @@ using System.Text.RegularExpressions;
 
 namespace OneCDPFHIRFacade.Controllers
 {
-
-
+#if !runLocal
+    [Authorize(Policy = "RequiredScope")]
+#endif
     [ApiController]
     [Route("[controller]")]
     public class BundleController : ControllerBase
@@ -21,9 +23,7 @@ namespace OneCDPFHIRFacade.Controllers
         {
             _loggingUtility = loggingUtility;
         }
-#if runLocal
-    [Authorize(Policy = "RequiredScope")]
-#endif
+
         [HttpPost(Name = "PostBundle")]
         public async Task<IResult> Post()
         {

@@ -201,7 +201,7 @@ namespace OneCDPFHIRFacade
             }
 
             app.UseHttpsRedirection();
-            if (!LocalFileStorageConfig.UseLocalDevFolder)
+            if (runEnvironment == "AWS")
             {
                 app.UseAuthentication();
                 app.UseAuthorization();
