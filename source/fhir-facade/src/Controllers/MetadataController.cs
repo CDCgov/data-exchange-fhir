@@ -9,7 +9,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("metadata")]
     public class MetadataController : Controller
     {
-        [HttpGet]      
+        [HttpGet]
         public IActionResult Index()
         {
             // Create a CapabilityStatement object with the server's metadata
@@ -17,17 +17,17 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 // Set basic information
                 Title = "Capability Statement",
-                Id=  "0565560f-016a-4473-82a7-cb44d3447f3c",
+                Id = "0565560f-016a-4473-82a7-cb44d3447f3c",
                 Url = "https://localhost:7216/metadata",
                 FhirVersion = FHIRVersion.N4_0_1,
                 Name = "One CDP FHIR Facade Capability Statement",
                 Status = PublicationStatus.Active,
                 Experimental = true,
-                Date = DateTime.Now.ToString(),
+                Date = "2015/02", //Year and month it was last updated
                 Publisher = "CDC 1CDP FHIR Facade",
-                Kind = CapabilityStatementKind.Instance,
-                Format = ["json+fhir", "json"],
-                PatchFormat = ["json-patch+json"],
+                Kind = CapabilityStatementKind.Capability,
+                Format = ["json", "xml"],
+                PatchFormat = ["application/json-patch+json", "application/xml-patch+xml"],
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
@@ -35,33 +35,13 @@ namespace OneCDPFHIRFacade.Controllers
                     new RestComponent
                     {
                         Mode = RestfulCapabilityMode.Client,
-                        Security = new SecurityComponent
-                        {
-                            Service = new List<CodeableConcept>
-                            {
-                                new CodeableConcept
-                                {
-                                    Coding = new List<Coding>
-                                    {
-                                        new Coding
-                                        {
-                                            System = "",
-                                            Code = "",
-                                            Display = ""
-                                        }
-                                    }
-                                },
-                            },
-                            Cors = false,
-                            Description = ""
-                        },
                         // Add a custom extension to indicate 'Facade'
                         Extension = new List<Extension>
                         {
                             new Extension
                             {
                                 // Use an example URL for the extension; replace with your system's URL
-                                Url = "https://ocioedefhirhealthtst-ocioedefhirtst.fhir.azurehealthcareapis.com/metadata",
+                                Url = "https://mklbbe9uzh.execute-api.us-east-1.amazonaws.com/metadata",
                                 Value = new FhirString("Facade")
                             }
                         },
@@ -86,16 +66,46 @@ namespace OneCDPFHIRFacade.Controllers
                                 ConditionalRead = ConditionalReadStatus.FullSupport,
                                 ConditionalDelete = ConditionalDeleteStatus.Multiple,
                                 ReferencePolicy = [],
-                                SearchParam = new List<SearchParamComponent>()
+                                SearchParam = new List<SearchParamComponent>
                                 {
                                     new SearchParamComponent
                                     {
-                                        Type = SearchParamType.String
+                                        Name = "date",
+                                        Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-date",
+                                        Type = SearchParamType.Date
+                                    },
+                                    new SearchParamComponent
+                                    {
+                                      Name = "name",
+                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-name",
+                                      Type = SearchParamType.String
+                                    },
+                                    new SearchParamComponent
+                                    {
+                                      Name = "reference",
+                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-reference",
+                                      Type = SearchParamType.Token
+                                    },
+                                    new SearchParamComponent
+                                    {
+                                      Name = "status",
+                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-status",
+                                      Type = SearchParamType.Token
+                                    },
+                                    new SearchParamComponent
+                                    {
+                                      Name = "url",
+                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-url",
+                                      Type = SearchParamType.Uri
+                                    },
+                                    new SearchParamComponent
+                                    {
+                                      Name = "version",
+                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-version",
+                                      Type = SearchParamType.Token
                                     }
                                 }
                             },
-
-
                         },
                         Interaction = new List<SystemInteractionComponent>
                         {
@@ -117,7 +127,7 @@ namespace OneCDPFHIRFacade.Controllers
                             new OperationComponent
                             {
                                 Name = "export",
-                                Definition = ""
+                                Definition = "OperationDefinition/export"
                             }
                         }
                     },
@@ -135,19 +145,12 @@ namespace OneCDPFHIRFacade.Controllers
                             new SupportedMessageComponent
                             {
                                 Mode = EventCapabilityMode.Sender
+                            },
+                            new SupportedMessageComponent
+                            {
+                                Definition = "Null"
                             }
                         }
-                    }
-                },
-                Document = new List<DocumentComponent>
-                {
-                    new DocumentComponent
-                    {
-                        Mode = DocumentMode.Consumer
-                    },
-                    new DocumentComponent
-                    {
-                        Mode = DocumentMode.Producer
                     }
                 }
             };
