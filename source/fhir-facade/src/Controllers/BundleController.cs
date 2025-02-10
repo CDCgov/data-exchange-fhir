@@ -67,7 +67,8 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
                 await _loggingUtility.Logging(logMessage);
-                await _loggingUtility.SaveLogS3(fileName);
+                if (!runLocal)
+                    await _loggingUtility.SaveLogS3(fileName);
                 return Results.BadRequest(new
                 {
                     error = "Invalid payload",
