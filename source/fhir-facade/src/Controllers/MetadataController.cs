@@ -23,12 +23,16 @@ namespace OneCDPFHIRFacade.Controllers
                 Name = "OneCDPFHIRFacadeCapabilityStatement",
                 Status = PublicationStatus.Active,
                 Experimental = true,
-                Date = "2015/02", //Year and month it was last updated
+                Date = "2015-02", //Year and month it was last updated
                 Publisher = "CDC 1CDP FHIR Facade",
-                Kind = CapabilityStatementKind.Capability,
+                Kind = CapabilityStatementKind.Instance,
                 Format = ["json", "xml"],
                 PatchFormat = ["application/json-patch+json", "application/xml-patch+xml"],
-
+                Description = "One CDP FHIR Facade",
+                Implementation = new ImplementationComponent
+                {
+                    Description = "One CDP Implementation"
+                },
                 // Add Rest details
                 Rest = new List<RestComponent>()
                 {
@@ -60,52 +64,13 @@ namespace OneCDPFHIRFacade.Controllers
                                     new ResourceInteractionComponent
                                     {
                                         Code = TypeRestfulInteraction.Create
-                                    },
+                                    }
                                 },
                                 Versioning = ResourceVersionPolicy.VersionedUpdate,
                                 ConditionalRead = ConditionalReadStatus.FullSupport,
                                 ConditionalDelete = ConditionalDeleteStatus.Multiple,
                                 ReferencePolicy = [],
-                                SearchParam = new List<SearchParamComponent>
-                                {
-                                    new SearchParamComponent
-                                    {
-                                        Name = "date",
-                                        Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-date",
-                                        Type = SearchParamType.Date
-                                    },
-                                    new SearchParamComponent
-                                    {
-                                      Name = "name",
-                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-name",
-                                      Type = SearchParamType.String
-                                    },
-                                    new SearchParamComponent
-                                    {
-                                      Name = "reference",
-                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-reference",
-                                      Type = SearchParamType.Token
-                                    },
-                                    new SearchParamComponent
-                                    {
-                                      Name = "status",
-                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-status",
-                                      Type = SearchParamType.Token
-                                    },
-                                    new SearchParamComponent
-                                    {
-                                      Name = "url",
-                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-url",
-                                      Type = SearchParamType.Uri
-                                    },
-                                    new SearchParamComponent
-                                    {
-                                      Name = "version",
-                                      Definition = "http://hl7.org/fhir/SearchParameter/ValueSet-version",
-                                      Type = SearchParamType.Token
-                                    }
-                                }
-                            },
+                            }
                         },
                         Interaction = new List<SystemInteractionComponent>
                         {
@@ -120,36 +85,7 @@ namespace OneCDPFHIRFacade.Controllers
                              new SystemInteractionComponent
                              {
                                  Code = SystemRestfulInteraction.Transaction
-                             },
-                        },
-                        Operation = new List<OperationComponent>
-                        {
-                            new OperationComponent
-                            {
-                                Name = "export",
-                                Definition = "OperationDefinition/export"
-                            }
-                        }
-                    },
-                },
-                Messaging = new List<MessagingComponent>
-                {
-                    new MessagingComponent
-                    {
-                        SupportedMessage = new List<SupportedMessageComponent>
-                        {
-                            new SupportedMessageComponent
-                            {
-                                Mode = EventCapabilityMode.Receiver
-                            },
-                            new SupportedMessageComponent
-                            {
-                                Mode = EventCapabilityMode.Sender
-                            },
-                            new SupportedMessageComponent
-                            {
-                                Definition = "Null"
-                            }
+                             }
                         }
                     }
                 }
