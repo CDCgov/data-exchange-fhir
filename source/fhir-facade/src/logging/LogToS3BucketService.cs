@@ -13,7 +13,7 @@ namespace OneCDP.Logging
 
     public class LogToS3BucketService : ILogToS3BucketService
     {
-        private readonly List<object> _resultList = new();
+        public List<object> _resultList = new();
 
         public async Task<IActionResult> SaveResourceToS3(IAmazonS3 s3Client, string bucketName, string fileName)
         {
@@ -29,6 +29,7 @@ namespace OneCDP.Logging
             {
                 Console.WriteLine($"Writing logs to S3: fileName=Logs/{fileName}, bucket={bucketName}");
                 await s3Client.PutObjectAsync(putRequest);
+                _resultList = [];
                 return new OkObjectResult($"Logs saved successfully to S3 at Logs/{fileName}");
             }
             catch (Exception ex)

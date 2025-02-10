@@ -8,17 +8,18 @@ namespace OneCDPFHIRFacade.Utilities
     public class LoggingUtility
     {
         private readonly bool runEnv = LocalFileStorageConfig.UseLocalDevFolder;
-
         // Inject the dependencies via constructor
         private readonly LoggerService _loggerService;
         private readonly ILogToS3BucketService _logToS3BucketService;
+        public string requestId;
 
-        public LoggingUtility(LoggerService loggerService, ILogToS3BucketService logToS3BucketService)
+        public LoggingUtility(LoggerService loggerService, ILogToS3BucketService logToS3BucketService, string requestId)
         {
             _loggerService = loggerService;
             _logToS3BucketService = logToS3BucketService;
+            this.requestId = requestId;
         }
-        public async Task Logging(string message, string requestId)
+        public async Task Logging(string message)
         {
             //Log message as json
             var logMessage = new

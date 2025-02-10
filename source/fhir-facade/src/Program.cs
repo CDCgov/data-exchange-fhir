@@ -69,11 +69,25 @@ namespace OneCDPFHIRFacade
                 }
             }// .if
 
-            // Register serivces, Create instances of Logging
-            builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddScoped<LoggingUtility>(sp =>
+            {
+                var loggerService = sp.GetRequiredService<LoggerService>();
+                var logToS3BucketService = sp.GetRequiredService<ILogToS3BucketService>();
+                var httpContext = sp.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
+
+                var requestId = httpContext?.TraceIdentifier ?? Guid.NewGuid().ToString();
+
+                return new LoggingUtility(loggerService, logToS3BucketService, requestId);
+            });
+
             builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
-            builder.Services.AddSingleton<LoggingUtility>();
-            builder.Services.AddSingleton<ScopeValidator>();
+            builder.Services.AddScoped<ScopeValidator>();
+            // Register serivces, Create instances of Logging
+            builder.Services.AddSingleton<LoggerService>(sp =>
+                new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!)
+            );
 
             // Configure JwtBearer authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -96,6 +110,7 @@ namespace OneCDPFHIRFacade
                 {
                     policy.RequireAssertion(async context =>
                     {
+                        //Create request ID
                         // Instantiate the validator with required suffixes
                         var httpContext = context.Resource as HttpContext;
                         if (httpContext == null)
@@ -111,13 +126,12 @@ namespace OneCDPFHIRFacade
                             return false;
                         }
 
-                        var clientScope = AwsConfig.ClientScope;
+                        string requestId = httpContext.TraceIdentifier;
+                        Console.WriteLine($"[{requestId}] Validating scopes...");
 
-                        // Get the scope claim
+                        var clientScope = AwsConfig.ClientScope;
                         var scopeClaim = context.User.FindFirst("scope")?.Value;
 
-                        // Validate the scopes claim from JWT token are scopes from config
-                        // checks sent scopes are onboarded scopes in config
                         return await scopeValidator.Validate(scopeClaim, clientScope!);
                     });
                 });
@@ -129,65 +143,95 @@ namespace OneCDPFHIRFacade
                 {
                     OnAuthenticationFailed = async context =>
                     {
-                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}", "Validator");
+                        string requestId = context.HttpContext.TraceIdentifier;
+
+                        Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+                        await loggingUtility.Logging($"Authentication failed: {context.Exception.Message}");
                     },
                     OnTokenValidated = async context =>
                     {
-                        Console.WriteLine("Token validated successfully.");
-
                         var loggingUtility = context.HttpContext.RequestServices.GetRequiredService<LoggingUtility>();
-                        await loggingUtility.Logging("Token validated successfully.", "Validator");
+                        string requestId = context.HttpContext.TraceIdentifier; // Ensure request ID consistency
+
+                        Console.WriteLine($"Token validated successfully.");
+                        await loggingUtility.Logging($"Token validated successfully.");
                     },
                 };
             });
 
+            if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
+            {
+                builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
+                {
+                    tracerProviderBuilder
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddAWSInstrumentation()
+                        .AddConsoleExporter()
+                        .AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                            options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                        })
+                        .AddProcessor(sp =>
+                        {
+                            using var scope = sp.CreateScope();
+                            var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
+                            return new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility));
+                        });
+                });
+
+                builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
+                {
+                    metricsProviderBuilder
+                        .SetResourceBuilder(resourceBuilder)
+                        .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
+                        .AddHttpClientInstrumentation() // Collect HTTP client metrics
+                        .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                        }).AddConsoleExporter();  // Custom metrics              
+                });
+
+                builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
+                {
+                    metricsProviderBuilder
+                        .AddAspNetCoreInstrumentation()
+                        .AddHttpClientInstrumentation()
+                        .AddMeter("OneCDPFHIRFacadeMeter")
+                        .AddOtlpExporter(options =>
+                        {
+                            options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
+                        })
+                        .AddConsoleExporter();
+                });
+            }
+
+
+            // Now Build the App
             var app = builder.Build();
+
+            // Now Resolve Services & Call Methods
             using (var scope = app.Services.CreateScope())
             {
-                var loggerService = scope.ServiceProvider.GetRequiredService<LoggerService>();
-                var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
+                var services = scope.ServiceProvider;
+
+                var loggerService = services.GetRequiredService<LoggerService>();
+                var loggingUtility = services.GetRequiredService<LoggingUtility>();
+
                 if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
                 {
                     bool runLocal = LocalFileStorageConfig.UseLocalDevFolder;
-                    await loggerService.LogData(AwsConfig.OltpEndpoint, " ProgramOLTP ", runLocal);
 
-                    builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
-                   {
-                       tracerProviderBuilder
-                           .SetResourceBuilder(resourceBuilder)
-                           .AddAspNetCoreInstrumentation() // Instruments ASP.NET Core (HTTP request handling)
-                           .AddHttpClientInstrumentation() // Instruments outgoing HTTP client requests
-                           .AddAWSInstrumentation()
-                           .AddConsoleExporter()
-                           .AddOtlpExporter(options =>
-                           {
-                               options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
-                               options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
-                           })
-                           .AddProcessor(new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility)));
-                   });
-
-                    builder.Services.AddOpenTelemetry().WithMetrics(metricsProviderBuilder =>
-                    {
-                        metricsProviderBuilder
-                            .SetResourceBuilder(resourceBuilder)
-                            .AddAspNetCoreInstrumentation() // Collect ASP.NET Core metrics
-                            .AddHttpClientInstrumentation() // Collect HTTP client metrics
-                            .AddMeter("OneCDPFHIRFacadeMeter").AddOtlpExporter(options =>
-                            {
-                                options.Endpoint = new Uri(AwsConfig.OltpEndpoint);
-                            }).AddConsoleExporter();  // Custom metrics              
-                    });
+                    // Call LogData synchronously
+                    loggerService.LogData(AwsConfig.OltpEndpoint, "OLTP", runLocal)
+                        .GetAwaiter().GetResult();
                 }
                 else
                 {
-                    await loggingUtility.Logging("No OLTP", " ProgramOLTP ");
+                    await loggingUtility.Logging("No OLTP");
                 }
-
-
             }
 
             // Configure the HTTP request pipeline.
@@ -196,9 +240,8 @@ namespace OneCDPFHIRFacade
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
-            app.UseHttpsRedirection();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.MapControllers();
             // #####################################################
             // Start the App
