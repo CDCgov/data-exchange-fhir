@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <DefineConstants>AWS</DefineConstants>
+    <DefineConstants>runAws</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
