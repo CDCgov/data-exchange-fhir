@@ -33,6 +33,11 @@ namespace OneCDPFHIRFacade.Controllers
                 {
                     Description = "One CDP Implementation"
                 },
+                Instantiates =
+                [
+                    "http://hl7.org/fhir/us/core/CapabilityStatement/us-core-server"
+                ],
+
                 // Add Rest details
                 Rest = new List<RestComponent>()
                 {
