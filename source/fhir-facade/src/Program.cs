@@ -45,6 +45,9 @@ namespace OneCDPFHIRFacade
 
             builder.Services.AddHttpContextAccessor();
 
+            // #####################################################
+            // AWS Configuration
+            // #####################################################
             if (runEnvironment == "AWS")
             {
                 var s3Config = new AmazonS3Config
@@ -153,6 +156,9 @@ namespace OneCDPFHIRFacade
                 });
 
             }// .if
+            // #####################################################
+            // Local - Non-AWS Configuration
+            // #####################################################
             else
             {
                 builder.Services.AddSingleton(new LoggerService());
@@ -166,8 +172,13 @@ namespace OneCDPFHIRFacade
                     return new LoggingUtility(loggerService, requestId);
                 });
             }
-            // Register serivces, Create instances of Logging
+            // #####################################################
+            // ./ end Configuration
+            // #####################################################
 
+            // #####################################################
+            // Register serivces, Create instances of Logging
+            // #####################################################
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
@@ -215,8 +226,13 @@ namespace OneCDPFHIRFacade
                         .AddConsoleExporter();
                 });
             }
+            // #####################################################
+            // ./ end - Register serivces, Create instances of Logging
+            // #####################################################
 
+            // #####################################################
             // Now Build the App
+            // #####################################################
             var app = builder.Build();
 
             // Now Resolve Services & Call Methods
@@ -260,6 +276,6 @@ namespace OneCDPFHIRFacade
             // Start the App
             // #####################################################
             await app.RunAsync();
-        }
-    }
-}
+        }// /. public static async Task Main(string[] args)
+    }// ./ public static class Program
+}// ./ namespace OneCDPFHIRFacade
