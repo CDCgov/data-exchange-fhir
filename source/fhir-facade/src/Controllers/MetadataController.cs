@@ -44,16 +44,6 @@ namespace OneCDPFHIRFacade.Controllers
                     new RestComponent
                     {
                         Mode = RestfulCapabilityMode.Client,
-                        // Add a custom extension to indicate 'Facade'
-                        Extension = new List<Extension>
-                        {
-                            new Extension
-                            {
-                                // Use an example URL for the extension; replace with your system's URL
-                                Url = "https://mklbbe9uzh.execute-api.us-east-1.amazonaws.com/metadata",
-                                Value = new FhirString("Facade")
-                            }
-                        },
                         Resource = new List<ResourceComponent>()
                         {
                             // Add information for supported resources
