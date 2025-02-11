@@ -41,22 +41,9 @@ namespace OneCDPFHIRFacade
 
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
+            AwsConfig.Initialize(builder.Configuration);
 
             builder.Services.AddHttpContextAccessor();
-
-            // Register serivces, Create instances of Logging
-            builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
-            builder.Services.AddScoped<LoggingUtility>(sp =>
-            {
-                var loggerService = sp.GetRequiredService<LoggerService>();
-                var logToS3BucketService = sp.GetRequiredService<ILogToS3BucketService>();
-                var httpContext = sp.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
-
-                var requestId = httpContext?.TraceIdentifier ?? Guid.NewGuid().ToString();
-
-                return new LoggingUtility(loggerService, logToS3BucketService, requestId);
-            });
-
 
             if (runEnvironment == "AWS")
             {
@@ -84,6 +71,7 @@ namespace OneCDPFHIRFacade
                     AwsConfig.logsClient = new AmazonCloudWatchLogsClient(basicCred, logClient);
                 }
                 builder.Services.AddSingleton(new LoggerService(AwsConfig.logsClient!, AwsConfig.LogGroupName!));
+                builder.Services.AddSingleton<ILogToS3BucketService, LogToS3BucketService>();
                 // Configure JwtBearer authentication
                 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
@@ -153,12 +141,32 @@ namespace OneCDPFHIRFacade
                     };
                 });
                 builder.Services.AddSingleton<ScopeValidator>();
+                builder.Services.AddScoped<LoggingUtility>(sp =>
+                {
+                    var loggerService = sp.GetRequiredService<LoggerService>();
+                    var logToS3BucketService = sp.GetRequiredService<ILogToS3BucketService>();
+                    var httpContext = sp.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
+
+                    var requestId = httpContext?.TraceIdentifier ?? Guid.NewGuid().ToString();
+
+                    return new LoggingUtility(loggerService, logToS3BucketService, requestId);
+                });
+
             }// .if
             else
             {
                 builder.Services.AddSingleton(new LoggerService());
-            }
+                builder.Services.AddScoped<LoggingUtility>(sp =>
+                {
+                    var loggerService = sp.GetRequiredService<LoggerService>();
+                    var httpContext = sp.GetRequiredService<IHttpContextAccessor>()?.HttpContext;
 
+                    var requestId = httpContext?.TraceIdentifier ?? Guid.NewGuid().ToString();
+
+                    return new LoggingUtility(loggerService, requestId);
+                });
+            }
+            // Register serivces, Create instances of Logging
 
             if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
             {
@@ -207,7 +215,6 @@ namespace OneCDPFHIRFacade
                         .AddConsoleExporter();
                 });
             }
-
 
             // Now Build the App
             var app = builder.Build();
