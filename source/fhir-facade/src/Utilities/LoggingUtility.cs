@@ -44,11 +44,11 @@ namespace OneCDPFHIRFacade.Utilities
         public async Task SaveLogS3(string fileName)
         {
             // Save logs to S3
-            await _logToS3BucketService.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, fileName);
+            await _logToS3BucketService!.SaveResourceToS3(AwsConfig.S3Client!, AwsConfig.BucketName!, fileName);
         }
         public void AddLogForS3(object logMessage)
         {
-            _logToS3BucketService.JsonResult(logMessage);
+            _logToS3BucketService!.JsonResult(logMessage);
         }
     }
 }
