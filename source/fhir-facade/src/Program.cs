@@ -106,12 +106,21 @@ namespace OneCDPFHIRFacade
 
                             var clientScope = AwsConfig.ClientScope;
 
-                            // Get the scope claim
-                            var scopeClaim = context.User.FindFirst("scope")?.Value;
-
-                            // Validate the scopes claim from JWT token are scopes from config
-                            // checks sent scopes are onboarded scopes in config
-                            return await scopeValidator.Validate(scopeClaim, clientScope!);
+                            if (!string.IsNullOrEmpty(context.User.FindFirst("scope")?.Value))
+                            {
+                                // Get the scope claim
+                                var scopeClaim = context.User.FindFirst("scope")?.Value;
+                                AwsConfig.ScopeClaim = scopeClaim!.Split(' ');
+                                // Validate the scopes claim from JWT token are scopes from config
+                                // checks sent scopes are onboarded scopes in config
+                                return await scopeValidator.Validate(scopeClaim, clientScope!);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Scope claim not provided");
+                                AwsConfig.ScopeClaim = [];
+                                return false;
+                            }
                         });
                     });
                 });

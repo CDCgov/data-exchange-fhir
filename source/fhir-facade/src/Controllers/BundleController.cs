@@ -2,6 +2,7 @@
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
@@ -50,6 +51,21 @@ namespace OneCDPFHIRFacade.Controllers
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
                 bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
+
+                if (!runLocal)
+                {
+                    BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
+                    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+                    if (bundleScopeValid)
+                    {
+                        Console.WriteLine("Bundle scope validated");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Bundle scope not validated");
+                        return Results.Unauthorized();
+                    }
+                }
             }
             catch (FormatException ex)
             {

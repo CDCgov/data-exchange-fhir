@@ -15,6 +15,7 @@ namespace OneCDPFHIRFacade.Config
         public static string? OltpEndpoint { get; set; }
         public static string? AuthValidateURL { get; set; }
         public static string[]? ClientScope { get; set; }
+        public static string[]? ScopeClaim { get; set; }
         public static AmazonS3Client? S3Client { get; set; }
         public static AmazonCloudWatchLogsClient? logsClient { get; set; }
 
