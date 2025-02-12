@@ -38,16 +38,21 @@ namespace OneCDPFHIRFacade.Authentication
             }
             bool valid = false;
             string[] bundleMetaProfile = GetBundleProfile();
-            foreach (var scope in AwsConfig.ScopeClaim)
+
+            foreach (var item in bundleMetaProfile)
             {
-                foreach (var item in bundleMetaProfile)
+                int pos = item.LastIndexOf("/") + 1;
+                string getProfile = item.Substring(pos, item.Length - pos);
+                foreach (var scope in AwsConfig.ScopeClaim)
                 {
-                    if (item.Contains(scope))
+                    string[] scopeSplit = scope.Split(new string[] { "/" }, StringSplitOptions.None);
+                    string currentScope = scopeSplit[1];
+                    if (currentScope.Equals(getProfile))
                     {
+                        AwsConfig.ClientId = scopeSplit[1];
                         return true;
                     }
                 }
-
             }
             return valid;
         }

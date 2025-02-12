@@ -1,5 +1,6 @@
 ﻿using Amazon.CloudWatchLogs;
 using Amazon.CloudWatchLogs.Model;
+using OneCDPFHIRFacade.Config;
 using Serilog;
 using System.Text.Json;
 
@@ -38,6 +39,7 @@ namespace OneCDP.Logging
             var logMessage = new
             {
                 RequestID = requestId,
+                ClientID = AwsConfig.ClientId,
                 Message = message,
                 Timestamp = DateTime.UtcNow,
             };
@@ -75,6 +77,7 @@ namespace OneCDP.Logging
                 var logMessage = new
                 {
                     RequestID = requestId,
+                    ClientID = AwsConfig.ClientId,
                     Message = message,
                     Timestamp = DateTime.UtcNow,
                 };

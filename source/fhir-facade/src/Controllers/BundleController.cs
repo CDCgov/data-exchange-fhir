@@ -50,6 +50,8 @@ namespace OneCDPFHIRFacade.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
+                parser.Settings.PermissiveParsing = true;
+                parser.Settings.AcceptUnknownMembers = true;
                 bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
 
                 if (!runLocal)
@@ -128,9 +130,6 @@ namespace OneCDPFHIRFacade.Controllers
                 return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync(), requestId);
             }// .else
 
-
-
         }
-
     }
 }
