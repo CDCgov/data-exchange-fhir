@@ -52,4 +52,3 @@ namespace OneCDPFHIRFacade.Utilities
         }
     }
 }
-
