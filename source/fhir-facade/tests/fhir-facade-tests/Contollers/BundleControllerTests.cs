@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
+using OneCDP.Logging;
 using OneCDPFHIRFacade.Controllers;
 using OneCDPFHIRFacade.Utilities;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,7 +13,7 @@ using System.Text;
 namespace fhir_facade_tests.Tests
 {
     [TestFixture]
-    public class ExampleControllerTests
+    public class BundleControllerTests
     {
         //  private Mock<BundleController> _mockBundeService;
         private BundleController _controller;
@@ -21,69 +22,71 @@ namespace fhir_facade_tests.Tests
         public void SetUp()
         {
 
-          //  var secretKey = "your-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-key"; // Secret key for signing the token
-          //  var issuer = "your-issuer"; // The issuer (usually your API or service name)
-          //  var audience = "your-audience"; // The audience (target client or system)
-          //  var expirationDate = DateTime.UtcNow.AddHours(1); // Set expiration time for the token
+              var secretKey = "your-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-keyyour-secret-key"; // Secret key for signing the token
+              var issuer = "your-issuer"; // The issuer (usually your API or service name)
+              var audience = "your-audience"; // The audience (target client or system)
+              var expirationDate = DateTime.UtcNow.AddHours(1); // Set expiration time for the token
 
 
-          //  string token = GenerateJwtToken(secretKey, issuer, audience, expirationDate);
+             string token = GenerateJwtToken(secretKey, issuer, audience, expirationDate);
 
 
-          //  // Create the mock HttpContext
-          //  var mockHttpContext = new Mock<HttpContext>();
+            //  // Create the mock HttpContext
+            var mockHttpContext = new Mock<HttpContext>();
 
 
-          //  var mockHeaders = new Mock<IHeaderDictionary>();
+              var mockHeaders = new Mock<IHeaderDictionary>();
 
-          //  // Add the Authorization header to the mock headers
-          //  mockHeaders.Setup(headers => headers.ContainsKey("Authorization")).Returns(true);
-          //  mockHeaders.Setup(headers => headers["Authorization"]).Returns(new StringValues(token));
+            //  // Add the Authorization header to the mock headers
+              mockHeaders.Setup(headers => headers.ContainsKey("Authorization")).Returns(true);
+              mockHeaders.Setup(headers => headers["Authorization"]).Returns(new StringValues(token));
 
-          //  mockHeaders
-          //.Setup(h => h.TryGetValue("Authorization", out It.Ref<StringValues>.IsAny))
-          //.Returns((string key, out StringValues value) =>
-          //{
-          //    if (key == "Authorization")
-          //    {
-          //        value = new StringValues(token);
-          //        return true;
-          //    }
-          //    value = StringValues.Empty;
-          //    return false;
-          //});
-
-
-          //  //   mockHeaders.Setup(headers => headers.TryGetValue("Authorization").Returns(new StringValues("Bearer some-jwt-token"));
+            //  mockHeaders
+            //.Setup(h => h.TryGetValue("Authorization", out It.Ref<StringValues>.IsAny))
+            //.Returns((string key, out StringValues value) =>
+            //{
+            //    if (key == "Authorization")
+            //    {
+            //        value = new StringValues(token);
+            //        return true;
+            //    }
+            //    value = StringValues.Empty;
+            //    return false;
+            //});
 
 
-
-          //  // Setup the Request's Headers property
+            //  //   mockHeaders.Setup(headers => headers.TryGetValue("Authorization").Returns(new StringValues("Bearer some-jwt-token"));
 
 
 
-          //  var mockRequest = new Mock<HttpRequest>();
-          //  mockRequest.Setup(r => r.Headers).Returns(mockHeaders.Object);
-
-          //  var bodyContent = "{\"name\": \"John Doe\", \"age\": 30}"; // Example JSON body
-
-          //  // Set the Request.Body to a memory stream with the JSON content
-          //  mockRequest.Setup(req => req.Body).Returns(new MemoryStream(Encoding.UTF8.GetBytes(bodyContent)));
-
-          //  // Set up the mock HttpContext.Request to return the mock request
-          //  mockHttpContext.Setup(ctx => ctx.Request).Returns(mockRequest.Object);
-
-          //  var mockLogger = new Mock<LoggingUtility>();
+            //  // Setup the Request's Headers property
 
 
-          //  // Create the controller
-          //  _controller = new BundleController(mockLogger.Object)
-          //  {
-          //      ControllerContext = new ControllerContext()
-          //      {
-          //          HttpContext = mockHttpContext.Object
-          //      }
-          //  };
+
+            var mockRequest = new Mock<HttpRequest>();
+            mockRequest.Setup(r => r.Headers).Returns(mockHeaders.Object);
+
+            var bodyContent = "{\"name\": \"John Doe\", \"age\": 30}"; // Example JSON body
+
+            //  // Set the Request.Body to a memory stream with the JSON content
+            mockRequest.Setup(req => req.Body).Returns(new MemoryStream(Encoding.UTF8.GetBytes(bodyContent)));
+
+            //  // Set up the mock HttpContext.Request to return the mock request
+            mockHttpContext.Setup(ctx => ctx.Request).Returns(mockRequest.Object);
+            var loggerService = new Mock<LoggerService>();
+            string requestId = "asdf";
+           var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object,requestId);
+
+            mockLoggingUtility.Setup(utility => utility.Logging("MESSAGE"));
+
+            //  // Create the controller
+            _controller = new BundleController(mockLoggingUtility.Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
 
 
 
@@ -92,10 +95,11 @@ namespace fhir_facade_tests.Tests
         }
 
         [Test]
-        public void Echo_ReturnsOkResult_WithRequestBody()
+        public void testPost()
         {
+            Console.WriteLine("POST");
             // Act
-         //   var result = _controller.Post();
+             var result = _controller.Post();
 
             // Assert
             //   var okResult = result as OkObjectResult;
