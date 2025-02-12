@@ -3,7 +3,7 @@ using Moq;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Utilities;
 
-namespace fhir_facade_tests.Utilities
+namespace fhir_facade_tests.UtilitiesTest
 {
     [TestFixture]
     public class RequestIdTest

@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace fhir_facade_tests.Tests
+namespace fhir_facade_tests.AuthenticationTests
 {
     [TestFixture]
     public class ScopeValidatorTests
