@@ -74,18 +74,11 @@ namespace OneCDP.Logging
                     sequenceToken = logStream.UploadSequenceToken;
                 }
 
-                var logMessage = new
+                var logEvent = new InputLogEvent
                 {
                     RequestID = requestId,
                     ClientID = AwsConfig.ClientId,
                     Message = message,
-                    Timestamp = DateTime.UtcNow,
-                };
-                var jsonLogMessage = JsonSerializer.Serialize(logMessage);
-
-                var logEvent = new InputLogEvent
-                {
-                    Message = jsonLogMessage,
                     Timestamp = DateTime.UtcNow
                 };
 

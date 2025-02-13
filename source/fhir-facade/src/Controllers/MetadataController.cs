@@ -9,7 +9,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("metadata")]
     public class MetadataController : Controller
     {
-        [HttpGet]      
+        [HttpGet]
         public IActionResult Index()
         {
             // Create a CapabilityStatement object with the server's metadata
@@ -17,17 +17,26 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 // Set basic information
                 Title = "Capability Statement",
-                Id=  "0565560f-016a-4473-82a7-cb44d3447f3c",
+                Id = "0565560f-016a-4473-82a7-cb44d3447f3c",
                 Url = "https://localhost:7216/metadata",
                 FhirVersion = FHIRVersion.N4_0_1,
-                Name = "One CDP FHIR Facade Capability Statement",
+                Name = "OneCDPFHIRFacadeCapabilityStatement",
                 Status = PublicationStatus.Active,
                 Experimental = true,
-                Date = DateTime.Now.ToString(),
+                Date = "2015-02", //Year and month it was last updated
                 Publisher = "CDC 1CDP FHIR Facade",
                 Kind = CapabilityStatementKind.Instance,
-                Format = ["json+fhir", "json"],
-                PatchFormat = ["json-patch+json"],
+                Format = ["json", "xml"],
+                PatchFormat = ["application/json-patch+json", "application/xml-patch+xml"],
+                Description = "One CDP FHIR Facade",
+                Implementation = new ImplementationComponent
+                {
+                    Description = "One CDP Implementation"
+                },
+                Instantiates =
+                [
+                    "https://hl7.org/fhir/us/core/CapabilityStatement/us-core-server"
+                ],
 
                 // Add Rest details
                 Rest = new List<RestComponent>()
@@ -35,36 +44,6 @@ namespace OneCDPFHIRFacade.Controllers
                     new RestComponent
                     {
                         Mode = RestfulCapabilityMode.Client,
-                        Security = new SecurityComponent
-                        {
-                            Service = new List<CodeableConcept>
-                            {
-                                new CodeableConcept
-                                {
-                                    Coding = new List<Coding>
-                                    {
-                                        new Coding
-                                        {
-                                            System = "",
-                                            Code = "",
-                                            Display = ""
-                                        }
-                                    }
-                                },
-                            },
-                            Cors = false,
-                            Description = ""
-                        },
-                        // Add a custom extension to indicate 'Facade'
-                        Extension = new List<Extension>
-                        {
-                            new Extension
-                            {
-                                // Use an example URL for the extension; replace with your system's URL
-                                Url = "https://ocioedefhirhealthtst-ocioedefhirtst.fhir.azurehealthcareapis.com/metadata",
-                                Value = new FhirString("Facade")
-                            }
-                        },
                         Resource = new List<ResourceComponent>()
                         {
                             // Add information for supported resources
@@ -80,22 +59,13 @@ namespace OneCDPFHIRFacade.Controllers
                                     new ResourceInteractionComponent
                                     {
                                         Code = TypeRestfulInteraction.Create
-                                    },
+                                    }
                                 },
                                 Versioning = ResourceVersionPolicy.VersionedUpdate,
                                 ConditionalRead = ConditionalReadStatus.FullSupport,
                                 ConditionalDelete = ConditionalDeleteStatus.Multiple,
                                 ReferencePolicy = [],
-                                SearchParam = new List<SearchParamComponent>()
-                                {
-                                    new SearchParamComponent
-                                    {
-                                        Type = SearchParamType.String
-                                    }
-                                }
-                            },
-
-
+                            }
                         },
                         Interaction = new List<SystemInteractionComponent>
                         {
@@ -110,44 +80,8 @@ namespace OneCDPFHIRFacade.Controllers
                              new SystemInteractionComponent
                              {
                                  Code = SystemRestfulInteraction.Transaction
-                             },
-                        },
-                        Operation = new List<OperationComponent>
-                        {
-                            new OperationComponent
-                            {
-                                Name = "export",
-                                Definition = ""
-                            }
+                             }
                         }
-                    },
-                },
-                Messaging = new List<MessagingComponent>
-                {
-                    new MessagingComponent
-                    {
-                        SupportedMessage = new List<SupportedMessageComponent>
-                        {
-                            new SupportedMessageComponent
-                            {
-                                Mode = EventCapabilityMode.Receiver
-                            },
-                            new SupportedMessageComponent
-                            {
-                                Mode = EventCapabilityMode.Sender
-                            }
-                        }
-                    }
-                },
-                Document = new List<DocumentComponent>
-                {
-                    new DocumentComponent
-                    {
-                        Mode = DocumentMode.Consumer
-                    },
-                    new DocumentComponent
-                    {
-                        Mode = DocumentMode.Producer
                     }
                 }
             };

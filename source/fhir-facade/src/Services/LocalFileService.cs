@@ -9,7 +9,7 @@ namespace OneCDPFHIRFacade.Services
 {
     public interface ILocalFileService
     {
-        Task<IResult> SaveResourceLocally(string folderPath, string resourceType, string fileName, string content, string requestId);
+        Task<IResult> SaveResourceLocally(string folderPath, string resourceType, string fileName, string content);
         // TODO: should this be IActionResult? vs. IResult 
     }
     public class LocalFileService : ILocalFileService
@@ -19,7 +19,7 @@ namespace OneCDPFHIRFacade.Services
         {
             this._loggingUtility = loggingUtility;
         }
-        public async Task<IResult> SaveResourceLocally(string baseDirectory, string subDirectory, string fileName, string resourceJson, string requestId)
+        public async Task<IResult> SaveResourceLocally(string baseDirectory, string subDirectory, string fileName, string resourceJson)
         {
             // Define the directory and file path
             var directoryPath = Path.Combine(baseDirectory, subDirectory);
@@ -40,7 +40,7 @@ namespace OneCDPFHIRFacade.Services
                 return Results.Problem($"Error saving resource to file: {ex.Message}");
             }
 
-            await _loggingUtility.Logging($"Resource saved successfully at {filePath}", requestId);
+            await _loggingUtility.Logging($"Resource saved successfully at {filePath}");
             return Results.Ok($"Resource saved successfully at {filePath}");
         }// .SaveResourceLocally
     }// .LocalFileService
