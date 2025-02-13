@@ -47,8 +47,7 @@ namespace OneCDPFHIRFacade.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
-                parser.Settings.PermissiveParsing = true;
-                parser.Settings.AcceptUnknownMembers = true;
+                parser.Settings.AcceptUnknownMembers = true; //Only needed for testing since bundle format is incorrect
                 bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
 
                 if (!runLocal)
@@ -62,7 +61,7 @@ namespace OneCDPFHIRFacade.Controllers
                     else
                     {
                         Console.WriteLine("Bundle scope not validated");
-                        return Results.Unauthorized();
+                        return Results.Forbid();
                     }
                 }
             }
