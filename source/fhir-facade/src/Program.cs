@@ -29,6 +29,11 @@ namespace OneCDPFHIRFacade
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
 
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+            });
+
             // Set this via config or environment
             // #####################################################
             // UseLocalDevFolder to true for Local development and Not AWS
