@@ -32,7 +32,7 @@ namespace OneCDPFHIRFacade.Authentication
             if (AwsConfig.ScopeClaim == null || AwsConfig.ScopeClaim.Length == 0)
             {
                 Console.WriteLine("Missing or empty 'scope' claim.");
-                await loggingUtility.Logging("Missing or empty 'scope' claim.", "Scope Validator");
+                await loggingUtility.Logging("Missing or empty 'scope' claim.");
                 await loggingUtility.SaveLogS3("ScopeError");
                 return false;
             }
