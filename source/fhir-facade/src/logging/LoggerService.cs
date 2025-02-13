@@ -76,8 +76,6 @@ namespace OneCDP.Logging
 
                 var logEvent = new InputLogEvent
                 {
-                    RequestID = requestId,
-                    ClientID = AwsConfig.ClientId,
                     Message = message,
                     Timestamp = DateTime.UtcNow
                 };
