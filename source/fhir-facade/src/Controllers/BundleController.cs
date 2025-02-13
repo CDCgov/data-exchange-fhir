@@ -2,6 +2,7 @@
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
@@ -46,7 +47,23 @@ namespace OneCDPFHIRFacade.Controllers
                 // Read the request body as a string
                 var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 // Parse JSON string to FHIR bundle object
+                parser.Settings.AcceptUnknownMembers = true; //Only needed for testing since bundle format is incorrect
                 bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
+
+                if (!runLocal)
+                {
+                    BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
+                    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+                    if (bundleScopeValid)
+                    {
+                        Console.WriteLine("Bundle scope validated");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Bundle scope not validated");
+                        return Results.Forbid();
+                    }
+                }
             }
             catch (FormatException ex)
             {
@@ -108,9 +125,6 @@ namespace OneCDPFHIRFacade.Controllers
                 return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
             }// .else
 
-
-
         }
-
     }
 }
