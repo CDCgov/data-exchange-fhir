@@ -3,6 +3,7 @@ using Amazon.CloudWatchLogs;
 using Amazon.Runtime;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
@@ -28,10 +29,14 @@ namespace OneCDPFHIRFacade
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB limit
+            });
 
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+                options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
             });
 
             // Set this via config or environment
@@ -269,7 +274,6 @@ namespace OneCDPFHIRFacade
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
             if (runEnvironment == "AWS")
             {
                 app.UseAuthentication();
