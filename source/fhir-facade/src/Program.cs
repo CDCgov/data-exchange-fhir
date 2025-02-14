@@ -36,7 +36,7 @@ namespace OneCDPFHIRFacade
 
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+                options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB limit
             });
 
             // Set this via config or environment
