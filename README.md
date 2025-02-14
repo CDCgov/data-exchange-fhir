@@ -2,17 +2,18 @@
 
 ## Overview
 
-Code Repository for the CDC Data Exchange FHIR solution
+Code Repository for the CDC (Proof-of-Concept) Ingest FHIR solution
 
 ## Content
 
-`/source` - source code for DEX FHIR solution on Microsoft Azure
-- Functions
-  - Process Message Function (validate and process FHIR message bundles)
-  - Data Export Function (export FHIR message bundles to EDAV data lake)
-  - Shared Code
-- Utilities
-  - IG Loader (load HL7 IG validation profiles into FHIR server instance)
+`source` - .net C# source code
+
+TODO: add more content
+
+`/spikes`
+
+TODO: list folders and purpose of each
+
 
 `/spikes`
 - FHIR solution Logic App (archived)

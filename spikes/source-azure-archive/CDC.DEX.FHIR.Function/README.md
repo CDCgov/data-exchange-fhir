@@ -1,5 +1,6 @@
 ﻿# Data Exchange (DEX) FHIR 
 
+
 DEX FHIR solution as part of the DEX platform/ingest solution.
 
 This was build in the Azure cloud infrastructute and it has been decomissioned.
@@ -51,6 +52,9 @@ This function handles complex data transformation tasks like unbundling nested F
 ## DataPurge
 
 The DataPurge application is a crohn based service designed to remove client data from fhir repository at scheduled intervals
+
+##  Shared Code
+The shared code that is common functionality between functions.
 
 
 # Source Code
