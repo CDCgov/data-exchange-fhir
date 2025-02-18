@@ -24,21 +24,39 @@ namespace fhir_facade_tests.AuthenticationTests
         {
 
             var serviceProvider = new  Mock<IServiceProvider>();
-            
+
+         
+
             _controller = new ScopeValidator(serviceProvider.Object)
             {
             };
         }
 
         [Test]
-        public void testValidates()
+        public async Task testValidates()
+        {
+            string scopeClaim = "Banana";
+             string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
+
+            var result = await _controller.Validate(scopeClaim, requiredScopes);
+
+          //  Assert.That(result, "test validate error");
+
+          //  Console.WriteLine(result);
+          //  Console.WriteLine(result.GetType().FullName);
+            //  Assert.Fail("NOT YET IMPLEMENTED");
+         //   return Task.FromResult(result);
+        }
+
+        [Test]
+        public void testDoesNotValidate()
         {
             string scopeClaim = "HAS";
-             string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
+            string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
 
             var result = _controller.Validate(scopeClaim, requiredScopes);
 
-        
+            // Assert.Fail("NOT YET IMPLEMENTED");
         }
 
         [TearDown]

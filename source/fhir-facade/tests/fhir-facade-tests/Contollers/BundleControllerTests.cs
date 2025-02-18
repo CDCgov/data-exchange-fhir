@@ -1,12 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hl7.Fhir.Model.CdsHooks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using OneCDP.Logging;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Controllers;
 using OneCDPFHIRFacade.Utilities;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -26,6 +30,7 @@ namespace fhir_facade_tests.ControllerTests
               var issuer = "your-issuer"; // The issuer (usually your API or service name)
               var audience = "your-audience"; // The audience (target client or system)
               var expirationDate = DateTime.UtcNow.AddHours(1); // Set expiration time for the token
+
 
 
              string token = GenerateJwtToken(secretKey, issuer, audience, expirationDate);
@@ -66,7 +71,7 @@ namespace fhir_facade_tests.ControllerTests
             var mockRequest = new Mock<HttpRequest>();
             mockRequest.Setup(r => r.Headers).Returns(mockHeaders.Object);
 
-            var bodyContent = "{\"name\": \"John Doe\", \"age\": 30}"; // Example JSON body
+            var bodyContent = getJsonBundle();
 
             //  // Set the Request.Body to a memory stream with the JSON content
             mockRequest.Setup(req => req.Body).Returns(new MemoryStream(Encoding.UTF8.GetBytes(bodyContent)));
@@ -74,8 +79,16 @@ namespace fhir_facade_tests.ControllerTests
             //  // Set up the mock HttpContext.Request to return the mock request
             mockHttpContext.Setup(ctx => ctx.Request).Returns(mockRequest.Object);
             var loggerService = new Mock<LoggerService>();
-            string requestId = "asdf";
-           var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object,requestId);
+
+            var logToS3BucketService = new Mock<ILogToS3BucketService>();
+
+            string requestId = Guid.NewGuid().ToString(); 
+           var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object,requestId);
+
+
+            LocalFileStorageConfig.UseLocalDevFolder = true;
+
+            LocalFileStorageConfig.LocalDevFolder = ".";
 
             mockLoggingUtility.Setup(utility => utility.Logging("MESSAGE"));
 
@@ -95,17 +108,17 @@ namespace fhir_facade_tests.ControllerTests
         }
 
         [Test]
-        public void testPost()
+        public async Task testSuccesfulPost() 
         {
             Console.WriteLine("POST");
-            // Act
-             var result = _controller.Post();
+            var result =  await _controller.Post();
+         
 
-            // Assert
-            //   var okResult = result as OkObjectResult;
-            //   Assert.IsNotNull(okResult);
-            //   Assert.AreEqual(200, okResult.StatusCode); // HTTP 200 OK
-            //   Assert.AreEqual("{\"name\": \"John Doe\", \"age\": 30}", okResult.Value); // Ensure the body content is returned correctly
+            Console.WriteLine("POST" + result.GetType().FullName);
+            Console.WriteLine("POST" + result.GetType().Name);
+            Console.WriteLine("POST" + result.GetType().Name);
+
+
         }
 
 
@@ -145,7 +158,28 @@ namespace fhir_facade_tests.ControllerTests
             // Return the token as a string
             return tokenHandler.WriteToken(token);
         }
+
+        private string getJsonBundle()
+        {
+         
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\Resources\sample.json");
+
+            try
+            {
+                // Read all text from the file
+                string fileContent = File.ReadAllText(filePath);
+                return fileContent;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+            return "";
+        }
     }
+
+
+  
 
 }
 
