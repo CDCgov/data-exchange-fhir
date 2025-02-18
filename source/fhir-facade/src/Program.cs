@@ -29,6 +29,7 @@ namespace OneCDPFHIRFacade
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
+            //Allow files as big as 300mb
             builder.Services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB limit

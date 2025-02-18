@@ -50,7 +50,7 @@ namespace OneCDPFHIRFacade.Controllers
                 if (HttpContext.Request.HasFormContentType)
                 {
                     // Ensure that the request is actually a file upload
-                    if (!HttpContext.Request.ContentType.Contains("multipart/form-data"))
+                    if (!HttpContext.Request.ContentType!.Contains("multipart/form-data"))
                     {
                         logMessage = "Invalid content-type for form-data request.";
                         await _loggingUtility.Logging(logMessage);
@@ -70,10 +70,6 @@ namespace OneCDPFHIRFacade.Controllers
                     await file.CopyToAsync(memoryStream);
                     memoryStream.Seek(0, SeekOrigin.Begin); // Reset position
                     fileContent = await new StreamReader(memoryStream).ReadToEndAsync();
-
-                    //using var stream = file.OpenReadStream();
-                    //using var reader = new StreamReader(stream);
-                    //fileContent = await reader.ReadToEndAsync();
                 }
                 //Read from body
                 else if (HttpContext.Request.ContentType != null &&
@@ -92,6 +88,7 @@ namespace OneCDPFHIRFacade.Controllers
                 // Parse JSON into a FHIR Bundle
                 bundle = await parser.ParseAsync<Bundle>(fileContent);
 
+                //Check that bundle profile matches user's scope
                 //if (!runLocal)
                 //{
                 //    BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
@@ -103,10 +100,6 @@ namespace OneCDPFHIRFacade.Controllers
                 //        return Results.Forbid();
                 //    }
                 //}
-
-                // TODO Check if the bundle Type is in line with the sender client scope 
-                // TODO Example bundle type eICR, sender scope should system/eICR/bundle.c  -> how to insert eICR <-
-                // TODO checkBundleTypeAgainstScope(bundle.Type, scopeClaim) 
 
                 // Log details 
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
