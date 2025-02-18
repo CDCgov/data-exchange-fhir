@@ -25,7 +25,7 @@ namespace OneCDPFHIRFacade.Controllers
 
         [HttpPost(Name = "PostBundle")]
         [RequestSizeLimit(300 * 1024 * 1024)] //300MB limit
-        public async Task<IResult> Post()
+        public async Task<IResult> Post([FromForm] BundleUploadRequest request)
         {
             LocalFileService localFileService = new LocalFileService(_loggingUtility);
             S3FileService s3FileService = new S3FileService(_loggingUtility);
@@ -41,48 +41,25 @@ namespace OneCDPFHIRFacade.Controllers
             //Log starts
             string logMessage = "Bundle request has started.";
             await _loggingUtility.Logging(logMessage);
+            string fileContent = string.Empty;
 
             try
             {
-                string fileContent;
-
-                //Read from File
-                if (HttpContext.Request.HasFormContentType)
+                // Determine whether JSON is coming from a file upload or direct request body
+                if (request.File != null && request.File.Length > 0)
                 {
-                    // Ensure that the request is actually a file upload
-                    if (!HttpContext.Request.ContentType!.Contains("multipart/form-data"))
-                    {
-                        logMessage = "Invalid content-type for form-data request.";
-                        await _loggingUtility.Logging(logMessage);
-                        return Results.BadRequest(new { error = "Invalid request", message = "Expected multipart/form-data but received a different content-type." });
-                    }
-
-                    var form = await HttpContext.Request.ReadFormAsync();
-                    var file = form.Files.FirstOrDefault();
-
-                    if (file == null || file.Length == 0)
-                    {
-                        logMessage = "No file uploaded or file is empty.";
-                        await _loggingUtility.Logging(logMessage);
-                        return Results.BadRequest(new { error = "Invalid request", message = "No file uploaded or file is empty." });
-                    }
-                    using var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin); // Reset position
-                    fileContent = await new StreamReader(memoryStream).ReadToEndAsync();
-                }
-                //Read from body
-                else if (HttpContext.Request.ContentType != null &&
-                         HttpContext.Request.ContentType.StartsWith("application/json"))
-                {
-                    using var reader = new StreamReader(HttpContext.Request.Body);
+                    using var reader = new StreamReader(request.File.OpenReadStream());
                     fileContent = await reader.ReadToEndAsync();
+                }
+                else if (!string.IsNullOrWhiteSpace(request.Json))
+                {
+                    fileContent = request.Json;
                 }
                 else
                 {
-                    logMessage = "Unsupported content type.";
+                    logMessage = "Invalid request: No valid JSON payload provided.";
                     await _loggingUtility.Logging(logMessage);
-                    return Results.BadRequest(new { error = "Invalid request", message = "Supported content types: application/json or multipart/form-data." });
+                    return Results.BadRequest(new { error = "Invalid request", message = "Expected JSON data or a file upload." });
                 }
 
                 // Parse JSON into a FHIR Bundle
@@ -101,33 +78,38 @@ namespace OneCDPFHIRFacade.Controllers
                 //    }
                 //}
 
-                // Log details 
+                // Ensure bundle has a valid ID
+                if (string.IsNullOrWhiteSpace(bundle.Id))
+                {
+                    logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
+                    await _loggingUtility.Logging(logMessage);
+                    return Results.BadRequest(new { error = "Invalid payload", message = "Resource ID is required." });
+                }
+
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 
+                // Save based on environment (local or cloud)
                 if (runLocal)
                 {
-                    // #####################################################
-                    // Save the FHIR Resource Locally
-                    // #####################################################
-                    return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
-
-                } // .if UseLocalDevFolder
+                    return await localFileService.SaveResourceLocally(
+                        LocalFileStorageConfig.LocalDevFolder!,
+                        "Bundle",
+                        fileName,
+                        await bundle.ToJsonAsync()
+                    );
+                }
                 else
                 {
-                    // #####################################################
-                    // Save the FHIR Resource to AWS S3
-                    // #####################################################
                     if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                     {
                         logMessage = "S3 client and bucket are not configured.";
                         await _loggingUtility.Logging(logMessage);
-                        await _loggingUtility.SaveLogS3(fileName);
                         return Results.Problem(logMessage);
                     }
 
                     return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
-                }// .else
+                }
             }
             catch (Exception ex)
             {
@@ -137,5 +119,13 @@ namespace OneCDPFHIRFacade.Controllers
             }
 
         }
+    }
+    public class BundleUploadRequest
+    {
+        [FromForm(Name = "json")]
+        public string? Json { get; set; }
+
+        [FromForm(Name = "file")]
+        public IFormFile? File { get; set; }
     }
 }
