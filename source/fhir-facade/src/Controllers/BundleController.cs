@@ -24,7 +24,6 @@ namespace OneCDPFHIRFacade.Controllers
         }
 
         [HttpPost(Name = "PostBundle")]
-        [RequestSizeLimit(300 * 1024 * 1024)] //300MB limit
         public async Task<IResult> Post()
         {
             LocalFileService localFileService = new LocalFileService(_loggingUtility);
