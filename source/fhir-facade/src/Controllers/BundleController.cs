@@ -100,10 +100,18 @@ namespace OneCDPFHIRFacade.Controllers
                 //    }
                 //}
 
-                // Log details 
+                // Ensure bundle has a valid ID
+                if (string.IsNullOrWhiteSpace(bundle.Id))
+                {
+                    logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
+                    await _loggingUtility.Logging(logMessage);
+                    return Results.BadRequest(new { error = "Invalid payload", message = "Resource ID is required." });
+                }
+
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 
+                // Save based on environment (local or cloud)
                 if (runLocal)
                 {
                     // #####################################################
@@ -114,19 +122,15 @@ namespace OneCDPFHIRFacade.Controllers
                 } // .if UseLocalDevFolder
                 else
                 {
-                    // #####################################################
-                    // Save the FHIR Resource to AWS S3
-                    // #####################################################
                     if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                     {
                         logMessage = "S3 client and bucket are not configured.";
                         await _loggingUtility.Logging(logMessage);
-                        await _loggingUtility.SaveLogS3(fileName);
                         return Results.Problem(logMessage);
                     }
 
                     return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
-                }// .else
+                }
             }
             catch (Exception ex)
             {
