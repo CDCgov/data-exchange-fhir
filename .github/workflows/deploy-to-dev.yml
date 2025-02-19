@@ -1,0 +1,44 @@
+name: Deploy latest code to DEV
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: one-cdp-fhir-facade
+  ECS_CLUSTER: fhir-dev-ecs-cluster
+  ECS_SERVICE: fhir-dev-ecs-service
+  TASK_FAMILY: fhir-dev-ecs-task-family
+
+jobs:
+  deploy:
+    name: Build, Push & Deploy
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 971422675401.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Build and Push Docker Image
+        run: |
+          cd source/fhir-facade/src  # Move to correct directory
+          docker build -t $ECR_REPO .
+          docker tag $ECR_REPO:latest 971422675401.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+          docker push 971422675401.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
