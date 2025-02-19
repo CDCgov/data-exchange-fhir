@@ -44,12 +44,51 @@ namespace OneCDPFHIRFacade.Controllers
 
             try
             {
-                // Read the request body as a string
-                var requestBody = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                // Parse JSON string to FHIR bundle object
-                parser.Settings.AcceptUnknownMembers = true; //Only needed for testing since bundle format is incorrect
-                bundle = await parser.ParseAsync<Bundle>(requestBody.ToString());
+                string fileContent;
 
+                //Read from File
+                if (HttpContext.Request.HasFormContentType)
+                {
+                    // Ensure that the request is actually a file upload
+                    if (!HttpContext.Request.ContentType!.Contains("multipart/form-data"))
+                    {
+                        logMessage = "Invalid content-type for form-data request.";
+                        await _loggingUtility.Logging(logMessage);
+                        return Results.BadRequest(new { error = "Invalid request", message = "Expected multipart/form-data but received a different content-type." });
+                    }
+
+                    var form = await HttpContext.Request.ReadFormAsync();
+                    var file = form.Files.FirstOrDefault();
+
+                    if (file == null || file.Length == 0)
+                    {
+                        logMessage = "No file uploaded or file is empty.";
+                        await _loggingUtility.Logging(logMessage);
+                        return Results.BadRequest(new { error = "Invalid request", message = "No file uploaded or file is empty." });
+                    }
+                    using var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Seek(0, SeekOrigin.Begin); // Reset position
+                    fileContent = await new StreamReader(memoryStream).ReadToEndAsync();
+                }
+                //Read from body
+                else if (HttpContext.Request.ContentType != null &&
+                         HttpContext.Request.ContentType.StartsWith("application/json"))
+                {
+                    using var reader = new StreamReader(HttpContext.Request.Body);
+                    fileContent = await reader.ReadToEndAsync();
+                }
+                else
+                {
+                    logMessage = "Unsupported content type.";
+                    await _loggingUtility.Logging(logMessage);
+                    return Results.BadRequest(new { error = "Invalid request", message = "Supported content types: application/json or multipart/form-data." });
+                }
+
+                // Parse JSON into a FHIR Bundle
+                bundle = await parser.ParseAsync<Bundle>(fileContent);
+
+                //Check that bundle profile matches user's scope
                 if (!runLocal)
                 {
                     BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
@@ -64,66 +103,45 @@ namespace OneCDPFHIRFacade.Controllers
                         return Results.Forbid();
                     }
                 }
+
+                // Ensure bundle has a valid ID
+                if (string.IsNullOrWhiteSpace(bundle.Id))
+                {
+                    logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
+                    await _loggingUtility.Logging(logMessage);
+                    return Results.BadRequest(new { error = "Invalid payload", message = "Resource ID is required." });
+                }
+
+                logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
+                await _loggingUtility.Logging(logMessage);
+
+                // Save based on environment (local or cloud)
+                if (runLocal)
+                {
+                    // #####################################################
+                    // Save the FHIR Resource Locally
+                    // #####################################################
+                    return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
+
+                } // .if UseLocalDevFolder
+                else
+                {
+                    if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
+                    {
+                        logMessage = "S3 client and bucket are not configured.";
+                        await _loggingUtility.Logging(logMessage);
+                        return Results.Problem(logMessage);
+                    }
+
+                    return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
+                }
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 logMessage = $"Failed to parse FHIR Resource: {ex.Message}";
                 await _loggingUtility.Logging(logMessage);
-                await _loggingUtility.SaveLogS3(fileName);
-
-                // Return 400 Bad Request if JSON is invalid
-                return Results.BadRequest(new
-                {
-                    error = "Invalid payload",
-                    message = $"Failed to parse FHIR Resource: {ex.Message}"
-                });
+                return Results.BadRequest(new { error = "Invalid payload", message = $"Failed to parse FHIR Resource: {ex.Message}" });
             }
-
-            // Check if bundle ID is present
-            if (string.IsNullOrWhiteSpace(bundle.Id))
-            {
-                logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
-                await _loggingUtility.Logging(logMessage);
-                if (!runLocal)
-                    await _loggingUtility.SaveLogS3(fileName);
-                return Results.BadRequest(new
-                {
-                    error = "Invalid payload",
-                    message = "Resource ID is required."
-                });
-            }
-
-            // TODO Check if the bundle Type is in line with the sender client scope 
-            // TODO Example bundle type eICR, sender scope should system/eICR/bundle.c  -> how to insert eICR <-
-            // TODO checkBundleTypeAgainstScope(bundle.Type, scopeClaim) 
-
-            // Log details 
-            logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
-            await _loggingUtility.Logging(logMessage);
-
-            if (runLocal)
-            {
-                // #####################################################
-                // Save the FHIR Resource Locally
-                // #####################################################
-                return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
-
-            } // .if UseLocalDevFolder
-            else
-            {
-                // #####################################################
-                // Save the FHIR Resource to AWS S3
-                // #####################################################
-                if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
-                {
-                    logMessage = "S3 client and bucket are not configured.";
-                    await _loggingUtility.Logging(logMessage);
-                    await _loggingUtility.SaveLogS3(fileName);
-                    return Results.Problem(logMessage);
-                }
-
-                return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
-            }// .else
 
         }
     }

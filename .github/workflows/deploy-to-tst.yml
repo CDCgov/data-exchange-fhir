@@ -1,0 +1,28 @@
+name: Deploy latest image to TST
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECS_CLUSTER: fhir-tst-ecs-cluster
+  ECS_SERVICE: fhir-tst-ecs-service
+  TASK_FAMILY: fhir-tst-ecs-task-family
+
+jobs:
+  deploy:
+    name: Deploy Latest Task to ECS
+    runs-on: ubuntu-latest
+    environment: tst
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Force new deployment
+        run: |
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
