@@ -87,7 +87,7 @@ namespace OneCDP.Logging
                 };
 
                 await _logClient.PutLogEventsAsync(putLogEventsRequest);
-                Console.WriteLine($"Log event appended successfully.\n{message}");
+                Console.WriteLine(message);
             }
             catch (Exception ex)
             {
