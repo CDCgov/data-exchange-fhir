@@ -26,7 +26,6 @@ namespace OneCDPFHIRFacade
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
 
             // Add services to the container.
-            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
             //Allow files as big as 300mb
@@ -47,13 +46,8 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Initialize AWS configuration
-            AwsConfig.Initialize(builder.Configuration);
-
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
-            AwsConfig.Initialize(builder.Configuration);
-
             builder.Services.AddHttpContextAccessor();
 
             // #####################################################
@@ -61,6 +55,10 @@ namespace OneCDPFHIRFacade
             // #####################################################
             if (runEnvironment == "AWS")
             {
+                // Initialize AWS configuration
+                AwsConfig.Initialize(builder.Configuration);
+                AwsConfig.Initialize(builder.Configuration);
+
                 var s3Config = new AmazonS3Config
                 {
                     RegionEndpoint = RegionEndpoint.GetBySystemName(AwsConfig.Region), // Set region

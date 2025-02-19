@@ -10,7 +10,7 @@ namespace OneCDPFHIRFacade.Controllers
     public class MetadataController : Controller
     {
         [HttpGet]
-        public IActionResult Index()
+        public IResult Index()
         {
             // Create a CapabilityStatement object with the server's metadata
             CapabilityStatement capabilityStatement = new CapabilityStatement
@@ -87,7 +87,7 @@ namespace OneCDPFHIRFacade.Controllers
             };
 
             var jsonSerializer = new FhirJsonSerializer();
-            return Content(jsonSerializer.SerializeToString(capabilityStatement), "application/fhir+json");
+            return Results.Content(jsonSerializer.SerializeToString(capabilityStatement), "application/fhir+json");
         }
     }
 }
