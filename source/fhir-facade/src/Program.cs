@@ -35,13 +35,8 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Initialize AWS configuration
-            AwsConfig.Initialize(builder.Configuration);
-
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
-            AwsConfig.Initialize(builder.Configuration);
-
             builder.Services.AddHttpContextAccessor();
 
             // #####################################################
@@ -49,6 +44,10 @@ namespace OneCDPFHIRFacade
             // #####################################################
             if (runEnvironment == "AWS")
             {
+                // Initialize AWS configuration
+                AwsConfig.Initialize(builder.Configuration);
+                AwsConfig.Initialize(builder.Configuration);
+
                 var s3Config = new AmazonS3Config
                 {
                     RegionEndpoint = RegionEndpoint.GetBySystemName(AwsConfig.Region), // Set region
