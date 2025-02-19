@@ -30,18 +30,13 @@ namespace fhir_facade_tests.ControllerTests
         public void testGet()
         {
             var result = _controller.Get();
-           Console.WriteLine(result);
-            Console.WriteLine(result.ToString());
-         //   var okResult = result as Results;
-          //  Console.WriteLine(okResult.Content);
-            // TODO Add Assert(s)        
+            Assert.That(result, Is.Not.Null);          
         }
 
         [TearDown]
         public void TearDown()
         {
-            // Dispose the disposable object in TearDown to release the resource
-          //  _controller?.Dispose();
+         
         }
 
     }

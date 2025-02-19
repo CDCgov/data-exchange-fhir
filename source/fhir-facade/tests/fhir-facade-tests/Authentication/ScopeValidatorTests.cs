@@ -1,72 +1,65 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
-using Microsoft.IdentityModel.Tokens;
 using Moq;
+using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Controllers;
 using OneCDPFHIRFacade.Utilities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using System;
+using System.Threading.Tasks;
 
 namespace fhir_facade_tests.AuthenticationTests
 {
     [TestFixture]
     public class ScopeValidatorTests
     {
-  
         private ScopeValidator _controller;
 
         [SetUp]
         public void SetUp()
         {
+            var loggerService = new Mock<LoggerService>();
+            var logToS3BucketService = new Mock<ILogToS3BucketService>();
+            string requestId = Guid.NewGuid().ToString();
 
-            var serviceProvider = new  Mock<IServiceProvider>();
+            var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object, requestId);
 
-         
+            // Set up dependency injection for the controller
+            var services = new ServiceCollection();
+            services.AddSingleton(mockLoggingUtility.Object); // Register the LoggingUtility service
 
-            _controller = new ScopeValidator(serviceProvider.Object)
-            {
-            };
+            var serviceProvider = services.BuildServiceProvider();
+            _controller = new ScopeValidator(serviceProvider);
         }
 
         [Test]
-        public async Task testValidates()
+        public async Task TestValidates()
         {
             string scopeClaim = "Banana";
-             string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
+            string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
 
             var result = await _controller.Validate(scopeClaim, requiredScopes);
-
-          //  Assert.That(result, "test validate error");
-
-          //  Console.WriteLine(result);
-          //  Console.WriteLine(result.GetType().FullName);
-            //  Assert.Fail("NOT YET IMPLEMENTED");
-         //   return Task.FromResult(result);
+            Assert.That(result);
         }
 
         [Test]
-        public void testDoesNotValidate()
+        public async Task TestDoesNotValidate()
         {
             string scopeClaim = "HAS";
             string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
 
-            var result = _controller.Validate(scopeClaim, requiredScopes);
-
-            // Assert.Fail("NOT YET IMPLEMENTED");
+            var result = await _controller.Validate(scopeClaim, requiredScopes);
+            Assert.That(!result);
         }
 
         [TearDown]
         public void TearDown()
         {
-            // Dispose the disposable object in TearDown to release the resource
-          //  _controller?.Dispose();
+            // Clean-up resources if needed
+            // _controller?.Dispose();
         }
-
     }
-
 }
-

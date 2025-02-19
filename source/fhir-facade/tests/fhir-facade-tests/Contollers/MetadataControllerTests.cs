@@ -30,10 +30,7 @@ namespace fhir_facade_tests.ControllerTests
         public void testIndex()
         {           
             var result = _controller.Index();
-           Console.WriteLine(result.ToString());
-            var okResult = result as ContentResult;
-            Console.WriteLine(okResult.Content);
-            // TODO Add Assert(s)        
+            Assert.That(result, Is.Not.Null);
         }
 
         [TearDown]
