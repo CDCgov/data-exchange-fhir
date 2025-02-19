@@ -25,7 +25,6 @@ namespace OneCDPFHIRFacade
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
 
             // Add services to the container.
-            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
 
