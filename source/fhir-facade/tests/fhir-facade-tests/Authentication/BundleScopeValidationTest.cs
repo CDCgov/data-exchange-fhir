@@ -13,7 +13,6 @@ namespace fhir_facade_tests.Authentication
         private Mock<AmazonCloudWatchLogsClient> _mockCloudWatchLogsClient;
         private LoggerService _loggerService;
         private LogToS3BucketService _logToS3BucketService;
-        private string[] clientScope = { "org/org-name-1", "stream/eicr-composition", "system/bundle.C" };
 
         [SetUp]
         public void SetUp()
@@ -58,7 +57,6 @@ namespace fhir_facade_tests.Authentication
         public async System.Threading.Tasks.Task BundleScopeValidator_Scope_DoesNotMatch_BundleProfile()
         {
             // Arrange
-            string[] clientScope = { "org/org-name-1", "stream/eicr-composition", "system/bundle.C" };
             var loggingUtility = new LoggingUtility(_loggerService, _logToS3BucketService, "123");
 
             Bundle bundle2 = new Bundle
