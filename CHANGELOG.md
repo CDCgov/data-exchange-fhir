@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.2.alpha Pre-release
+	- Updates to logging feature
+	- Updates to authentication and scopes
+	- Updates to general structure for unit tests
+## What's Changed
+	- Updates to serialization by @swmuirdhie in #321
+	- Updates for logging and docker by @swmuirdhie in #322
+	- Skip validation when running locally No Aws settings when running locally by @csalmi56 in #323
+	- Request id in start up and opentelemetry cleanup by @csalmi56 in #320
+	- Create big bundle sizes with Synthea by @csalmi56 in #319
+	- Capability statement redone according to inferno test by @csalmi56 in #324
+	- Fixed logging format by @csalmi56 in #326
+	- deploy to dev by @rohitpanwar in #327
+	- deploy to dev by @rohitpanwar in #328
+	- deploy to tst by @rohitpanwar in #329
+	- pull vales from secrets by @rohitpanwar in #331
+	- Support large bundle file up to 300mb by @csalmi56 in #330
+	- Review code updates by @csalmi56 in #332
+	- Fhir 1087 unit test updates initial fix by @swmuirdhie in #334
+
 ## 2.0.1.alpha Pre-release
 	- Updates to logging feature
 	- Updates to authentication and scopes
