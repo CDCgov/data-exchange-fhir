@@ -13,7 +13,6 @@ namespace OneCDPFHIRFacade.Controllers
         [HttpGet(Name = "Health")]
         public IResult Get()
         {
-            //TODO Check saving to logs and S3 buckets
             return Results.Json(new
             {
                 status = "Healthy",
