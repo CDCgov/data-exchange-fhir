@@ -4,10 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 2.0.2.alpha Pre-release
-	- Updates to logging feature
-	- Updates to authentication and scopes
-	- Updates to general structure for unit tests
+## 2.0.2.alpha Pre-release 2024-02-20
+	- Discover FHIR Facade bottlenecks and benchmarks 
+	- JWT check between API Gateway and FHIR Facade code
+	- CI/CD process for TST environment 
+	- Validate scope in token 
+	- Check logging when running locally 
+	- Implement SAMS integration with Cognito 
+	- Inferno test suite troubleshooting 
+	- Validate request ID during authentication 
+	- Terraform API Gateway and Cognito in DEV environment 
+	- Apply Terraform changes to TST environment 
+	- CD pipeline in DEV environment 
+	- Resolve bundle ID requirement 
+	- Investigate FHIR Facade activity dashboard 
+	- Review app, infrastructure, CI/CD code 
+	- Unit test updates
 ## What's Changed
 	- Updates to serialization by @swmuirdhie in #321
 	- Updates for logging and docker by @swmuirdhie in #322
@@ -24,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 	- Review code updates by @csalmi56 in #332
 	- Fhir 1087 unit test updates initial fix by @swmuirdhie in #334
 
-## 2.0.1.alpha Pre-release
+## 2.0.1.alpha Pre-release 2024-02-06
 	- Updates to logging feature
 	- Updates to authentication and scopes
 	- Updates to general structure for unit tests
