@@ -116,7 +116,7 @@ namespace OneCDPFHIRFacade
                             var scopeValidator = httpContext.RequestServices.GetRequiredService<ScopeValidator>();
                             if (AwsConfig.ClientScope.IsNullOrEmpty())
                             {
-                                Console.WriteLine("Scope not provided");
+                                Console.WriteLine("Client Scope not provided");
                                 return false;
                             }
 
@@ -127,9 +127,11 @@ namespace OneCDPFHIRFacade
                                 // Get the scope claim
                                 var scopeClaim = context.User.FindFirst("scope")?.Value;
                                 AwsConfig.ScopeClaim = scopeClaim!.Split(' ');
+                                UserIdFromScopeUtility userIdFromScope = new UserIdFromScopeUtility();
+                                userIdFromScope.GetUserIdFromScope();
                                 // Validate the scopes claim from JWT token are scopes from config
                                 // checks sent scopes are onboarded scopes in config
-                                return await scopeValidator.Validate(scopeClaim, clientScope!);
+                                return await scopeValidator.Validate(scopeClaim);
                             }
                             else
                             {

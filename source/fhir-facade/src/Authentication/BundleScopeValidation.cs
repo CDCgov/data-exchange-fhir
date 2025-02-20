@@ -54,16 +54,6 @@ namespace OneCDPFHIRFacade.Authentication
                             return true;
                         }
                     }
-                    else if (scope.Contains("org"))
-                    {
-                        string[] scopeSplit = scope.Split(new string[] { "/" }, StringSplitOptions.None);
-                        string currentScope = scopeSplit[1];
-                        if (currentScope.Equals(getProfile))
-                        {
-                            return true;
-                        }
-                        AwsConfig.ClientId = scopeSplit[1];
-                    }
                 }
             }
             return valid;
