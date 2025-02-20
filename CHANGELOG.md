@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.1.alpha Pre-release
+	- Updates to logging feature
+	- Updates to authentication and scopes
+	- Updates to general structure for unit tests
+## What's Changed
+	- Initial version of unit test and project solution structure by @swmuirdhie in #302
+	- Added missing gitignore file by @swmuirdhie in #306
+	- Logsto s3 by @csalmi56 in #316
+	- FHIR-1057: Added README file by @svalluripalli in #315
+	- Implementing Authentication into Fhir Facade by @csalmi56 in #313
+
+
+
+
 ## [0.3.5] 2024-04-10
 	- Pre-release before STG/PRD
 	- Data Export: 
