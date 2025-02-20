@@ -10,7 +10,6 @@ namespace OneCDPFHIRFacade.Services
     public interface ILocalFileService
     {
         Task<IResult> SaveResourceLocally(string folderPath, string resourceType, string fileName, string content);
-        // TODO: should this be IActionResult? vs. IResult 
     }
     public class LocalFileService : ILocalFileService
     {
