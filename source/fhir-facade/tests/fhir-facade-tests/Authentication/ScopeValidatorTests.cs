@@ -1,15 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
-using OneCDPFHIRFacade.Config;
-using OneCDPFHIRFacade.Controllers;
 using OneCDPFHIRFacade.Utilities;
-using System;
-using System.Threading.Tasks;
 
 namespace fhir_facade_tests.AuthenticationTests
 {
@@ -38,10 +31,9 @@ namespace fhir_facade_tests.AuthenticationTests
         [Test]
         public async Task TestValidates()
         {
-            string scopeClaim = "Banana";
-            string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
+            string scopeClaim = "eicr-document-bundle";
 
-            var result = await _controller.Validate(scopeClaim, requiredScopes);
+            var result = await _controller.Validate(scopeClaim);
             Assert.That(result);
         }
 
@@ -49,9 +41,8 @@ namespace fhir_facade_tests.AuthenticationTests
         public async Task TestDoesNotValidate()
         {
             string scopeClaim = "HAS";
-            string[] requiredScopes = new string[] { "Apple", "Banana", "Cherry" };
 
-            var result = await _controller.Validate(scopeClaim, requiredScopes);
+            var result = await _controller.Validate(scopeClaim);
             Assert.That(!result);
         }
 
