@@ -2,6 +2,7 @@
 using Moq;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 
 namespace fhir_facade_tests.AuthenticationTests
@@ -31,18 +32,19 @@ namespace fhir_facade_tests.AuthenticationTests
         [Test]
         public async Task TestValidates()
         {
-            string scopeClaim = "eicr-document-bundle";
-
-            var result = await _controller.Validate(scopeClaim);
+            string scopeClaimString = "system/bundle.c";
+            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            AwsConfig.ClientScope = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            var result = await _controller.Validate(scopeClaimString, scopeClaim);
             Assert.That(result);
         }
 
         [Test]
         public async Task TestDoesNotValidate()
         {
-            string scopeClaim = "HAS";
-
-            var result = await _controller.Validate(scopeClaim);
+            string scopeClaimString = "HAS";
+            string[] scopeClaim = new string[] { "system/bundle.rs", "org/org-name1", "stream/eicr-composition" };
+            var result = await _controller.Validate(scopeClaimString, scopeClaim);
             Assert.That(!result);
         }
 

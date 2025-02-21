@@ -1,4 +1,5 @@
-﻿using OneCDPFHIRFacade.Utilities;
+﻿using OneCDPFHIRFacade.Config;
+using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Authentication
 {
@@ -25,12 +26,18 @@ namespace OneCDPFHIRFacade.Authentication
                     await loggingUtility.SaveLogS3("ScopeError");
                     return false;
                 }
+                if (AwsConfig.ClientScope == null)
+                {
+                    await loggingUtility.Logging("Missing or empty client scope.");
+                    await loggingUtility.SaveLogS3("ScopeError");
+                    return false;
+                }
 
                 foreach (var item in sp)
                 {
                     if (item.Contains("system"))
                     {
-                        var isValid = sp.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
+                        var isValid = AwsConfig.ClientScope!.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
                         Console.WriteLine($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         await loggingUtility.Logging($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         return isValid;
