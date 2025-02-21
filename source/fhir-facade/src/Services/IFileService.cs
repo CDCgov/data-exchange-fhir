@@ -6,7 +6,7 @@ namespace OneCDPFHIRFacade.Services
 {
     public interface IFileService
     {
-        Task<IResult> SaveResource(string folderPath, string resourceType, string fileName, string content);
+        Task<IResult> SaveResource(string resourceType, string fileName, string content);
     }
 
     public class FileServiceFactory

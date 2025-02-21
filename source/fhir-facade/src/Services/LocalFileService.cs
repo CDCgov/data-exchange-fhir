@@ -17,10 +17,10 @@ namespace OneCDPFHIRFacade.Services
             _loggingUtility = loggingUtility ?? throw new ArgumentNullException(nameof(loggingUtility));
         }
 
-        public async Task<IResult> SaveResource(string folderPath, string resourceType, string fileName, string content)
+        public async Task<IResult> SaveResource(string resourceType, string fileName, string content)
         {
             // Define the directory and file path
-            var directoryPath = Path.Combine(LocalFileStorageConfig.LocalDevFolder!, folderPath,resourceType);
+            var directoryPath = Path.Combine(LocalFileStorageConfig.LocalDevFolder!,resourceType);
 
             // Ensure the directory exists
             Directory.CreateDirectory(directoryPath);

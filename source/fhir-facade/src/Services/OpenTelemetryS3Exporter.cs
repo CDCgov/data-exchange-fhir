@@ -36,7 +36,7 @@ namespace OneCDPFHIRFacade.Services
                     var jsonString = JsonSerializer.Serialize(activity);
 
                     // Save the serialized JSON string asynchronously (no waiting in this context)
-                    _ = fileService.SaveResource("OpenTelemetry", "Activity", $"{activity.Id}.json", jsonString);
+                    _ = fileService.SaveResource( "Activity", $"{activity.Id}.json", jsonString);
                 }
             }
 
