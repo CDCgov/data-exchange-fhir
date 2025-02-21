@@ -52,16 +52,20 @@ namespace fhir_facade_tests.ServicesTests
             // Set local storage configuration
             LocalFileStorageConfig.LocalDevFolder = LocalStorageTestFolder;
 
+            // Construct file path and read file content
+            string relativePath = Path.Combine(LocalStorageTestFolder,  LocalResourceTest, LocalFileName);
+            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
+            File.Delete(fullPath);
+
             // Initialize service
             var localFileService = new LocalFileService(mockLoggingUtility.Object);
 
             // Perform SaveResource operation
-            await localFileService.SaveResource(LocalFolderTest, LocalResourceTest, LocalFileName, ExpectedFileContent);
+            await localFileService.SaveResource(LocalResourceTest, LocalFileName, ExpectedFileContent);
 
-            // Construct file path and read file content
-            string relativePath = Path.Combine(LocalStorageTestFolder, LocalFolderTest, LocalResourceTest, LocalFileName);
-            string fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
             string fileContent = File.ReadAllText(fullPath);
+
+            Console.WriteLine($"Captured file content: {fileContent}");
 
             // Assert that the content matches the expected value
             Assert.That(fileContent, Is.EqualTo(ExpectedFileContent));

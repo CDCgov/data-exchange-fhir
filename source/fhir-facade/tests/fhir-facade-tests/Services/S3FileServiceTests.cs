@@ -70,7 +70,7 @@ namespace fhir_facade_tests.ServicesTests
 
             // Create the S3FileService and call the SaveResource method
             var s3FileService = new S3FileService(mockLoggingUtility.Object);
-            await s3FileService.SaveResource(S3FolderTest, S3ResourceTest, S3FileName, ExpectedFileContent);
+            await s3FileService.SaveResource( S3ResourceTest, S3FileName, ExpectedFileContent);
         }
     }
 }
