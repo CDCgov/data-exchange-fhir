@@ -1,5 +1,4 @@
 ﻿using Hl7.Fhir.Model;
-using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 namespace OneCDPFHIRFacade.Authentication
 {
@@ -27,9 +26,9 @@ namespace OneCDPFHIRFacade.Authentication
                 return [];
             }
         }
-        public async Task<bool> IsBundleProfileMatchScope()
+        public async Task<bool> IsBundleProfileMatchScope(string[] scopeClaim)
         {
-            if (AwsConfig.ScopeClaim == null || AwsConfig.ScopeClaim.Length == 0)
+            if (scopeClaim == null || scopeClaim.Length == 0)
             {
                 Console.WriteLine("Missing or empty 'scope' claim.");
                 await loggingUtility.Logging("Missing or empty 'scope' claim.");
@@ -43,7 +42,7 @@ namespace OneCDPFHIRFacade.Authentication
             {
                 int pos = item.LastIndexOf("/") + 1;
                 string getProfile = item.Substring(pos, item.Length - pos);
-                foreach (var scope in AwsConfig.ScopeClaim)
+                foreach (var scope in scopeClaim)
                 {
                     if (scope.Contains("stream"))
                     {
