@@ -1,5 +1,4 @@
-﻿using OneCDPFHIRFacade.Config;
-using OneCDPFHIRFacade.Utilities;
+﻿using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Authentication
 {
@@ -13,13 +12,13 @@ namespace OneCDPFHIRFacade.Authentication
         }
 
         // check the scope claim from the JTW token are valid scopes from config scopes
-        public async Task<bool> Validate(string scopeClaimString)
+        public async Task<bool> Validate(string scopeClaimString, string[] sp)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
                 var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
 
-                if (AwsConfig.ScopeClaim == null && AwsConfig.ScopeClaim!.Length == 0)
+                if (sp == null && sp!.Length == 0)
                 {
                     Console.WriteLine("Missing or empty 'scope' claim.");
                     await loggingUtility.Logging("Missing or empty 'scope' claim.");
@@ -27,11 +26,11 @@ namespace OneCDPFHIRFacade.Authentication
                     return false;
                 }
 
-                foreach (var item in AwsConfig.ScopeClaim)
+                foreach (var item in sp)
                 {
                     if (item.Contains("system"))
                     {
-                        var isValid = AwsConfig.ClientScope!.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
+                        var isValid = sp.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
                         Console.WriteLine($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         await loggingUtility.Logging($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         return isValid;
