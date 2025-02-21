@@ -131,7 +131,7 @@ namespace OneCDPFHIRFacade
                                 userIdFromScope.GetUserIdFromScope();
                                 // Validate the scopes claim from JWT token are scopes from config
                                 // checks sent scopes are onboarded scopes in config
-                                return await scopeValidator.Validate(scopeClaim, AwsConfig.ScopeClaim);
+                                return await scopeValidator.Validate(scopeClaim);
                             }
                             else
                             {

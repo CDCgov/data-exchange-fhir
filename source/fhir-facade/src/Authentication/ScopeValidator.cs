@@ -13,12 +13,12 @@ namespace OneCDPFHIRFacade.Authentication
         }
 
         // check the scope claim from the JTW token are valid scopes from config scopes
-        public async Task<bool> Validate(string scopeClaimString, string[] sp)
+        public async Task<bool> Validate(string scopeClaimString)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
                 var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
-
+                string[] sp = AwsConfig.ScopeClaim!;
                 if (sp == null && sp!.Length == 0)
                 {
                     Console.WriteLine("Missing or empty 'scope' claim.");

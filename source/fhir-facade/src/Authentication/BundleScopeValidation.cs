@@ -1,4 +1,5 @@
 ﻿using Hl7.Fhir.Model;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 namespace OneCDPFHIRFacade.Authentication
 {
@@ -26,8 +27,9 @@ namespace OneCDPFHIRFacade.Authentication
                 return [];
             }
         }
-        public async Task<bool> IsBundleProfileMatchScope(string[] scopeClaim)
+        public async Task<bool> IsBundleProfileMatchScope()
         {
+            var scopeClaim = AwsConfig.ScopeClaim;
             if (scopeClaim == null || scopeClaim.Length == 0)
             {
                 Console.WriteLine("Missing or empty 'scope' claim.");
