@@ -6,21 +6,17 @@ Code Repository for the CDC (Proof-of-Concept) Ingest FHIR solution
 
 ## Content
 
-`source` - .net C# source code
-
-TODO: add more content
-
-`/spikes`
-
-TODO: list folders and purpose of each
-
+`/source`
+- FHIR-Facade -  Is a ASP.net source code.
+	The purpose of this FHIR Facade is ingestion and storeage of FHIR data with additional features for authentication, authorization, and observability.
 
 `/spikes`
-- FHIR solution Logic App (archived)
-- Connectathon 33 artifacts
+- CDC.DEX.FHIR.Logic
+- Connectathon
+- Connectathon33
 - FHIR Facade ADR research
-- FHIR Facade implementation for AWS
-- OpenTelemetry research
+- source-azure-archive
+- SyntheaCreatLargeFiles
   
 ## Public Domain Standard Notice
 This repository constitutes a work of the United States Government and is not
