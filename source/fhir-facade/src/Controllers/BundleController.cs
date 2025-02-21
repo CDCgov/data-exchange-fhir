@@ -92,7 +92,7 @@ namespace OneCDPFHIRFacade.Controllers
                 if (!runLocal)
                 {
                     BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
-                    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+                    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope(AwsConfig.ScopeClaim!);
                     if (bundleScopeValid)
                     {
                         Console.WriteLine("Bundle scope validated");

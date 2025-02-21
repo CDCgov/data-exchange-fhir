@@ -43,11 +43,12 @@ namespace fhir_facade_tests.Authentication
                 }
             };
 
+            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
             // Create an instance of BundleScopeValidation with mock dependencies
             BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, loggingUtility);
 
             // Act
-            bool isValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+            bool isValid = await bundleScopeValidation.IsBundleProfileMatchScope(scopeClaim);
 
             // Assert - Request IDs should be unique for each log entry
             Assert.That(isValid);
@@ -69,12 +70,13 @@ namespace fhir_facade_tests.Authentication
                     Profile = ["http://hl7.org/fhir/us/medmorph/StructureDefinition/us-ph-content-bundle"]
                 }
             };
+            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
 
             // Create an instance of BundleScopeValidation with mock dependencies
             BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle2, loggingUtility);
 
             // Act
-            bool isNotValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+            bool isNotValid = await bundleScopeValidation.IsBundleProfileMatchScope(scopeClaim);
 
             // Act & Assert
             Assert.That(!isNotValid);
