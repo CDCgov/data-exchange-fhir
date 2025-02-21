@@ -33,9 +33,9 @@ namespace fhir_facade_tests.AuthenticationTests
         public async Task TestValidates()
         {
             string scopeClaimString = "system/bundle.c";
-            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            AwsConfig.ScopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
             AwsConfig.ClientScope = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
-            var result = await _controller.Validate(scopeClaimString, scopeClaim);
+            var result = await _controller.Validate(scopeClaimString);
             Assert.That(result);
         }
 
@@ -43,8 +43,9 @@ namespace fhir_facade_tests.AuthenticationTests
         public async Task TestDoesNotValidate()
         {
             string scopeClaimString = "HAS";
-            string[] scopeClaim = new string[] { "system/bundle.rs", "org/org-name1", "stream/eicr-composition" };
-            var result = await _controller.Validate(scopeClaimString, scopeClaim);
+            AwsConfig.ScopeClaim = new string[] { "system/bundle.rs", "org/org-name1", "stream/eicr-composition" };
+            AwsConfig.ClientScope = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            var result = await _controller.Validate(scopeClaimString);
             Assert.That(!result);
         }
 

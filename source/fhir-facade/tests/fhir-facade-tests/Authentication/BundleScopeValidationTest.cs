@@ -3,6 +3,7 @@ using Hl7.Fhir.Model;
 using Moq;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
+using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 
 namespace fhir_facade_tests.Authentication
@@ -43,12 +44,12 @@ namespace fhir_facade_tests.Authentication
                 }
             };
 
-            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            AwsConfig.ScopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
             // Create an instance of BundleScopeValidation with mock dependencies
             BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, loggingUtility);
 
             // Act
-            bool isValid = await bundleScopeValidation.IsBundleProfileMatchScope(scopeClaim);
+            bool isValid = await bundleScopeValidation.IsBundleProfileMatchScope();
 
             // Assert - Request IDs should be unique for each log entry
             Assert.That(isValid);
@@ -70,13 +71,14 @@ namespace fhir_facade_tests.Authentication
                     Profile = ["http://hl7.org/fhir/us/medmorph/StructureDefinition/us-ph-content-bundle"]
                 }
             };
-            string[] scopeClaim = new string[] { "system/bundle.c", "org/org-name1", "stream/eicr-composition" };
+            AwsConfig.ClientScope = new string[] { "system/bundle.rc", "org/org-name1", "stream/eicr-composition" };
+
 
             // Create an instance of BundleScopeValidation with mock dependencies
             BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle2, loggingUtility);
 
             // Act
-            bool isNotValid = await bundleScopeValidation.IsBundleProfileMatchScope(scopeClaim);
+            bool isNotValid = await bundleScopeValidation.IsBundleProfileMatchScope();
 
             // Act & Assert
             Assert.That(!isNotValid);
