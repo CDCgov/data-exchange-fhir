@@ -6,7 +6,7 @@
         {
             try
             {
-                outputFolder = $"{outputFolder}50mb";
+                outputFolder = $"{outputFolder}300mb";
 
                 if (!Directory.Exists(outputFolder))
                 {
@@ -22,7 +22,7 @@
                 string[] files = Directory.GetFiles(folderPath);
                 int fileIndex = 0;
                 int fileCount = 0;
-                double maxSizeMB = 50.0;
+                double maxSizeMB = 290.0;
                 List<string> jsonObjects = new List<string>();
 
                 while (fileIndex < files.Length && fileCount < 20)
@@ -37,6 +37,21 @@
                             string fileContent = File.ReadAllText(files[fileIndex]).Trim();
                             FileInfo inputFile = new FileInfo(files[fileIndex]);
                             double inputFileSizeMB = inputFile.Length / (1024.0 * 1024.0);
+
+                            if (!string.IsNullOrEmpty(fileContent))
+                            {
+                                // Find the index of the first occurrence of `"resourceType": "Bundle"`
+                                int insertIndex = fileContent.IndexOf("\"resourceType\": \"Bundle\"");
+                                if (insertIndex != -1)
+                                {
+                                    int insertPosition = insertIndex + "\"resourceType\": \"Bundle\"".Length;
+
+                                    // Insert `"id": "125",` right after the first `"resourceType": "Bundle"`
+                                    string modifiedContent = fileContent.Insert(insertPosition, ",\n  \"id\": \"125\"");
+
+                                    fileContent = modifiedContent;
+                                }
+                            }
 
                             if (jsonObjects.Count > 0) writer.WriteLine(",");
                             jsonObjects.Add(fileContent);

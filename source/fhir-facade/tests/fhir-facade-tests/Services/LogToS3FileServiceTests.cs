@@ -3,7 +3,7 @@ using Amazon.S3.Model;
 using Moq;
 using OneCDP.Logging;
 
-namespace fhir_facade_tests.Services
+namespace fhir_facade_tests.ServicesTest
 {
     public class LogToS3FileServiceTests
     {
