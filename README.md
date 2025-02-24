@@ -17,6 +17,7 @@ Code Repository for the CDC Data Exchange FHIR solution
 `/spikes`
 - FHIR solution Logic App (archived)
 - Connectathon 33 artifacts
+- Connectathon 34 artifacts
 - FHIR Facade ADR research
 - FHIR Facade implementation for AWS
 - OpenTelemetry research
