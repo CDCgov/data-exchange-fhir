@@ -24,7 +24,7 @@ namespace OneCDPFHIRFacade.Utilities
             _loggerService = loggerService;
             this.requestId = requestId;
         }
-        public async Task Logging(string message)
+        public virtual async Task Logging(string message)
         {
             //Log message as json
             var logMessage = new

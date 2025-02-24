@@ -3,6 +3,7 @@ using Amazon.CloudWatchLogs;
 using Amazon.Runtime;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Authentication;
@@ -25,9 +26,18 @@ namespace OneCDPFHIRFacade
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService("OneCDPFHIRFacade");
 
             // Add services to the container.
-            builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddControllers();
+            //Allow files as big as 300mb
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB limit
+            });
+
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB limit
+            });
 
             // Set this via config or environment
             // #####################################################
@@ -36,13 +46,8 @@ namespace OneCDPFHIRFacade
             // #####################################################
             string runEnvironment = builder.Configuration.GetValue<string>("RunEnvironment")!;
 
-            // Initialize AWS configuration
-            AwsConfig.Initialize(builder.Configuration);
-
             // Initialize Local file storage configuration
             LocalFileStorageConfig.Initialize(builder.Configuration);
-            AwsConfig.Initialize(builder.Configuration);
-
             builder.Services.AddHttpContextAccessor();
 
             // #####################################################
@@ -50,6 +55,10 @@ namespace OneCDPFHIRFacade
             // #####################################################
             if (runEnvironment == "AWS")
             {
+                // Initialize AWS configuration
+                AwsConfig.Initialize(builder.Configuration);
+                AwsConfig.Initialize(builder.Configuration);
+
                 var s3Config = new AmazonS3Config
                 {
                     RegionEndpoint = RegionEndpoint.GetBySystemName(AwsConfig.Region), // Set region
@@ -264,7 +273,6 @@ namespace OneCDPFHIRFacade
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
             if (runEnvironment == "AWS")
             {
                 app.UseAuthentication();

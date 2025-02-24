@@ -2,7 +2,7 @@
 using Moq;
 using OneCDP.Logging;
 
-namespace fhir_facade_tests.Services
+namespace fhir_facade_tests.ServicesTests
 {
     [TestFixture]
     public class LoggerServiceTests
