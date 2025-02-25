@@ -5,7 +5,7 @@ using OneCDP.Logging;
 
 namespace fhir_facade_tests.ServicesTests
 {
-    public class LogToS3FileServiceTests
+    public class OpenTelemetryS3Exporter
     {
         [SetUp]
         public void Setup()
