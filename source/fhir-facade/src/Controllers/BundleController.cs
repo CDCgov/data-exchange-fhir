@@ -12,7 +12,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Authorize(Policy = "RequiredScope")]
 #endif
     [ApiController]
-    [Route("[controller]")]
+    [Route("bundle")]
     public class BundleController : ControllerBase
     {
         //Create a cloud instance to add logs
@@ -23,7 +23,7 @@ namespace OneCDPFHIRFacade.Controllers
             _loggingUtility = loggingUtility;
         }
 
-        [HttpPost(Name = "PostBundle")]
+        [HttpPost]
         public async Task<IResult> Post()
         {
             LocalFileService localFileService = new LocalFileService(_loggingUtility);
