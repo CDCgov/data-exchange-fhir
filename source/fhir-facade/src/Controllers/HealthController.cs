@@ -7,10 +7,10 @@ namespace OneCDPFHIRFacade.Controllers
     // #####################################################
 
     [ApiController]
-    [Route("[controller]")]
+    [Route("health")]
     public class HealthController : ControllerBase
     {
-        [HttpGet(Name = "Health")]
+        [HttpGet]
         public IResult Get()
         {
             return Results.Json(new

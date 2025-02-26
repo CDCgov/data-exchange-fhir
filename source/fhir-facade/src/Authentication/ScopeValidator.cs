@@ -31,7 +31,7 @@ namespace OneCDPFHIRFacade.Authentication
                 {
                     if (item.Contains("system"))
                     {
-                        var isValid = sp.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
+                        var isValid = AwsConfig.ClientScope!.Any(existingScope => existingScope.Equals(item, StringComparison.OrdinalIgnoreCase));
                         Console.WriteLine($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         await loggingUtility.Logging($"Scope claim: {scopeClaimString}, Valid scope: {isValid}");
                         return isValid;
