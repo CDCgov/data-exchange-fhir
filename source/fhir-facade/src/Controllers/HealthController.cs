@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OneCDPFHIRFacade.Utilities;
+using System.Net;
 
 namespace OneCDPFHIRFacade.Controllers
 {
@@ -37,7 +38,9 @@ namespace OneCDPFHIRFacade.Controllers
             }
             else
             {
-                return Results.Problem("FHIR Facade services are not availible.");
+                return TypedResults.Problem("FHIR Facade services are not availible.", statusCode: (int)HttpStatusCode.ServiceUnavailable);
+
+                //Results.Problem("FHIR Facade services are not availible.");
             }
         }
 
