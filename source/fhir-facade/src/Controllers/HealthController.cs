@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
 
 namespace OneCDPFHIRFacade.Controllers
@@ -9,10 +8,10 @@ namespace OneCDPFHIRFacade.Controllers
     // #####################################################
 
     [ApiController]
-    [Route("[Controller]")]
+    [Route("health")]
     public class HealthController : ControllerBase
     {
-        [HttpGet(Name = "Health")]
+        [HttpGet("system-health")]
         public IResult GetHealth()
         {
             return Results.Json(new
@@ -23,40 +22,22 @@ namespace OneCDPFHIRFacade.Controllers
             });
         }
 
-        [HttpGet("LogAvailibility")]
-        public async Task<IResult> GetLogAvailibility()
+        [HttpGet("fhir-service-health")]
+        public async Task<IResult> GetAwsServiceHealth()
         {
-            ServiceAvailibilityUtility serviceAvailibilityUtility = new ServiceAvailibilityUtility();
-            if (await serviceAvailibilityUtility.IsLogGroupAvailable())
+            ServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
+            if (await serviceAvailabilityUtility.IsServiceAvailable())
             {
                 return Results.Ok(new
                 {
                     Static = "Availible",
                     timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
-                    description = "Log Group is availible."
+                    description = "FHIR Facade services are available."
                 });
             }
             else
             {
-                return Results.Problem("Log Group is not availible.");
-            }
-        }
-        [HttpGet("S3Availibility")]
-        public async Task<IResult> GetS3Availibility()
-        {
-            ServiceAvailibilityUtility serviceAvailibilityUtility = new ServiceAvailibilityUtility();
-            if (await serviceAvailibilityUtility.IsLogGroupAvailable())
-            {
-                return Results.Ok(new
-                {
-                    Static = "Availible",
-                    timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
-                    description = $"S3 Bucket {AwsConfig.BucketName} is availible."
-                });
-            }
-            else
-            {
-                return Results.Problem("S3 client and bucket are not configured.");
+                return Results.Problem("FHIR Facade services are not availible.");
             }
         }
 
