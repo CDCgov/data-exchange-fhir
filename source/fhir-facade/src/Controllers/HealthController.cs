@@ -39,8 +39,6 @@ namespace OneCDPFHIRFacade.Controllers
             else
             {
                 return TypedResults.Problem("FHIR Facade services are not availible.", statusCode: (int)HttpStatusCode.ServiceUnavailable);
-
-                //Results.Problem("FHIR Facade services are not availible.");
             }
         }
 
