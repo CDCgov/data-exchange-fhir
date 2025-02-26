@@ -2,6 +2,7 @@
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OneCDPFHIRFacade.Authentication;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
@@ -12,7 +13,7 @@ namespace OneCDPFHIRFacade.Controllers
     [Authorize(Policy = "RequiredScope")]
 #endif
     [ApiController]
-    [Route("[controller]")]
+    [Route("bundle")]
     public class BundleController : ControllerBase
     {
         //Create a cloud instance to add logs
@@ -23,7 +24,7 @@ namespace OneCDPFHIRFacade.Controllers
             _loggingUtility = loggingUtility;
         }
 
-        [HttpPost(Name = "PostBundle")]
+        [HttpPost]
         public async Task<IResult> Post()
         {
             LocalFileService localFileService = new LocalFileService(_loggingUtility);
@@ -88,17 +89,20 @@ namespace OneCDPFHIRFacade.Controllers
                 bundle = await parser.ParseAsync<Bundle>(fileContent);
 
                 //Check that bundle profile matches user's scope
-                //if (!runLocal)
-                //{
-                //    BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
-                //    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
-                //    if (!bundleScopeValid)
-                //    {
-                //        logMessage = "Bundle scope not validated";
-                //        await _loggingUtility.Logging(logMessage);
-                //        return Results.Forbid();
-                //    }
-                //}
+                if (!runLocal)
+                {
+                    BundleScopeValidation bundleScopeValidation = new BundleScopeValidation(bundle, _loggingUtility);
+                    bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
+                    if (bundleScopeValid)
+                    {
+                        Console.WriteLine("Bundle scope validated");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Bundle scope not validated");
+                        return Results.Forbid();
+                    }
+                }
 
                 // Ensure bundle has a valid ID
                 if (string.IsNullOrWhiteSpace(bundle.Id))
