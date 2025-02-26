@@ -5,35 +5,48 @@ namespace OneCDPFHIRFacade.Utilities
 {
     public class ServiceAvailabilityUtility
     {
-        public async Task<bool> IsServiceAvailable()
+        public async Task<List<string>> ServiceAvailable()
         {
+            List<string> message = new List<string>();
             try
             {
-                // Fetch or create the log group
+                // Check if log group
                 if (AwsConfig.logsClient == null)
                 {
-                    return false;
+                    message.Add("Log Service is unavailable.");
                 }
-                var describeResponse = await AwsConfig.logsClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
+                else
                 {
-                    LogGroupName = AwsConfig.LogGroupName
-                });
+                    var describeResponse = await AwsConfig.logsClient.DescribeLogStreamsAsync(new DescribeLogStreamsRequest
+                    {
+                        LogGroupName = AwsConfig.LogGroupName
+                    });
+                    message.Add("Log Service is available and healthy.");
+                }
                 //Check if S3 is available
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
-                    return false;
+                    message.Add("S3 Bucket is unavailable.");
                 }
-                var response = await AwsConfig.S3Client.ListBucketsAsync();
-                if (!response.Buckets.Exists(b => b.BucketName == AwsConfig.BucketName))
+                else
                 {
-                    return false;
-                }
-                return true;
+                    var response = await AwsConfig.S3Client.ListBucketsAsync();
+                    if (!response.Buckets.Exists(b => b.BucketName == AwsConfig.BucketName))
+                    {
+                        message.Add("S3 Bucket is unavailable.");
+                    }
 
+                    else
+                    {
+                        message.Add("S3 Bucket is available and healhy.");
+                    }
+                }
+                return message;
             }
             catch
             {
-                return false;
+                message.Add("Failed to get access to services.");
+                return message;
             }
         }
     }

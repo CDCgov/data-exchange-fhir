@@ -27,18 +27,26 @@ namespace OneCDPFHIRFacade.Controllers
         public async Task<IResult> GetAwsServiceHealth()
         {
             ServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
-            if (await serviceAvailabilityUtility.IsServiceAvailable())
+            List<string> serviceAvailable = await serviceAvailabilityUtility.ServiceAvailable();
+            if (!serviceAvailable.Any(s => s.Contains("unavailable")))
             {
                 return Results.Ok(new
                 {
                     Static = "Availible",
                     timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
-                    description = "FHIR Facade services are available."
+                    description = serviceAvailable
                 });
             }
             else
             {
-                return TypedResults.Problem("FHIR Facade services are not availible.", statusCode: (int)HttpStatusCode.ServiceUnavailable);
+                string message = "";
+                foreach (string item in serviceAvailable)
+                {
+                    if (message.Length > 0)
+                        message += " ";
+                    message += item;
+                }
+                return TypedResults.Problem(message, statusCode: (int)HttpStatusCode.ServiceUnavailable);
             }
         }
 
