@@ -37,7 +37,7 @@ namespace fhir_facade_tests.ServicesTests
         }
 
         [Test]
-        public async Task LogData_CloudWatchLogs_ShouldNotThrowException()
+        public void LogData_CloudWatchLogs_ShouldNotThrowException()
         {
             // Arrange
             string requestId = Guid.NewGuid().ToString();
