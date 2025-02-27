@@ -1,86 +1,56 @@
-// S3FileService.cs
-// #####################################################
-// SaveResourceToS3
-// #####################################################
-
 using Amazon.S3.Model;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
-using System.Text.Json;
+using System;
+using System.Threading.Tasks;
 
 namespace OneCDPFHIRFacade.Services
 {
-    public interface IS3FileService
+    public class S3FileService : IFileService
     {
-        Task<IResult> SaveResourceToS3(string folderName, string fileName, string content);
-    }
-    public class S3FileService : IS3FileService
-    {
-        private readonly LoggingUtility LoggingUtility;
+        private readonly LoggingUtility _loggingUtility;
 
         public S3FileService(LoggingUtility loggingUtility)
         {
-            this.LoggingUtility = loggingUtility;
+            _loggingUtility = loggingUtility ?? throw new ArgumentNullException(nameof(loggingUtility));
         }
 
-        public async Task<IResult> SaveOpenTelemetryToS3(string folderName, string fileName, string content)
+        public async Task<IResult> SaveResource( string resourceType, string fileName, string content)
         {
-            // Define the S3 put request
             var putRequest = new PutObjectRequest
             {
                 BucketName = AwsConfig.BucketName,
-                Key = $"{folderName}/{fileName}",
-                ContentBody = content
-            };
-            string jsonString = JsonSerializer.Serialize(putRequest);
-
-            try
-            {
-                await AwsConfig.S3Client!.PutObjectAsync(putRequest);
-                return Results.Ok($"Telemtry saved successfully to S3 at {folderName}");
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem($"Error saving resource to S3: {ex.Message}");
-            }
-        }
-        public async Task<IResult> SaveResourceToS3(string folderName, string fileName, string content)
-        {
-            // Define the S3 put request
-            var putRequest = new PutObjectRequest
-            {
-                BucketName = AwsConfig.BucketName,
-                Key = $"{folderName}/{fileName}",
+                Key = $"{resourceType}/{fileName}",
                 ContentBody = content
             };
 
-            // Attempt to save the resource to S3
             try
             {
-                string logMessage = $"End writing bundle to S3: fileName={fileName}, bucket={AwsConfig.BucketName}/Bucket";
-
-                await LoggingUtility.Logging(logMessage);
+                // Log the start of the save process
+                var logMessage = $"Start writing resource to S3: fileName={fileName}, bucket={AwsConfig.BucketName}/{resourceType}";
+                await _loggingUtility.Logging(logMessage);
                 Console.WriteLine(logMessage);
 
+                // Perform the S3 upload
                 var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
 
-                string logString = $"Logs saved to S3: fileName={fileName},bucket={AwsConfig.BucketName}/Logs, response={response.HttpStatusCode}";
-                await LoggingUtility.Logging(logString);
-
+                // Log the successful upload
+                var logString = $"Resource saved to S3: fileName={fileName}, bucket={AwsConfig.BucketName}/{resourceType}, response={response.HttpStatusCode}";
+                await _loggingUtility.Logging(logString);
                 Console.WriteLine(logString);
 
-                await LoggingUtility.SaveLogS3(fileName);
-                return Results.Ok($"Resource saved successfully to S3 at {folderName}/{fileName}");
+                // Save log to S3 and return success result
+                await _loggingUtility.SaveLogS3(fileName);
+                return Results.Ok($"Resource saved successfully to S3 at {resourceType}/{fileName}");
             }
             catch (Exception ex)
             {
-                string logMessage = $"Error saving resource to S3: {ex.Message}";
-                await LoggingUtility.Logging(logMessage);
-                await LoggingUtility.SaveLogS3(fileName);
-                return Results.Problem($"Error saving resource to S3: {ex.Message}");
+                // Log the error and return failure result
+                var errorMessage = $"Error saving resource to S3: {ex.Message}";
+                await _loggingUtility.Logging(errorMessage);
+                await _loggingUtility.SaveLogS3(fileName);
+                return Results.Problem(errorMessage);
             }
-        }// .SaveResourceToS3
-
-    }// .S3FileService
-
-} // .namespace
+        }
+    }
+}
