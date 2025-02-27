@@ -24,11 +24,17 @@ namespace OneCDPFHIRFacade.Controllers
             _loggingUtility = loggingUtility;
         }
 
+        private FileServiceFactory getFileServiceFactory()
+        {
+            return new FileServiceFactory(_loggingUtility);
+        }
+
         [HttpPost]
         public async Task<IResult> Post()
         {
-            LocalFileService localFileService = new LocalFileService(_loggingUtility);
-            S3FileService s3FileService = new S3FileService(_loggingUtility);
+
+            FileServiceFactory fileServiceFactory = getFileServiceFactory();
+            IFileService fileService = fileServiceFactory.CreateFileService(runLocal);
 
             // Use FhirJsonParser to parse incoming JSON as FHIR bundle
             var parser = new FhirJsonParser();
@@ -115,26 +121,7 @@ namespace OneCDPFHIRFacade.Controllers
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 
-                // Save based on environment (local or cloud)
-                if (runLocal)
-                {
-                    // #####################################################
-                    // Save the FHIR Resource Locally
-                    // #####################################################
-                    return await localFileService.SaveResourceLocally(LocalFileStorageConfig.LocalDevFolder!, "Bundle", fileName, await bundle.ToJsonAsync());
-
-                } // .if UseLocalDevFolder
-                else
-                {
-                    if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
-                    {
-                        logMessage = "S3 client and bucket are not configured.";
-                        await _loggingUtility.Logging(logMessage);
-                        return Results.Problem(logMessage);
-                    }
-
-                    return await s3FileService.SaveResourceToS3("Bundle", fileName, await bundle.ToJsonAsync());
-                }
+                return await fileService.SaveResource( "Bundle", fileName, await bundle.ToJsonAsync());
             }
             catch (Exception ex)
             {
