@@ -79,9 +79,9 @@ namespace fhir_facade_tests.ControllerTests
 
             // Act
             var result = await _controller.Post();
-            Assert.That(result, Is.TypeOf<BadRequest<Dictionary<string, string>>>());
 
             // Assert
+            Assert.That(result, Is.TypeOf<BadRequest<Dictionary<string, string>>>());
             var badResult = result as BadRequest<Dictionary<string, string>>;
             Assert.That(badResult, Is.Not.Null);
             Assert.That(badResult.Value, Is.Not.Null);
@@ -91,6 +91,30 @@ namespace fhir_facade_tests.ControllerTests
             Assert.That(resultError, Is.EqualTo("Invalid request"));
             Assert.That(resultMessage, Is.EqualTo("No file uploaded or file is empty."));
         }
+
+        [Test]
+        public async Task Post_Should_ReturnBadRequest_When_ContentTypeNotSupported()
+        {
+            // Arrange: Setting an unsupported content type
+            _controller.HttpContext.Request.ContentType = "text/plain";
+
+            // Act
+            var result = await _controller.Post();
+
+            // Assert
+            Assert.That(result, Is.TypeOf<BadRequest<Dictionary<string, string>>>());
+
+            var badResult = result as BadRequest<Dictionary<string, string>>;
+            Assert.That(badResult, Is.Not.Null);
+            Assert.That(badResult.Value, Is.Not.Null);
+            var badRequestError = badResult.Value["error"];
+            var badRequestMessage = badResult.Value["message"];
+
+            Assert.That(badRequestError, Is.EqualTo("Invalid request"));
+            Assert.That(badRequestMessage, Is.EqualTo("Supported content types: application/json or multipart/form-data."));
+        }
+
+
 
         private string GenerateJwtToken(string secretKey, string issuer, string audience, DateTime expirationDate)
         {
