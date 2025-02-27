@@ -1,5 +1,5 @@
-﻿using Hl7.Fhir.Model.CdsHooks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +9,6 @@ using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Controllers;
 using OneCDPFHIRFacade.Utilities;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -53,12 +52,12 @@ namespace fhir_facade_tests.ControllerTests
             LocalFileStorageConfig.LocalDevFolder = ".";
 
             mockLoggingUtility.Setup(utility => utility.Logging("MESSAGE"));
-
+            var httpContext = new DefaultHttpContext();
             _controller = new BundleController(mockLoggingUtility.Object)
             {
                 ControllerContext = new ControllerContext()
                 {
-                    HttpContext = mockHttpContext.Object
+                    HttpContext = httpContext
                 }
             };
         }
@@ -68,6 +67,29 @@ namespace fhir_facade_tests.ControllerTests
         {
             var result = await _controller.Post();
             Assert.That(result, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task Post_Should_ReturnBadRequest_When_NoFileUploaded()
+        {
+            // Arrange: Simulating a form request with no file
+            var formCollection = new FormCollection(new Dictionary<string, StringValues>());
+            _controller.HttpContext.Request.ContentType = "multipart/form-data";
+            _controller.HttpContext.Request.Form = formCollection;
+
+            // Act
+            var result = await _controller.Post();
+            Assert.That(result, Is.TypeOf<BadRequest<Dictionary<string, string>>>());
+
+            // Assert
+            var badResult = result as BadRequest<Dictionary<string, string>>;
+            Assert.That(badResult, Is.Not.Null);
+            Assert.That(badResult.Value, Is.Not.Null);
+            var resultError = badResult.Value["error"];
+            var resultMessage = badResult.Value["message"];
+
+            Assert.That(resultError, Is.EqualTo("Invalid request"));
+            Assert.That(resultMessage, Is.EqualTo("No file uploaded or file is empty."));
         }
 
         private string GenerateJwtToken(string secretKey, string issuer, string audience, DateTime expirationDate)

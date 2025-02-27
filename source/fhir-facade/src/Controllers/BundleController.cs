@@ -70,7 +70,11 @@ namespace OneCDPFHIRFacade.Controllers
                     {
                         logMessage = "No file uploaded or file is empty.";
                         await _loggingUtility.Logging(logMessage);
-                        return Results.BadRequest(new { error = "Invalid request", message = "No file uploaded or file is empty." });
+                        return Results.BadRequest(new Dictionary<string, string>
+                        {
+                            { "error", "Invalid request"},
+                            { "message", "No file uploaded or file is empty." }
+                        });
                     }
                     using var memoryStream = new MemoryStream();
                     await file.CopyToAsync(memoryStream);
@@ -88,7 +92,11 @@ namespace OneCDPFHIRFacade.Controllers
                 {
                     logMessage = "Unsupported content type.";
                     await _loggingUtility.Logging(logMessage);
-                    return Results.BadRequest(new { error = "Invalid request", message = "Supported content types: application/json or multipart/form-data." });
+                    return Results.BadRequest(new Dictionary<string, string>
+                    {
+                        { "error", "Invalid request"},
+                        { "message", "Supported content types: application/json or multipart/form-data." }
+                    });
                 }
 
                 // Parse JSON into a FHIR Bundle
@@ -121,7 +129,7 @@ namespace OneCDPFHIRFacade.Controllers
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 
-                return await fileService.SaveResource( "Bundle", fileName, await bundle.ToJsonAsync());
+                return await fileService.SaveResource("Bundle", fileName, await bundle.ToJsonAsync());
             }
             catch (Exception ex)
             {
