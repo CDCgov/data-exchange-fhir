@@ -18,6 +18,10 @@
     <PackageReference Include="AWSSDK.CloudWatch" Version="3.7.402.33" />
     <PackageReference Include="AWSSDK.CloudWatchLogs" Version="3.7.409.21" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.412.5" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.2.0" />
     <PackageReference Include="Hl7.Fhir.R4" Version="5.10.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
