@@ -2,24 +2,23 @@
 
 ## Overview
 
-Code Repository for the CDC Data Exchange FHIR solution
+Code Repository for the CDC (Proof-of-Concept) Ingest FHIR solution
 
 ## Content
 
-`/source` - source code for DEX FHIR solution on Microsoft Azure
-- Functions
-  - Process Message Function (validate and process FHIR message bundles)
-  - Data Export Function (export FHIR message bundles to EDAV data lake)
-  - Shared Code
-- Utilities
-  - IG Loader (load HL7 IG validation profiles into FHIR server instance)
+`/source`
+- FHIR-Facade -  ASP.net source code.
+	The purpose of this FHIR Facade is ingestion and storage of FHIR data with additional features for authentication, authorization, and observability.
 
 `/spikes`
-- FHIR solution Logic App (archived)
-- Connectathon 33 artifacts
-- FHIR Facade ADR research
-- FHIR Facade implementation for AWS
-- OpenTelemetry research
+- CDC.DEX.FHIR.Logic - Testing the workflow and RBAC required to flow data from FHIR Server to EDAV Data Lake (mockup).
+- Connectathon33 - Information about Connectathon 33
+- Connectathon34 - Information about Connectathon 34
+- FHIR Facade ADR research - Contains the research done for FHIR Facade
+- source-azure-archive
+	- CDC.DEX.FHIR.Functions - DEX FHIR, Azure build, consists of three .NET Function Applications: Processs Message, Data Export, and Data Purge and other used Azure resources: Azure Health Data Services (FHIR Service), Azure Message Bus, and Microsoft open sourced .NET function.
+	- FHIR.Server.IG.Loader - Load HL7 IG validation profiles into FHIR server instance.
+- SyntheaCreatLargeFiles - Use Synthea to create large Bundles of different sizes for testing purposes.
   
 ## Public Domain Standard Notice
 This repository constitutes a work of the United States Government and is not
