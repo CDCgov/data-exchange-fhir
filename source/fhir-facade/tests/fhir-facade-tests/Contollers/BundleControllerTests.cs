@@ -136,8 +136,43 @@ namespace fhir_facade_tests.ControllerTests
             var badRequestMessage = badResult.Value["message"];
 
             Assert.That(badRequestError, Is.EqualTo("Invalid request"));
-            Assert.That(badRequestMessage, Is.EqualTo("Supported content types: application/json or multipart/form-data."));
+            Assert.That(badRequestMessage, Is.EqualTo("Unable to parse request."));
         }
+
+        [Test]
+        public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_ContentTypeIsNotMultipartFormData()
+        {
+            // Arrange: Set an invalid content type (e.g., application/json)
+            _controller.HttpContext.Request.ContentType = "application/json";
+
+            // Mocking HasFormContentType to be true (so the block executes)
+            _controller.HttpContext.Request.Headers["Content-Type"] = "application/json";
+
+            // Mocking Form property to prevent exceptions when accessing it
+            var formCollection = new FormCollection(new Dictionary<string, StringValues>());
+            _controller.HttpContext.Request.Form = formCollection;
+
+            // Act: Call the controller's Post() method
+            var result = await _controller.Post();
+
+            // Assert: Ensure the result is a BadRequest with a Dictionary<string, string>
+            Assert.That(result, Is.InstanceOf<BadRequest<Dictionary<string, string>>>(),
+                $"Expected BadRequest<Dictionary<string, string>>, but got {result.GetType().FullName}");
+
+            // Extract the BadRequest result
+            var badRequestResult = result as BadRequest<Dictionary<string, string>>;
+            Assert.That(badRequestResult, Is.Not.Null, "BadRequest result should not be null");
+            Assert.That(badRequestResult!.Value, Is.Not.Null, "BadRequest value should not be null");
+
+            // Ensure the dictionary contains expected error messages
+            Assert.That(badRequestResult.Value, Does.ContainKey("error"), "Expected dictionary to contain key 'error'");
+            Assert.That(badRequestResult.Value["error"], Is.EqualTo("Invalid request"), "Incorrect 'error' message");
+
+            Assert.That(badRequestResult.Value, Does.ContainKey("message"), "Expected dictionary to contain key 'message'");
+            Assert.That(badRequestResult.Value["message"], Is.EqualTo("Expected multipart/form-data but received a different content-type."),
+                "Incorrect 'message' value");
+        }
+
 
         [Test]
         public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_BundleIdIsMissing()
