@@ -55,7 +55,18 @@ namespace fhir_facade_tests.ServicesTests
             // Construct file path and read file content
             string relativePath = Path.Combine(LocalStorageTestFolder,  LocalResourceTest, LocalFileName);
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
-            File.Delete(fullPath);
+          
+
+            try
+            {
+                File.Delete(fullPath);
+                Console.WriteLine("File deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+              // Ignore exception if file does not exist
+            }
+            
 
             // Initialize service
             var localFileService = new LocalFileService(mockLoggingUtility.Object);
