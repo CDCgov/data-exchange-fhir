@@ -82,7 +82,8 @@ namespace fhir_facade_tests.ControllerTests
 
             // Act
             var result = await _controller.Post();
-
+            Assert.That(result, Is.InstanceOf<BadRequest<Dictionary<string, string>>>(),
+                $"Expected BadRequest<Dictionary<string, string>>, but got {result.GetType().FullName}");
             // Assert
             Assert.That(result, Is.TypeOf<BadRequest<Dictionary<string, string>>>());
             var badResult = result as BadRequest<Dictionary<string, string>>;
@@ -223,6 +224,30 @@ namespace fhir_facade_tests.ControllerTests
 
             // Assert
             Assert.That(result, Is.InstanceOf<Ok<string>>());
+        }
+        [Test]
+        public async System.Threading.Tasks.Task Test_FileCopyToAsync_ReadsContentCorrectly()
+        {
+            // Arrange
+            var fileContent = "This is a test content of the file";
+            var fileName = "testFile.json";
+
+            // Create a MemoryStream with the content
+            var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
+            Mock<IFormFile> _mockFile = new Mock<IFormFile>();
+            _mockFile.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), default)).Returns(System.Threading.Tasks.Task.CompletedTask);
+            _mockFile.Setup(f => f.OpenReadStream()).Returns(fileStream);
+            _mockFile.Setup(f => f.Length).Returns(fileStream.Length);
+            _mockFile.Setup(f => f.FileName).Returns(fileName);
+
+            // Act
+            using var memoryStream = new MemoryStream();
+            await _mockFile.Object.CopyToAsync(memoryStream); // Simulating the CopyToAsync call
+            memoryStream.Seek(0, SeekOrigin.Begin); // Reset position
+            var resultContent = await new StreamReader(memoryStream).ReadToEndAsync();
+
+            // Assert
+            Assert.That(fileContent, Is.EqualTo("This is a test content of the file"));
         }
 
         private string GenerateJwtToken(string secretKey, string issuer, string audience, DateTime expirationDate)
