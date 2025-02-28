@@ -60,7 +60,11 @@ namespace OneCDPFHIRFacade.Controllers
                     {
                         logMessage = "Invalid content-type for form-data request.";
                         await _loggingUtility.Logging(logMessage);
-                        return Results.BadRequest(new { error = "Invalid request", message = "Expected multipart/form-data but received a different content-type." });
+                        return Results.BadRequest(new Dictionary<string, string>
+                        {
+                            { "error" , "Invalid request" },
+                            { "message" , "Expected multipart/form-data but received a different content-type." }
+                        });
                     }
 
                     var form = await HttpContext.Request.ReadFormAsync();
@@ -98,9 +102,20 @@ namespace OneCDPFHIRFacade.Controllers
                         { "message", "Supported content types: application/json or multipart/form-data." }
                     });
                 }
+                try
+                {
+                    // Parse JSON into a FHIR Bundle
+                    bundle = await parser.ParseAsync<Bundle>(fileContent);
+                }
+                catch
+                {
+                    return Results.BadRequest(new Dictionary<string, string>
+                    {
+                        { "error", "Invalid request"},
+                        { "message", "Unable to parse request." }
+                    });
+                }
 
-                // Parse JSON into a FHIR Bundle
-                bundle = await parser.ParseAsync<Bundle>(fileContent);
 
                 //Check that bundle profile matches user's scope
                 if (!runLocal)
@@ -123,9 +138,12 @@ namespace OneCDPFHIRFacade.Controllers
                 {
                     logMessage = "Error: Invalid Payload. Message: Resource ID is required.";
                     await _loggingUtility.Logging(logMessage);
-                    return Results.BadRequest(new { error = "Invalid payload", message = "Resource ID is required." });
+                    return Results.BadRequest(new Dictionary<string, string>
+                        {
+                            { "error", "Invalid payload"},
+                            { "message", "Resource ID is required." }
+                        });
                 }
-
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 

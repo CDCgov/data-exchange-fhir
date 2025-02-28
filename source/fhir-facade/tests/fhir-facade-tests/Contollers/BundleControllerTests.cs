@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
@@ -18,6 +20,7 @@ namespace fhir_facade_tests.ControllerTests
     public class BundleControllerTests
     {
         private BundleController _controller;
+        private Mock<LoggingUtility> mockLoggingUtility;
 
         [SetUp]
         public void SetUp()
@@ -46,7 +49,7 @@ namespace fhir_facade_tests.ControllerTests
             var loggerService = new Mock<LoggerService>();
             var logToS3BucketService = new Mock<ILogToS3BucketService>();
             string requestId = Guid.NewGuid().ToString();
-            var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object, requestId);
+            mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object, requestId);
 
             LocalFileStorageConfig.UseLocalDevFolder = true;
             LocalFileStorageConfig.LocalDevFolder = ".";
@@ -63,14 +66,14 @@ namespace fhir_facade_tests.ControllerTests
         }
 
         [Test]
-        public async Task TestSuccessfulPost()
+        public async System.Threading.Tasks.Task TestSuccessfulPost()
         {
             var result = await _controller.Post();
             Assert.That(result, Is.Not.Null);
         }
 
         [Test]
-        public async Task Post_Should_ReturnBadRequest_When_NoFileUploaded()
+        public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_NoFileUploaded()
         {
             // Arrange: Simulating a form request with no file
             var formCollection = new FormCollection(new Dictionary<string, StringValues>());
@@ -93,7 +96,7 @@ namespace fhir_facade_tests.ControllerTests
         }
 
         [Test]
-        public async Task Post_Should_ReturnBadRequest_When_ContentTypeNotSupported()
+        public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_ContentTypeNotSupported()
         {
             // Arrange: Setting an unsupported content type
             _controller.HttpContext.Request.ContentType = "text/plain";
@@ -114,7 +117,78 @@ namespace fhir_facade_tests.ControllerTests
             Assert.That(badRequestMessage, Is.EqualTo("Supported content types: application/json or multipart/form-data."));
         }
 
+        [Test]
+        public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_InvalidJsonProvided()
+        {
+            // Arrange: Setting up an invalid JSON request
+            var invalidJson = "This is not a JSON";
+            _controller.HttpContext.Request.ContentType = "application/json";
+            _controller.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(invalidJson));
 
+            // Act
+            var result = await _controller.Post();
+
+            // Assert
+            var badResult = result as BadRequest<Dictionary<string, string>>;
+            Assert.That(badResult, Is.Not.Null);
+            Assert.That(badResult.Value, Is.Not.Null);
+            var badRequestError = badResult.Value["error"];
+            var badRequestMessage = badResult.Value["message"];
+
+            Assert.That(badRequestError, Is.EqualTo("Invalid request"));
+            Assert.That(badRequestMessage, Is.EqualTo("Supported content types: application/json or multipart/form-data."));
+        }
+
+        [Test]
+        public async System.Threading.Tasks.Task Post_Should_ReturnBadRequest_When_BundleIdIsMissing()
+        {
+            // Arrange: Setting up a valid but missing `Id` in the FHIR Bundle
+            Bundle bundle = new Bundle
+            {
+                Type = Bundle.BundleType.Collection,
+                Timestamp = DateTimeOffset.UtcNow,
+            };
+            var jsonBundle = await bundle.ToJsonAsync();
+            _controller.HttpContext.Request.ContentType = "application/json";
+            _controller.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(jsonBundle));
+
+            // Act
+            var result = await _controller.Post();
+            var badResult = result as BadRequest<Dictionary<string, string>>;
+            Assert.That(badResult, Is.Not.Null);
+            Assert.That(badResult.Value, Is.Not.Null);
+            var badRequestError = badResult.Value["error"];
+            var badRequestMessage = badResult.Value["message"];
+
+            // Assert
+            var badRequestResult = result as BadRequestObjectResult;
+            Assert.That(badRequestError, Is.EqualTo("Invalid payload"));
+            Assert.That(badRequestMessage, Is.EqualTo("Resource ID is required."));
+        }
+
+        [Test]
+        public async System.Threading.Tasks.Task Post_Should_ReturnSuccess_When_ValidBundleIsProvided()
+        {
+            // Arrange: Mocking a valid FHIR Bundle
+            var bundle = new Bundle
+            {
+                Id = "123"
+            };
+            var jsonBundle = await bundle.ToJsonAsync();
+            _controller.HttpContext.Request.ContentType = "application/json";
+            _controller.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(jsonBundle));
+
+            // Mock logging behavior
+            mockLoggingUtility
+                .Setup(log => log.Logging(It.IsAny<string>()))
+                .Returns(System.Threading.Tasks.Task.CompletedTask);
+
+            // Act
+            var result = await _controller.Post();
+
+            // Assert
+            Assert.That(result, Is.InstanceOf<Ok<string>>());
+        }
 
         private string GenerateJwtToken(string secretKey, string issuer, string audience, DateTime expirationDate)
         {
@@ -123,9 +197,9 @@ namespace fhir_facade_tests.ControllerTests
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, "userName"),
-                new Claim(ClaimTypes.Role, "admin"),
-                new Claim("client_id", "7bojglo66k83fe8gugojugitao")
+                new System.Security.Claims.Claim(ClaimTypes.Name, "userName"),
+                new System.Security.Claims.Claim(ClaimTypes.Role, "admin"),
+                new System.Security.Claims.Claim("client_id", "7bojglo66k83fe8gugojugitao")
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
