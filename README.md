@@ -8,7 +8,7 @@ Code Repository for the CDC (Proof-of-Concept) Ingest FHIR solution
 
 `/source`
 - FHIR-Facade -  ASP.net source code.
-	The purpose of this FHIR Facade is ingestion and storeage of FHIR data with additional features for authentication, authorization, and observability.
+	The purpose of this FHIR Facade is ingestion and storage of FHIR data with additional features for authentication, authorization, and observability.
 
 `/spikes`
 - CDC.DEX.FHIR.Logic - Testing the workflow and RBAC required to flow data from FHIR Server to EDAV Data Lake (mockup).

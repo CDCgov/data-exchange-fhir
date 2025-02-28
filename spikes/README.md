@@ -1,1 +1,1 @@
-Contains archived work, utilities, tools and potential solutions explored.
+Contains archived work, utilities, tools and code for solutions explored.
