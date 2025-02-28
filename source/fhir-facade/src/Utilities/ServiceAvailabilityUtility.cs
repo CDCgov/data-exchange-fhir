@@ -3,7 +3,11 @@ using OneCDPFHIRFacade.Config;
 
 namespace OneCDPFHIRFacade.Utilities
 {
-    public class ServiceAvailabilityUtility
+    public interface IServiceAvailabilityUtility
+    {
+        Task<List<string>> ServiceAvailable();
+    }
+    public class ServiceAvailabilityUtility : IServiceAvailabilityUtility
     {
         public async Task<List<string>> ServiceAvailable()
         {
