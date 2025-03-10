@@ -19,7 +19,7 @@ authorization, and observability. Proof of concept built of the FHIR Facade is u
 # Steps
 - Step 1: Update appsettings.Development.json file. "RunEnvironment": Needs to be set to "Local"."LocalDevFolder" needs to be set to the location you want the Bundle file to be saved.
 - Step 2: OneCDPFHIRFacade.csproj under <DefineConstants>runLocal</DefineConstants> needs to be set to "RunLocal".
-- Steo 3: Run application by pressing Start Application (F5).
+- Step 3: Run application by pressing Start Application (F5).
 - Step 4: In postman under body, either past a raw Bundle or upload file under form-data. Key needs to be "file" of type File.
 - Step 5: Sent a Post request to http://localhost:5215/Bundle
 
