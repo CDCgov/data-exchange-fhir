@@ -35,7 +35,8 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           cd source/fhir-facade/src  # Move to correct directory
-          docker build -t $ECR_REPO .
+          docker buildx create --use  # Ensure Buildx is enabled
+          docker buildx build --platform linux/arm64 -t $ECR_REPO . --load
           docker tag $ECR_REPO:latest 971422675401.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
           docker push 971422675401.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
 
