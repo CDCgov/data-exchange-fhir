@@ -12,9 +12,18 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("health")]
     public class HealthController : ControllerBase
     {
+        private readonly IServiceAvailabilityUtility _serviceAvailabilityUtility;
+
+        // Inject IServiceAvailabilityUtility via constructor
+        public HealthController(IServiceAvailabilityUtility serviceAvailabilityUtility)
+        {
+            _serviceAvailabilityUtility = serviceAvailabilityUtility;
+        }
+
         [HttpGet("system-health")]
         public IResult GetHealth()
         {
+
             return Results.Ok(new Dictionary<string, string>
             {
                 {"status", "Healthy" },
@@ -26,6 +35,7 @@ namespace OneCDPFHIRFacade.Controllers
         [HttpGet("fhir-service-health")]
         public async Task<IResult> GetAwsServiceHealth()
         {
+
             IServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
             List<string> serviceAvailable = await serviceAvailabilityUtility.ServiceAvailable();
             string message = "";
@@ -40,6 +50,7 @@ namespace OneCDPFHIRFacade.Controllers
                 return Results.Ok(new Dictionary<string, string>
                 {
                     {"status", "Availible" },
+
                     {"timestamp", DateTime.UtcNow.ToString("")}, // ISO 8601 format for compatibility
                     {"description", message }
                 });
