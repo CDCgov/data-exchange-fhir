@@ -175,6 +175,15 @@ namespace OneCDPFHIRFacade
                     return new LoggingUtility(loggerService, logToS3BucketService, requestId);
                 });
 
+                builder.Services.AddScoped<FileServiceFactory>(sp =>
+                {
+                    using var scope = sp.CreateScope();
+                    var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
+
+                    return new FileServiceFactory(loggingUtility);
+
+                });
+
             }// .if
             // #####################################################
             // Local - Non-AWS Configuration
@@ -217,7 +226,8 @@ namespace OneCDPFHIRFacade
                         {
                             using var scope = sp.CreateScope();
                             var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
-                            return new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility));
+                            var fileServiceFactory = scope.ServiceProvider.GetRequiredService<FileServiceFactory>();
+                            return new SimpleActivityExportProcessor(new OpenTelemetryS3Exporter(loggingUtility, fileServiceFactory));
                         });
                 });
 
