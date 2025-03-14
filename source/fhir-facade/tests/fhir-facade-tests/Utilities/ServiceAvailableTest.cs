@@ -26,7 +26,6 @@ namespace fhir_facade_tests.Utilities
             // Assign the mocks to the AwsConfig (simulate dependency injection)
             AwsConfig.logsClient = _mockCloudWatchLogsClient.Object;
             AwsConfig.S3Client = _mockS3Client.Object;
-
             AwsConfig.LogGroupName = "test-log-group";
             AwsConfig.BucketName = "test-bucket";
 

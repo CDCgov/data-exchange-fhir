@@ -19,7 +19,7 @@ namespace OneCDPFHIRFacade.Authentication
             {
                 var loggingUtility = scope.ServiceProvider.GetRequiredService<LoggingUtility>();
                 string[] sp = AwsConfig.ScopeClaim!;
-                if (sp == null && sp!.Length == 0)
+                if (sp == null || sp!.Length == 0)
                 {
                     Console.WriteLine("Missing or empty 'scope' claim.");
                     await loggingUtility.Logging("Missing or empty 'scope' claim.");

@@ -15,6 +15,7 @@ namespace fhir_facade_tests.Authentication
         private LoggerService _loggerService;
         private LogToS3BucketService _logToS3BucketService;
 
+
         [SetUp]
         public void SetUp()
         {
@@ -23,7 +24,6 @@ namespace fhir_facade_tests.Authentication
             // Create instance of LoggerService with mock dependency
             _loggerService = new LoggerService(_mockCloudWatchLogsClient.Object, "TestUserScope");
             _logToS3BucketService = new LogToS3BucketService();
-
         }
 
         [Test]

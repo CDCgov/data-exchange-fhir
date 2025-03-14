@@ -62,7 +62,7 @@ namespace OneCDP.Logging
                     LogStreamNamePrefix = logStreamName
                 });
 
-                var logStream = describeResponse.LogStreams.FirstOrDefault(ls => ls.LogStreamName == logStreamName);
+                var logStream = describeResponse.LogStreams.FirstOrDefault(ls => ls.LogStreamName == logStreamName);//528
                 string? sequenceToken = null;
 
                 if (logStream == null)

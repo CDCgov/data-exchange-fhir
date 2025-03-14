@@ -23,9 +23,10 @@ namespace OneCDPFHIRFacade.Controllers
         [HttpGet("system-health")]
         public IResult GetHealth()
         {
-            return Results.Json(new Dictionary<string, string>
+
+            return Results.Ok(new Dictionary<string, string>
             {
-                {"status", "Healthy"},
+                {"status", "Healthy" },
                 {"timestamp", DateTime.UtcNow.ToString("")}, // ISO 8601 format for compatibility
                 {"description", "API is running and healthy" }
             });
@@ -34,8 +35,9 @@ namespace OneCDPFHIRFacade.Controllers
         [HttpGet("fhir-service-health")]
         public async Task<IResult> GetAwsServiceHealth()
         {
-            List<string> serviceAvailable = await _serviceAvailabilityUtility.ServiceAvailable();
 
+            IServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
+            List<string> serviceAvailable = await serviceAvailabilityUtility.ServiceAvailable();
             string message = "";
             foreach (string item in serviceAvailable)
             {
@@ -47,7 +49,8 @@ namespace OneCDPFHIRFacade.Controllers
             {
                 return Results.Ok(new Dictionary<string, string>
                 {
-                    {"status", "Available" },
+                    {"status", "Availible" },
+
                     {"timestamp", DateTime.UtcNow.ToString("")}, // ISO 8601 format for compatibility
                     {"description", message }
                 });

@@ -1,6 +1,4 @@
 ﻿using OneCDPFHIRFacade.Utilities;
-using System;
-using System.Threading.Tasks;
 
 namespace OneCDPFHIRFacade.Services
 {
@@ -9,7 +7,7 @@ namespace OneCDPFHIRFacade.Services
         Task<IResult> SaveResource(string resourceType, string fileName, string content);
     }
 
-    public class FileServiceFactory
+    public class FileServiceFactory : IFileService
     {
         private readonly LoggingUtility _loggingUtility;
 
@@ -18,11 +16,16 @@ namespace OneCDPFHIRFacade.Services
             _loggingUtility = loggingUtility ?? throw new ArgumentNullException(nameof(loggingUtility));
         }
 
-        public IFileService CreateFileService(bool runLocally)
+        public virtual IFileService CreateFileService(bool runLocally)
         {
             return runLocally
                 ? new LocalFileService(_loggingUtility)
                 : new S3FileService(_loggingUtility);
+        }
+
+        Task<IResult> IFileService.SaveResource(string resourceType, string fileName, string content)
+        {
+            return Task.FromResult<IResult>(Results.Ok(""));
         }
     }
 }
