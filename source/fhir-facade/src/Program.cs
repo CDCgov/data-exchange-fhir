@@ -15,11 +15,13 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Diagnostics.CodeAnalysis;
 
 namespace OneCDPFHIRFacade
 {
     public static class Program
     {
+        [ExcludeFromCodeCoverage]
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
