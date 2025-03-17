@@ -12,14 +12,15 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("health")]
     public class HealthController : ControllerBase
     {
+
         [HttpGet("system-health")]
         public IResult GetHealth()
         {
-            return Results.Json(new
+            return Results.Json(new Dictionary<string, string>
             {
-                status = "Healthy",
-                timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
-                description = "API is running and healthy"
+                {"status", "Healthy"},
+                {"timestamp", DateTime.UtcNow.ToString("")}, // ISO 8601 format for compatibility
+                {"description", "API is running and healthy" }
             });
         }
 
@@ -28,24 +29,25 @@ namespace OneCDPFHIRFacade.Controllers
         {
             ServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
             List<string> serviceAvailable = await serviceAvailabilityUtility.ServiceAvailable();
+
+            string message = "";
+            foreach (string item in serviceAvailable)
+            {
+                if (message.Length > 0)
+                    message += " ";
+                message += item;
+            }
             if (!serviceAvailable.Any(s => s.Contains("unavailable")))
             {
-                return Results.Ok(new
+                return Results.Ok(new Dictionary<string, string>
                 {
-                    Static = "Availible",
-                    timestamp = DateTime.UtcNow.ToString(""), // ISO 8601 format for compatibility
-                    description = serviceAvailable
+                    {"status", "Available" },
+                    {"timestamp", DateTime.UtcNow.ToString("")}, // ISO 8601 format for compatibility
+                    {"description", message }
                 });
             }
             else
             {
-                string message = "";
-                foreach (string item in serviceAvailable)
-                {
-                    if (message.Length > 0)
-                        message += " ";
-                    message += item;
-                }
                 return TypedResults.Problem(message, statusCode: (int)HttpStatusCode.ServiceUnavailable);
             }
         }
