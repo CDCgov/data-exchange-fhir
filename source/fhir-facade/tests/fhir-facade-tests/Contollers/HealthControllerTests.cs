@@ -24,6 +24,7 @@ namespace OneCDPFHIRFacade.Tests
             Assert.That(okResult.Value, Is.Not.Null);
             var okRequestMessage = okResult.Value["status"];
             Assert.That(okRequestMessage, Is.EqualTo("Healthy"));
+
         }
 
         [Test]
@@ -68,6 +69,7 @@ namespace OneCDPFHIRFacade.Tests
             var problemResult = result as ProblemHttpResult;
             Assert.That(problemResult, Is.Not.Null);
             Assert.That(problemResult!.StatusCode, Is.EqualTo((int)HttpStatusCode.ServiceUnavailable));
+
         }
     }
     public class TestableHealthController : HealthController
