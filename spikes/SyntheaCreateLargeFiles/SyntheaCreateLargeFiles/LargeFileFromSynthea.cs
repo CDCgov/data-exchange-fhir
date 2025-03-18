@@ -50,24 +50,17 @@ namespace SyntheaCreateLargeFiles
                             if (jsonObject["resourceType"]?.ToString() == "Bundle")
                             {
                                 jsonObject["id"] = "123"; // Add id field
-                                jsonObject["meta"] = "{ profile : [http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle]},";
-                            }
-
-                            File.WriteAllText(outputFile, jsonObject.ToString());
-
-                            // Read and modify JSON
-                            string jsonContent = File.ReadAllText(file);
-                            JObject jsonObject = JObject.Parse(jsonContent);
-
-                            if (jsonObject["resourceType"]?.ToString() == "Bundle")
-                            {
-                                jsonObject["id"] = "123"; // Add id field
                                 jsonObject["meta"] = new JObject
                                 {
                                     ["profile"] = new JArray("http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle")
                                 };
                             }
 
+                            File.WriteAllText(outputFile, jsonObject.ToString());
+
+                            Console.WriteLine($"Copied and modified {inputFileName} to {outputFile}");
+                        }
+                    }
                 }
                 else
                 {
