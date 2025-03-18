@@ -12,6 +12,13 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("health")]
     public class HealthController : ControllerBase
     {
+        private readonly IServiceAvailabilityUtility _serviceAvailabilityUtility;
+
+        // Inject IServiceAvailabilityUtility via constructor
+        public HealthController(IServiceAvailabilityUtility serviceAvailabilityUtility)
+        {
+            _serviceAvailabilityUtility = serviceAvailabilityUtility;
+        }
 
         [HttpGet("system-health")]
         public IResult GetHealth()
@@ -27,8 +34,7 @@ namespace OneCDPFHIRFacade.Controllers
         [HttpGet("fhir-service-health")]
         public async Task<IResult> GetAwsServiceHealth()
         {
-            ServiceAvailabilityUtility serviceAvailabilityUtility = new ServiceAvailabilityUtility();
-            List<string> serviceAvailable = await serviceAvailabilityUtility.ServiceAvailable();
+            List<string> serviceAvailable = await _serviceAvailabilityUtility.ServiceAvailable();
 
             string message = "";
             foreach (string item in serviceAvailable)

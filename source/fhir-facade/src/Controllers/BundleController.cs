@@ -147,8 +147,7 @@ namespace OneCDPFHIRFacade.Controllers
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
 
-                string bundleString = await bundle.ToJsonAsync();
-                return await fileService.SaveResource("Bundle", fileName, bundleString);
+                return await fileService.SaveResource("Bundle", fileName, await bundle.ToJsonAsync());
             }
             catch (Exception ex)
             {
