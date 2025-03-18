@@ -1,13 +1,14 @@
 ﻿using OneCDPFHIRFacade.Utilities;
-using System;
-using System.Threading.Tasks;
 
 namespace OneCDPFHIRFacade.Services
 {
     public interface IFileService
     {
         Task<IResult> SaveResource(string resourceType, string fileName, string content);
+        Task<IResult> OpenTelemetrySaveResource(string resourceType, string fileName, string content);
     }
+
+
 
     public class FileServiceFactory
     {

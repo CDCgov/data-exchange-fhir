@@ -23,18 +23,18 @@ namespace SyntheaCreateLargeFiles
                         {
                             subFolder = "5mb";
                         }
-                        else if (fileSizeInMb > 9 && fileSizeInMb < 11)
-                        {
-                            subFolder = "10mb";
-                        }
-                        else if (fileSizeInMb > 24 && fileSizeInMb < 26)
-                        {
-                            subFolder = "25mb";
-                        }
-                        else if (fileSizeInMb > 49 && fileSizeInMb < 51)
-                        {
-                            subFolder = "50mb";
-                        }
+                        //else if (fileSizeInMb > 9 && fileSizeInMb < 11)
+                        //{
+                        //    subFolder = "10mb";
+                        //}
+                        //else if (fileSizeInMb > 24 && fileSizeInMb < 26)
+                        //{
+                        //    subFolder = "25mb";
+                        //}
+                        //else if (fileSizeInMb > 49 && fileSizeInMb < 51)
+                        //{
+                        //    subFolder = "50mb";
+                        //}
 
                         if (subFolder != null)
                         {
@@ -50,7 +50,10 @@ namespace SyntheaCreateLargeFiles
                             if (jsonObject["resourceType"]?.ToString() == "Bundle")
                             {
                                 jsonObject["id"] = "123"; // Add id field
-                                jsonObject["meta"] = "{ profile : [http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle]},";
+                                jsonObject["meta"] = new JObject
+                                {
+                                    ["profile"] = new JArray("http://hl7.org/fhir/us/ecr/StructureDefinition/eicr-document-bundle")
+                                };
                             }
 
                             File.WriteAllText(outputFile, jsonObject.ToString());
