@@ -14,18 +14,18 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="CSVFileWithPaths" elementType="Argument">
             <stringProp name="Argument.name">CSVFileWithPaths</stringProp>
-            <stringProp name="Argument.value">C:\\Users\\zhw9\\temp\\jmeter\\5mb\\5mb.txt</stringProp>
+            <stringProp name="Argument.value">C:\\Users\\zhw9\\updatejmeter\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\5mb\\5mb.txt</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="NumOfFiles" elementType="Argument">
             <stringProp name="Argument.name">NumOfFiles</stringProp>
-            <stringProp name="Argument.value">75</stringProp>
+            <stringProp name="Argument.value">40</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Small Bundle Group" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Small Bundle Group">
         <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">1</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
@@ -36,8 +36,8 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Authenticate" enabled="true">
-          <stringProp name="HTTPSampler.domain">us-east-1jdpagq6lm.auth.us-east-1.amazoncognito.com</stringProp>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Authenticate">
+          <stringProp name="HTTPSampler.domain">fhir-dev-5be9d162.auth.us-east-1.amazoncognito.com</stringProp>
           <stringProp name="HTTPSampler.port">443</stringProp>
           <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.path">oauth2/token</stringProp>
@@ -56,14 +56,14 @@
               </elementProp>
               <elementProp name="client_id" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">cloigmg8j670e20hsgt81kbgg</stringProp>
+                <stringProp name="Argument.value">6emqe4anpve4lb2avaa482ks44</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">client_id</stringProp>
               </elementProp>
               <elementProp name="client_secret" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">mrsoe81rlg716cl6hfmrto0al1an2po7906h8aq51pv75plqbi6</stringProp>
+                <stringProp name="Argument.value">dgu696gqpsvor40s8lmrcf3dj0clrn4i5c1r7b416739nji4cgc</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">client_secret</stringProp>
@@ -78,14 +78,14 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Token Extractir" enabled="true">
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Token Extractir">
             <stringProp name="JSONPostProcessor.referenceNames">access_token</stringProp>
             <stringProp name="JSONPostProcessor.jsonPathExprs">$.access_token</stringProp>
             <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
           </JSONPostProcessor>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -122,11 +122,11 @@
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
           <stringProp name="LoopController.loops">50</stringProp>
         </LoopController>
         <hashTree>
-          <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="RandomVariable" enabled="true">
+          <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="RandomVariable">
             <stringProp name="variableName">RandomVariable</stringProp>
             <stringProp name="outputFormat"></stringProp>
             <stringProp name="minimumValue">1</stringProp>
@@ -135,7 +135,7 @@
             <boolProp name="perThread">true</boolProp>
           </RandomVariableConfig>
           <hashTree/>
-          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Small Bundle Random Selection" enabled="true">
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Small Bundle Random Selection">
             <stringProp name="cacheKey">true</stringProp>
             <stringProp name="filename"></stringProp>
             <stringProp name="parameters"></stringProp>
@@ -147,8 +147,8 @@ vars.put(&quot;file_path&quot;, filePath)
             <stringProp name="scriptLanguage">groovy</stringProp>
           </JSR223PreProcessor>
           <hashTree/>
-          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="PostFhirBundle : ${file_path}" enabled="true">
-            <stringProp name="HTTPSampler.domain">mklbbe9uzh.execute-api.us-east-1.amazonaws.com</stringProp>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="PostFhirBundle : ${file_path}">
+            <stringProp name="HTTPSampler.domain">zm3tbmz140.execute-api.us-east-1.amazonaws.com</stringProp>
             <stringProp name="HTTPSampler.protocol">https</stringProp>
             <stringProp name="HTTPSampler.path">bundle</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
@@ -156,9 +156,9 @@ vars.put(&quot;file_path&quot;, filePath)
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="\\5mb\\${file_path}" elementType="HTTPFileArg">
+                <elementProp name="C:\\Users\\zhw9\\updatejmeter\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}" elementType="HTTPFileArg">
                   <stringProp name="File.mimetype">application/json</stringProp>
-                  <stringProp name="File.path">\\5mb\\${file_path}</stringProp>
+                  <stringProp name="File.path">C:\\Users\\zhw9\\updatejmeter\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}</stringProp>
                   <stringProp name="File.paramname"></stringProp>
                 </elementProp>
               </collectionProp>
@@ -169,11 +169,11 @@ vars.put(&quot;file_path&quot;, filePath)
             </elementProp>
           </HTTPSamplerProxy>
           <hashTree>
-            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
               <collectionProp name="HeaderManager.headers">
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Content-Type</stringProp>
-                  <stringProp name="Header.value">text/xml</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
                 </elementProp>
                 <elementProp name="" elementType="Header">
                   <stringProp name="Header.name">Authorization</stringProp>
