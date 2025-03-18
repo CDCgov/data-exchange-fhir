@@ -28,7 +28,7 @@ namespace fhir_facade_tests.ServicesTests
         public void Constructor_ShouldThrowException_WhenLoggingUtilityIsNull()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => new OpenTelemetryS3Exporter(null, _mockFileServiceFactory.Object));
+            Assert.Throws<ArgumentNullException>(() => new OpenTelemetryS3Exporter(null!, _mockFileServiceFactory.Object));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace fhir_facade_tests.ServicesTests
 
             // Assert
             Assert.That(result, Is.EqualTo(ExportResult.Success));
-            _mockFileService.Verify(f => f.SaveResource(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _mockFileService.Verify(f => f.OpenTelemetrySaveResource(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
@@ -69,7 +69,7 @@ namespace fhir_facade_tests.ServicesTests
             Assert.That(result, Is.EqualTo(ExportResult.Success));
             Assert.That(AwsConfig.S3Client, Is.Not.Null);
 
-            _mockFileService.Verify(f => f.SaveResource("Activity", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+            _mockFileService.Verify(f => f.OpenTelemetrySaveResource("Activity", It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -90,7 +90,7 @@ namespace fhir_facade_tests.ServicesTests
             var batch = new Batch<Activity>(new[] { activity }, 1);
 
             _mockFileService
-                .Setup(f => f.SaveResource(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(f => f.OpenTelemetrySaveResource(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Callback((string category, string fileName, string content) =>
                 {
                     Console.WriteLine($"SaveResource called with: {category}, {fileName}");
@@ -108,7 +108,7 @@ namespace fhir_facade_tests.ServicesTests
 
             // Verify that SaveResource was called
             _mockFileService.Verify(
-                f => f.SaveResource("Activity", It.IsAny<string>(), It.IsAny<string>()),
+                f => f.OpenTelemetrySaveResource("Activity", It.IsAny<string>(), It.IsAny<string>()),
                 Times.Once
             );
         }

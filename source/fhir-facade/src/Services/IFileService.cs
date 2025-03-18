@@ -24,7 +24,12 @@ namespace OneCDPFHIRFacade.Services
                 : new S3FileService(_loggingUtility);
         }
 
-        Task<IResult> IFileService.SaveResource(string resourceType, string fileName, string content)
+        public Task<IResult> OpenTelemetrySaveResource(string resourceType, string fileName, string content)
+        {
+            return Task.FromResult<IResult>(Results.Ok(""));
+        }
+
+        public Task<IResult> SaveResource(string resourceType, string fileName, string content)
         {
             return Task.FromResult<IResult>(Results.Ok(""));
         }

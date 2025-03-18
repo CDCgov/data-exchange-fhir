@@ -12,13 +12,6 @@ namespace OneCDPFHIRFacade.Controllers
     [Route("health")]
     public class HealthController : ControllerBase
     {
-        private readonly IServiceAvailabilityUtility _serviceAvailabilityUtility;
-
-        // Inject IServiceAvailabilityUtility via constructor
-        public HealthController(IServiceAvailabilityUtility serviceAvailabilityUtility)
-        {
-            _serviceAvailabilityUtility = serviceAvailabilityUtility;
-        }
 
         [HttpGet("system-health")]
         public IResult GetHealth()
