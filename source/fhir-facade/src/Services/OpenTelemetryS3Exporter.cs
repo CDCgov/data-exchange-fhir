@@ -34,7 +34,6 @@ namespace OneCDPFHIRFacade.Services
 
                 // Save the serialized JSON string asynchronously (no waiting in this context)
                 fileService.SaveResource("Activity", $"{activity.Id}.json", jsonString);
-
             }
 
             return ExportResult.Success;

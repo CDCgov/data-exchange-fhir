@@ -1,8 +1,6 @@
 using Amazon.S3.Model;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Utilities;
-using System;
-using System.Threading.Tasks;
 
 namespace OneCDPFHIRFacade.Services
 {
@@ -15,7 +13,7 @@ namespace OneCDPFHIRFacade.Services
             _loggingUtility = loggingUtility ?? throw new ArgumentNullException(nameof(loggingUtility));
         }
 
-        public async Task<IResult> SaveResource( string resourceType, string fileName, string content)
+        public async Task<IResult> SaveResource(string resourceType, string fileName, string content)
         {
             var putRequest = new PutObjectRequest
             {
@@ -41,6 +39,33 @@ namespace OneCDPFHIRFacade.Services
 
                 // Save log to S3 and return success result
                 await _loggingUtility.SaveLogS3(fileName);
+                return Results.Ok($"Resource saved successfully to S3 at {resourceType}/{fileName}");
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return failure result
+                var errorMessage = $"Error saving resource to S3: {ex.Message}";
+                await _loggingUtility.Logging(errorMessage);
+                await _loggingUtility.SaveLogS3(fileName);
+                return Results.Problem(errorMessage);
+            }
+        }
+
+        public async Task<IResult> OpenTelemetrySaveResource(string resourceType, string fileName, string content)
+        {
+            var putRequest = new PutObjectRequest
+            {
+                BucketName = AwsConfig.BucketName,
+                Key = $"{resourceType}/{fileName}",
+                ContentBody = content
+            };
+
+            try
+            {
+                // Perform the S3 upload
+                var response = await AwsConfig.S3Client!.PutObjectAsync(putRequest);
+
+                // Save log to S3 and return success result
                 return Results.Ok($"Resource saved successfully to S3 at {resourceType}/{fileName}");
             }
             catch (Exception ex)
