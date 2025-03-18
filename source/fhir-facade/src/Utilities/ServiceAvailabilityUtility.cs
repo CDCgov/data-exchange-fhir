@@ -27,7 +27,6 @@ namespace OneCDPFHIRFacade.Utilities
                     });
                     message.Add("Log Service is available and healthy.");
                 }
-
                 //Check if S3 is available
                 if (AwsConfig.S3Client == null || string.IsNullOrEmpty(AwsConfig.BucketName))
                 {
@@ -48,9 +47,9 @@ namespace OneCDPFHIRFacade.Utilities
                 }
                 return message;
             }
-            catch (Exception ex)
+            catch
             {
-                message.Add($"Failed to get access to services. {ex}");
+                message.Add("Failed to get access to services.");
                 return message;
             }
         }
