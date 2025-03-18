@@ -32,9 +32,9 @@ namespace OneCDPFHIRFacade.Services
                 // Serialize the activity object to JSON
                 var jsonString = JsonSerializer.Serialize(activity);
 
-                // Save the serialized JSON string asynchronously (no waiting in this context)
-                fileService.SaveResource("Activity", $"{activity.Id}.json", jsonString);
-
+                    // Save the serialized JSON string asynchronously (no waiting in this context)
+                    _ = fileService.OpenTelemetrySaveResource("Activity", $"{activity.Id}.json", jsonString);
+                }
             }
 
             return ExportResult.Success;

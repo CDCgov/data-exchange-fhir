@@ -9,7 +9,7 @@
             DateTime dateTime = DateTime.Now;
             string fileName = dateTime.ToString("mmdd");
 
-            CombineFiles combineFiles = new CombineFiles(folderPath, outputFolder, fileName);
+            //CombineFiles combineFiles = new CombineFiles(folderPath, outputFolder, fileName);
             LargeFileFromSynthea largeFileFromSynthea = new LargeFileFromSynthea(folderPath, outputFolder, fileName);
         }
     }

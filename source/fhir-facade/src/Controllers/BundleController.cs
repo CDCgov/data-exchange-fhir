@@ -124,10 +124,15 @@ namespace OneCDPFHIRFacade.Controllers
                     bool bundleScopeValid = await bundleScopeValidation.IsBundleProfileMatchScope();
                     if (bundleScopeValid)
                     {
+
                         Console.WriteLine("Bundle scope validated");
+                        logMessage = $"Bundle scope validated";
+                        await _loggingUtility.Logging(logMessage);
                     }
                     else
                     {
+                        logMessage = $"Bundle scope not validated";
+                        await _loggingUtility.Logging(logMessage);
                         Console.WriteLine("Bundle scope not validated");
                         return Results.Forbid();
                     }
@@ -146,8 +151,9 @@ namespace OneCDPFHIRFacade.Controllers
                 }
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
-
-                return await fileService.SaveResource("Bundle", fileName, await bundle.ToJsonAsync());
+                
+                string bundleJson = await bundle.ToJsonAsync();
+                return await fileService.SaveResource("Bundle", fileName, bundleJson);
             }
             catch (Exception ex)
             {
