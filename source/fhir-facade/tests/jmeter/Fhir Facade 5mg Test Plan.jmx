@@ -22,7 +22,13 @@
             <stringProp name="Argument.value">40</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="DataExchangeRoot" elementType="Argument">
+            <stringProp name="Argument.name">DataExchangeRoot</stringProp>
+            <stringProp name="Argument.value">C:\\Users\\zhw9\\updatejmeter</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
+        <stringProp name="TestPlan.comments">CSVFileWithPaths is the complete path but you should only have to change the root  DataExchange is the root of the directory wher you cloned the repo</stringProp>
       </Arguments>
       <hashTree/>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Small Bundle Group">
@@ -156,9 +162,9 @@ vars.put(&quot;file_path&quot;, filePath)
             <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
             <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
               <collectionProp name="HTTPFileArgs.files">
-                <elementProp name="C:\\Users\\zhw9\\updatejmeter\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}" elementType="HTTPFileArg">
+                <elementProp name="${DataExchangeRoot}\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}" elementType="HTTPFileArg">
                   <stringProp name="File.mimetype">application/json</stringProp>
-                  <stringProp name="File.path">C:\\Users\\zhw9\\updatejmeter\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}</stringProp>
+                  <stringProp name="File.path">${DataExchangeRoot}\\data-exchange-fhir\\source\\fhir-facade\\tests\\jmeter\\\5mb\\${file_path}</stringProp>
                   <stringProp name="File.paramname"></stringProp>
                 </elementProp>
               </collectionProp>
