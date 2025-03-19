@@ -3,10 +3,6 @@ using OneCDP.Logging;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
-using NUnit.Framework;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace fhir_facade_tests.ServicesTests
 {
@@ -53,20 +49,20 @@ namespace fhir_facade_tests.ServicesTests
             LocalFileStorageConfig.LocalDevFolder = LocalStorageTestFolder;
 
             // Construct file path and read file content
-            string relativePath = Path.Combine(LocalStorageTestFolder,  LocalResourceTest, LocalFileName);
+            string relativePath = Path.Combine(LocalStorageTestFolder, LocalResourceTest, LocalFileName);
             string fullPath = Path.Combine(Directory.GetCurrentDirectory(), relativePath);
-          
+
 
             try
             {
                 File.Delete(fullPath);
                 Console.WriteLine("File deleted successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-              // Ignore exception if file does not exist
+                // Ignore exception if file does not exist
             }
-            
+
 
             // Initialize service
             var localFileService = new LocalFileService(mockLoggingUtility.Object);
