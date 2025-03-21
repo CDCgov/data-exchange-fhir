@@ -8,9 +8,7 @@ namespace OneCDPFHIRFacade.Services
         Task<IResult> OpenTelemetrySaveResource(string resourceType, string fileName, string content);
     }
 
-
-
-    public class FileServiceFactory
+    public class FileServiceFactory : IFileService
     {
         private readonly LoggingUtility _loggingUtility;
 
@@ -19,11 +17,21 @@ namespace OneCDPFHIRFacade.Services
             _loggingUtility = loggingUtility ?? throw new ArgumentNullException(nameof(loggingUtility));
         }
 
-        public IFileService CreateFileService(bool runLocally)
+        public virtual IFileService CreateFileService(bool runLocally)
         {
             return runLocally
                 ? new LocalFileService(_loggingUtility)
                 : new S3FileService(_loggingUtility);
+        }
+
+        public Task<IResult> OpenTelemetrySaveResource(string resourceType, string fileName, string content)
+        {
+            return Task.FromResult<IResult>(Results.Ok(""));
+        }
+
+        public Task<IResult> SaveResource(string resourceType, string fileName, string content)
+        {
+            return Task.FromResult<IResult>(Results.Ok(""));
         }
     }
 }

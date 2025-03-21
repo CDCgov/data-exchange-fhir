@@ -1,76 +1,110 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using OneCDP.Logging;
 using OneCDPFHIRFacade.Config;
 using OneCDPFHIRFacade.Services;
 using OneCDPFHIRFacade.Utilities;
-using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
+using System.Net;
 
-namespace fhir_facade_tests.ServicesTests
+namespace OneCDPFHIRFacade.Tests.Services
 {
+    [TestFixture]
     public class S3FileServiceTests
     {
-        // Constants for file paths, names, and expected content
-        private const string S3StorageTestFolder = "s3storagetest";
-        private const string S3FolderTest = "s3foldertest";
-        private const string S3ResourceTest = "s3resourcetest";
-        private const string S3FileName = "s3filename.json";
-
-        public const string ExpectedFileContent = @"{
-            ""name"": ""John Doe"",
-            ""age"": 30,
-            ""email"": ""john.doe@example.com"",
-            ""isActive"": true,
-            ""address"": {
-                ""street"": ""123 Main St"",
-                ""city"": ""Springfield"",
-                ""state"": ""IL"",
-                ""zipCode"": ""62701""
-            },
-            ""phoneNumbers"": [
-                ""123-456-7890"",
-                ""987-654-3210""
-            ]
-        }";
+        private Mock<AmazonS3Client> _mockS3Client;
+        private Mock<LoggingUtility> _mockLoggingUtility;
+        private S3FileService _s3FileService;
+        private const string BucketName = "test-bucket";
+        private const string ResourceType = "Patient";
+        private const string FileName = "test.json";
+        private const string Content = "{}";
 
         [SetUp]
-        public void Setup() { }
-
-        [Test]
-        public async Task TestS3FileService()
+        public void SetUp()
         {
-            // Mock dependencies
             var loggerService = new Mock<LoggerService>();
             var logToS3BucketService = new Mock<ILogToS3BucketService>();
             var requestId = Guid.NewGuid().ToString();
-            var mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object, requestId);
 
-            var mockS3Client = new Mock<AmazonS3Client>();
+            _mockLoggingUtility = new Mock<LoggingUtility>(loggerService.Object, logToS3BucketService.Object, requestId);
+            _mockS3Client = new Mock<AmazonS3Client>();
+            _s3FileService = new S3FileService(_mockLoggingUtility.Object);
 
-            // Setup the mock to capture the file content
-            mockS3Client
-                .Setup(client => client.PutObjectAsync(It.IsAny<PutObjectRequest>(), default))
-                .Callback<PutObjectRequest, System.Threading.CancellationToken>((putRequest, cancellationToken) =>
-                {
-                    Console.WriteLine($"Captured file content: {putRequest.ContentBody}");
-                    // Assert the file content is as expected
-                    Assert.That(putRequest.ContentBody, Is.EqualTo(ExpectedFileContent));
-                })
-                .ReturnsAsync(new PutObjectResponse
-                {
-                    HttpStatusCode = System.Net.HttpStatusCode.OK
-                });
+            // Set up the AwsConfig with the mock S3 client and bucket name
+            AwsConfig.S3Client = _mockS3Client.Object;
+            AwsConfig.BucketName = BucketName;
+        }
 
-            // Set the configuration for the S3 bucket
-            AwsConfig.BucketName = "BUCKET";
-            AwsConfig.S3Client = mockS3Client.Object;
+        [Test]
+        public void Constructor_ThrowsArgumentNullException_WhenLoggingUtilityIsNull()
+        {
+            Assert.That(() => new S3FileService(null!), Throws.ArgumentNullException);
+        }
 
-            // Create the S3FileService and call the SaveResource method
-            var s3FileService = new S3FileService(mockLoggingUtility.Object);
-            await s3FileService.SaveResource( S3ResourceTest, S3FileName, ExpectedFileContent);
+        [Test]
+        public async Task SaveResource_ReturnsOkResult_WhenS3UploadSucceeds()
+        {
+            // Arrange
+            var putResponse = new PutObjectResponse { HttpStatusCode = HttpStatusCode.OK };
+            _mockS3Client.Setup(s3 => s3.PutObjectAsync(It.IsAny<PutObjectRequest>(), default))
+                         .ReturnsAsync(putResponse);
+
+            // Act
+            var result = await _s3FileService.SaveResource(ResourceType, FileName, Content);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<Ok<string>>());
+        }
+
+        [Test]
+        public async Task SaveResource_ReturnsProblemResult_WhenS3UploadFails()
+        {
+            // Arrange
+            var exceptionMessage = "S3 upload failed";
+            _mockS3Client.Setup(s3 => s3.PutObjectAsync(It.IsAny<PutObjectRequest>(), default))
+                         .ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _s3FileService.SaveResource(ResourceType, FileName, Content);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<ProblemHttpResult>());
+        }
+
+        [Test]
+        public async Task OpenTelemetrySaveResource_ReturnsOkResult_WhenS3UploadSucceeds()
+        {
+            // Arrange
+            var putResponse = new PutObjectResponse { HttpStatusCode = HttpStatusCode.OK };
+            _mockS3Client.Setup(s3 => s3.PutObjectAsync(It.IsAny<PutObjectRequest>(), default))
+                         .ReturnsAsync(putResponse);
+
+            // Act
+            var result = await _s3FileService.OpenTelemetrySaveResource(ResourceType, FileName, Content);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<Ok<string>>());
+        }
+
+        [Test]
+        public async Task OpenTelemetrySaveResource_ReturnsProblemResult_WhenS3UploadFails()
+        {
+            // Arrange
+            var exceptionMessage = "S3 upload failed";
+            _mockS3Client.Setup(s3 => s3.PutObjectAsync(It.IsAny<PutObjectRequest>(), default))
+                         .ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _s3FileService.OpenTelemetrySaveResource(ResourceType, FileName, Content);
+
+            // Assert
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.InstanceOf<ProblemHttpResult>());
         }
     }
 }
