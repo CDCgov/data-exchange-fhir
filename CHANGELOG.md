@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 2.0.2.alpha Pre-release 2024-02-20
+## 2.0.4.alpha Pre-release 2025-03-20
+	- Image architecture fix
+	- Fix app settings
+	- Fix Health Controller endpoint
+	- Added Exception message to Service available
+	- Fix log message loop
+	- Unit test updates
+	- Health controller fixed
+## 2.0.3.alpha Pre-release 2025-03-07
+	- Change log updated
+	- Changed controllers to lower case
+	- Heath check added for logs & s3
+	- File services updated
+	- Updated unit tests
+	- Fix Read Me Errors
+## 2.0.2.alpha Pre-release 2025-02-20
 	- Discover FHIR Facade bottlenecks and benchmarks 
 	- JWT check between API Gateway and FHIR Facade code
 	- CI/CD process for TST environment 
