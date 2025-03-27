@@ -34,6 +34,8 @@ namespace OneCDPFHIRFacade
             builder.Services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB limit
+                options.BufferBody = true;
+                options.MemoryBufferThreshold = int.MaxValue;
             });
 
             builder.WebHost.ConfigureKestrel(options =>

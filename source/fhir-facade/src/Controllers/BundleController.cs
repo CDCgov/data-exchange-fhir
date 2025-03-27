@@ -80,10 +80,9 @@ namespace OneCDPFHIRFacade.Controllers
                             { "message", "No file uploaded or file is empty." }
                         });
                     }
-                    using var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin); // Reset position
-                    fileContent = await new StreamReader(memoryStream).ReadToEndAsync();
+                    using var reader = new StreamReader(file.OpenReadStream());
+                    fileContent = await reader.ReadToEndAsync();
+
                 }
                 //Read from body
                 else if (HttpContext.Request.ContentType != null &&
@@ -151,7 +150,7 @@ namespace OneCDPFHIRFacade.Controllers
                 }
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
-                
+
                 string bundleJson = await bundle.ToJsonAsync();
                 return await fileService.SaveResource("Bundle", fileName, bundleJson);
             }
