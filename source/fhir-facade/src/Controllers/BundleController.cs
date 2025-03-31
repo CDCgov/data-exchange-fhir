@@ -105,7 +105,11 @@ namespace OneCDPFHIRFacade.Controllers
                 try
                 {
                     // Parse JSON into a FHIR Bundle
+                    ValidationUtility validationUtility = new ValidationUtility();
+
                     bundle = await parser.ParseAsync<Bundle>(fileContent);
+                    bool validBundle = validationUtility.ValidateBundle(bundle);
+                    Console.WriteLine(validBundle);
                 }
                 catch
                 {
@@ -151,7 +155,7 @@ namespace OneCDPFHIRFacade.Controllers
                 }
                 logMessage = $"Received FHIR Bundle: Id={bundle.Id}";
                 await _loggingUtility.Logging(logMessage);
-                
+
                 string bundleJson = await bundle.ToJsonAsync();
                 return await fileService.SaveResource("Bundle", fileName, bundleJson);
             }
