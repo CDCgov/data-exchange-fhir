@@ -108,7 +108,7 @@ namespace OneCDPFHIRFacade.Controllers
                     ValidationUtility validationUtility = new ValidationUtility();
 
                     bundle = await parser.ParseAsync<Bundle>(fileContent);
-                    bool validBundle = validationUtility.ValidateBundle(bundle);
+                    string validBundle = validationUtility.ValidateBundle(bundle);
                     Console.WriteLine(validBundle);
                 }
                 catch
