@@ -1,0 +1,32 @@
+{
+  "name": "hl7.fhir.us.vr-common-library",
+  "version": "1.0.0",
+  "tools-version": 3,
+  "type": "fhir.ig",
+  "date": "20211012123706",
+  "license": "CC0-1.0",
+  "canonical": "http://hl7.org/fhir/us/vr-common-library",
+  "url": "http://hl7.org/fhir/us/vr-common-library/STU1",
+  "title": "Vital Records Common Profiles Library",
+  "description": "The purpose of this project is to create an HL7 Fast Healthcare Interoperability Resources (FHIR) Library standard to support the needs of multiple Vital Records Implementation Guides.\n\nThis guide is a FHIR Resources (FHIR) Library to support the needs of multiple Vital Records Implementation Guides. It does not provide any use case or scenario specific content or additional guidance on how to use these artifacts, but serves as a source for a standard set of profiles for reuse in multiple use case specific implementation guides focusing on the exchange of Vital Records information. Implementation details such as how and when to use a given artifact will be supplied in these guides.\n\n### Background\nAfter evaluation and analysis of two separate FHIR IG projects - [Birth Defects Reporting](https://build.fhir.org/ig/HL7/fhir-birthdefectsreporting-ig/) and [Birth and Fetal Death Reporting](http://build.fhir.org/ig/HL7/fhir-bfdr), it was determined that there are many common data elements between the two IGs. The short-term scope of this common profiles library will include data elements common to the above-mentioned FHIR IGs and will define a US Realm specific framework that defines common elements for the implementation guides. The longer-term scope of this profiles library will include analysis and possible inclusion of data elements from other Vital Records projects (such as [Vital Records Mortality and Morbidity Reporting FHIR IG](https://build.fhir.org/ig/HL7/vrdr/)).\n\nTo avoid defining the same profiles multiple times, this IG contains a US Realm focused profile library for use by Vital Records and other FHIR standards development efforts to define the appropriate FHIR profiles, value sets, etc., once and allow them to be referenced by each of the specific implementation guides. This profile library will provide a standard framework for inclusion in multiple use case specific implementation guides focused on the exchange of Vital Records information to support interoperability among public health systems and reduce provider and implementer burden. This FHIR implementation guide uses the US Core profiles. Where this FHIR implementation guide is unable to use a US Core profile, we have followed the Cross Group Projects WG\u0027s variance request process, and have provided the US Realm Steering Committee an approved rationale for deviation in the implementation guide.\n\nFor Clinical Safety Information please refer to the [FHIR Implementer’s Safety Checklist](http://hl7.org/fhir/safety.html).\n\n### How to Read This Guide\n\nThis Guide is divided into several pages which are listed at the top of each page in the menu bar.\n\n* Home: The home page provides the introduction and background for HL7 FHIR® Vital Records Common Profiles Library.\n* Terminology: This page provides a listing of the value sets used in this guide.\n* Downloads: This page provides links to downloadable artifacts.\n* Artifact Index: This page provides a list of the FHIR artifacts (profiles, examples, and value sets) defined as part of this guide. (built Tue, Oct 12, 2021 12:37+0000+00:00)",
+  "fhirVersions": [
+    "4.0.1"
+  ],
+  "dependencies": {
+    "hl7.fhir.r4.core": "4.0.1",
+    "hl7.fhir.us.core": "4.0.0",
+    "us.cdc.phinvads": "0.7.0"
+  },
+  "author": "HL7 International - Public Health Work Group",
+  "maintainers": [
+    {
+      "name": "HL7 International - Public Health",
+      "url": "http://www.hl7.org/Special/committees/pher"
+    }
+  ],
+  "directories": {
+    "lib": "package",
+    "example": "example"
+  },
+  "jurisdiction": "urn:iso:std:iso:3166#US"
+}

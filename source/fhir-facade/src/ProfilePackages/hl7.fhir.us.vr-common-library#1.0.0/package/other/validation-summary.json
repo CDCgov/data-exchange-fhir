@@ -1,0 +1,302 @@
+{
+  "ImplementationGuide/hl7.fhir.us.vr-common-library": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-pregnancy-risk-factor-carmen-teresa-lee-1-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-child-babyg-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-decedent-fetus-not-named-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Practitioner/practitioner-vital-records-janet-seito-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-mother-gestational-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-father-natural-tom-yan-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-father-tom-yan-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-mother-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/apgar-timing": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/education-level-person": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Extension-relatedperson-deceased": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Extension-relatedperson-birthplace": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Extension-within-city-limits-indicator": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/father-relationship": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/mother-relationship": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-apgar-score": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-apgar-score-babyg-quinn-5-min-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-autopsy-performed": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-autopsy-performed-not-named-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-birth-weight": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-birth-weight-babyg-quinn-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "Observation/observation-birth-weight-not-named-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Observation-gestational-age-at-delivery": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-gestational-age-at-delivery-babyg-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-gestational-age-at-delivery-not-named-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-infant-living": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-infant-living-babyg-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-last-menstrual-period": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-last-menstrual-period-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-mother-delivery-weight": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-mother-delivery-weight-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Observation-mother-height": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-mother-height-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Observation-mother-prepregnancy-weight": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-mother-prepregnancy-weight-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Observation-number-births-now-dead": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-number-births-now-dead-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-births-now-living": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-fetal-deaths-this-delivery": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-live-births-this-delivery": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-number-births-now-living-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-number-deaths-this-delivery-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-prenatal-visits": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-other-pregnancy-outcomes": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-number-prenatal-visits-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-number-previous-cesareans": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-parent-education-level": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-parent-education-level-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/Observation-plurality": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-plurality-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-pregnancy-risk-factor": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-number-previous-cesareans-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Patient-child": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Patient-decedent-fetus": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Patient-mother": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Practitioner-vital-records": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/RelatedPerson-parent": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/RelatedPerson-father": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/RelatedPerson-father-natural": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/RelatedPerson-mother": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/RelatedPerson-mother-gestational": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/ValueSet-date-part": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Extension-date-part-absent-reason": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-mother-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-nbr-live-births-delivery-carmen-teresa-lee-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-nbr-other-pregnancy-outcomes-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-parent-stepmother": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-race": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/Observation-tabulated-ethnicity": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-race-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-tabulated-ethnicity-jada-ann-quinn-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-mother-carol-hoffer-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-mother-birth-date-part-absent-common": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "RelatedPerson/relatedperson-father-tony-lewis-common": {
+    "errors": 0,
+    "warnings": 0
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "index-version": 1,
+  "files": [
+    {
+      "filename": "StructureDefinition-Observation-mother-height.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-mother-height",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-mother-height",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-RelatedPerson-father-natural.json",
+      "resourceType": "StructureDefinition",
+      "id": "RelatedPerson-father-natural",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/RelatedPerson-father-natural",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "RelatedPerson"
+    },
+    {
+      "filename": "ValueSet-father-relationship.json",
+      "resourceType": "ValueSet",
+      "id": "father-relationship",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ValueSet/father-relationship",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Observation-tabulated-ethnicity.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-tabulated-ethnicity",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-tabulated-ethnicity",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Extension-relatedperson-birthplace.json",
+      "resourceType": "StructureDefinition",
+      "id": "Extension-relatedperson-birthplace",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Extension-relatedperson-birthplace",
+      "version": "1.0.0",
+      "kind": "complex-type",
+      "type": "Extension"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-fetal-deaths-this-delivery.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-fetal-deaths-this-delivery",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-fetal-deaths-this-delivery",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-RelatedPerson-father.json",
+      "resourceType": "StructureDefinition",
+      "id": "RelatedPerson-father",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/RelatedPerson-father",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "RelatedPerson"
+    },
+    {
+      "filename": "StructureDefinition-Observation-mother-delivery-weight.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-mother-delivery-weight",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-mother-delivery-weight",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-infant-living.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-infant-living",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-infant-living",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-parent-education-level.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-parent-education-level",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-parent-education-level",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-live-births-this-delivery.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-live-births-this-delivery",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-live-births-this-delivery",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Extension-relatedperson-deceased.json",
+      "resourceType": "StructureDefinition",
+      "id": "Extension-relatedperson-deceased",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Extension-relatedperson-deceased",
+      "version": "1.0.0",
+      "kind": "complex-type",
+      "type": "Extension"
+    },
+    {
+      "filename": "StructureDefinition-Observation-plurality.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-plurality",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-plurality",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-autopsy-performed.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-autopsy-performed",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-autopsy-performed",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ig-r4.json",
+      "resourceType": "ImplementationGuide",
+      "id": "hl7.fhir.us.vr-common-library",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ImplementationGuide/hl7.fhir.us.vr-common-library",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "ValueSet-education-level-person.json",
+      "resourceType": "ValueSet",
+      "id": "education-level-person",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ValueSet/education-level-person",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Extension-within-city-limits-indicator.json",
+      "resourceType": "StructureDefinition",
+      "id": "Extension-within-city-limits-indicator",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Extension-within-city-limits-indicator",
+      "version": "1.0.0",
+      "kind": "complex-type",
+      "type": "Extension"
+    },
+    {
+      "filename": "ImplementationGuide-hl7.fhir.us.vr-common-library.json",
+      "resourceType": "ImplementationGuide",
+      "id": "hl7.fhir.us.vr-common-library",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ImplementationGuide/hl7.fhir.us.vr-common-library",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Extension-date-part-absent-reason.json",
+      "resourceType": "StructureDefinition",
+      "id": "Extension-date-part-absent-reason",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Extension-date-part-absent-reason",
+      "version": "1.0.0",
+      "kind": "complex-type",
+      "type": "Extension"
+    },
+    {
+      "filename": "StructureDefinition-Observation-race.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-race",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-race",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-apgar-score.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-apgar-score",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-apgar-score",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-births-now-dead.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-births-now-dead",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-births-now-dead",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Patient-child.json",
+      "resourceType": "StructureDefinition",
+      "id": "Patient-child",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Patient-child",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Patient"
+    },
+    {
+      "filename": "ValueSet-apgar-timing.json",
+      "resourceType": "ValueSet",
+      "id": "apgar-timing",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ValueSet/apgar-timing",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Observation-birth-weight.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-birth-weight",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-birth-weight",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-gestational-age-at-delivery.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-gestational-age-at-delivery",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-gestational-age-at-delivery",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Patient-mother.json",
+      "resourceType": "StructureDefinition",
+      "id": "Patient-mother",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Patient-mother",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Patient"
+    },
+    {
+      "filename": "StructureDefinition-RelatedPerson-mother.json",
+      "resourceType": "StructureDefinition",
+      "id": "RelatedPerson-mother",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/RelatedPerson-mother",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "RelatedPerson"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-previous-cesareans.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-previous-cesareans",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-previous-cesareans",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ValueSet-mother-relationship.json",
+      "resourceType": "ValueSet",
+      "id": "mother-relationship",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ValueSet/mother-relationship",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Observation-pregnancy-risk-factor.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-pregnancy-risk-factor",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-pregnancy-risk-factor",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-births-now-living.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-births-now-living",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-births-now-living",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-mother-prepregnancy-weight.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-mother-prepregnancy-weight",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-mother-prepregnancy-weight",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-prenatal-visits.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-prenatal-visits",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-prenatal-visits",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-RelatedPerson-parent.json",
+      "resourceType": "StructureDefinition",
+      "id": "RelatedPerson-parent",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/RelatedPerson-parent",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "RelatedPerson"
+    },
+    {
+      "filename": "ValueSet-ValueSet-date-part.json",
+      "resourceType": "ValueSet",
+      "id": "ValueSet-date-part",
+      "url": "http://hl7.org/fhir/us/vr-common-library/ValueSet/ValueSet-date-part",
+      "version": "1.0.0"
+    },
+    {
+      "filename": "StructureDefinition-Observation-number-other-pregnancy-outcomes.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-number-other-pregnancy-outcomes",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-number-other-pregnancy-outcomes",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-Patient-decedent-fetus.json",
+      "resourceType": "StructureDefinition",
+      "id": "Patient-decedent-fetus",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Patient-decedent-fetus",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Patient"
+    },
+    {
+      "filename": "StructureDefinition-Observation-last-menstrual-period.json",
+      "resourceType": "StructureDefinition",
+      "id": "Observation-last-menstrual-period",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Observation-last-menstrual-period",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "StructureDefinition-RelatedPerson-mother-gestational.json",
+      "resourceType": "StructureDefinition",
+      "id": "RelatedPerson-mother-gestational",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/RelatedPerson-mother-gestational",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "RelatedPerson"
+    },
+    {
+      "filename": "StructureDefinition-Practitioner-vital-records.json",
+      "resourceType": "StructureDefinition",
+      "id": "Practitioner-vital-records",
+      "url": "http://hl7.org/fhir/us/vr-common-library/StructureDefinition/Practitioner-vital-records",
+      "version": "1.0.0",
+      "kind": "resource",
+      "type": "Practitioner"
+    }
+  ]
+}
