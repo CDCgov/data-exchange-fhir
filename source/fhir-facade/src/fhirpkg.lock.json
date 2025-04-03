@@ -1,0 +1,16 @@
+{
+  "updated": "2025-03-31T11:10:10.9252588-04:00",
+  "dependencies": {
+    "hl7.fhir.us.ecr": "2.1.1",
+    "hl7.fhir.r4.core": "4.0.1",
+    "hl7.terminology.r4": "5.3.0",
+    "hl7.fhir.uv.extensions.r4": "1.0.0",
+    "hl7.fhir.us.core": "4.0.0",
+    "us.nlm.vsac": "0.17.0",
+    "us.cdc.phinvads": "0.12.0",
+    "hl7.fhir.us.vr-common-library": "1.0.0",
+    "hl7.fhir.us.odh": "1.1.0",
+    "hl7.fhir.uv.bulkdata": "1.1.0"
+  },
+  "missing": {}
+}

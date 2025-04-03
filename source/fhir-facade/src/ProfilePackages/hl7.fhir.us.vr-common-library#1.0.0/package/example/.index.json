@@ -1,0 +1,180 @@
+{
+  "index-version": 1,
+  "files": [
+    {
+      "filename": "Observation-observation-last-menstrual-period-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-last-menstrual-period-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Patient-patient-mother-jada-ann-quinn-common.json",
+      "resourceType": "Patient",
+      "id": "patient-mother-jada-ann-quinn-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-father-tony-lewis-common.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-father-tony-lewis-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-father-natural-tom-yan-lee-common.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-father-natural-tom-yan-lee-common"
+    },
+    {
+      "filename": "Observation-observation-mother-prepregnancy-weight-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-mother-prepregnancy-weight-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-gestational-age-at-delivery-babyg-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-gestational-age-at-delivery-babyg-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-number-previous-cesareans-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-number-previous-cesareans-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-mother-carol-hoffer-common.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-mother-carol-hoffer-common"
+    },
+    {
+      "filename": "Observation-observation-apgar-score-babyg-quinn-5-min-common.json",
+      "resourceType": "Observation",
+      "id": "observation-apgar-score-babyg-quinn-5-min-common"
+    },
+    {
+      "filename": "Observation-observation-number-prenatal-visits-jada-ann-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-number-prenatal-visits-jada-ann-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-plurality-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-plurality-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-race-jada-ann-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-race-jada-ann-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-nbr-live-births-delivery-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-nbr-live-births-delivery-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-tabulated-ethnicity-jada-ann-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-tabulated-ethnicity-jada-ann-quinn-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-father-tom-yan-lee-common.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-father-tom-yan-lee-common"
+    },
+    {
+      "filename": "Observation-observation-birth-weight-not-named-common.json",
+      "resourceType": "Observation",
+      "id": "observation-birth-weight-not-named-common"
+    },
+    {
+      "filename": "Patient-patient-mother-birth-date-part-absent-common.json",
+      "resourceType": "Patient",
+      "id": "patient-mother-birth-date-part-absent-common"
+    },
+    {
+      "filename": "Observation-observation-number-deaths-this-delivery-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-number-deaths-this-delivery-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-pregnancy-risk-factor-carmen-teresa-lee-1-common.json",
+      "resourceType": "Observation",
+      "id": "observation-pregnancy-risk-factor-carmen-teresa-lee-1-common"
+    },
+    {
+      "filename": "Observation-observation-infant-living-babyg-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-infant-living-babyg-quinn-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-mother-gestational-carmen-teresa-lee-common.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-mother-gestational-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Practitioner-practitioner-vital-records-janet-seito-common.json",
+      "resourceType": "Practitioner",
+      "id": "practitioner-vital-records-janet-seito-common"
+    },
+    {
+      "filename": "Observation-observation-gestational-age-at-delivery-not-named-common.json",
+      "resourceType": "Observation",
+      "id": "observation-gestational-age-at-delivery-not-named-common"
+    },
+    {
+      "filename": "RelatedPerson-relatedperson-parent-stepmother.json",
+      "resourceType": "RelatedPerson",
+      "id": "relatedperson-parent-stepmother"
+    },
+    {
+      "filename": "Patient-patient-decedent-fetus-not-named-common.json",
+      "resourceType": "Patient",
+      "id": "patient-decedent-fetus-not-named-common"
+    },
+    {
+      "filename": "Observation-observation-autopsy-performed-not-named-common.json",
+      "resourceType": "Observation",
+      "id": "observation-autopsy-performed-not-named-common"
+    },
+    {
+      "filename": "Observation-observation-birth-weight-babyg-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-birth-weight-babyg-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-number-births-now-dead-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-number-births-now-dead-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-mother-delivery-weight-jada-ann-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-mother-delivery-weight-jada-ann-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-number-births-now-living-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-number-births-now-living-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-parent-education-level-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-parent-education-level-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Patient-patient-child-babyg-quinn-common.json",
+      "resourceType": "Patient",
+      "id": "patient-child-babyg-quinn-common"
+    },
+    {
+      "filename": "Patient-patient-mother-carmen-teresa-lee-common.json",
+      "resourceType": "Patient",
+      "id": "patient-mother-carmen-teresa-lee-common"
+    },
+    {
+      "filename": "Observation-observation-nbr-other-pregnancy-outcomes-jada-ann-quinn-common.json",
+      "resourceType": "Observation",
+      "id": "observation-nbr-other-pregnancy-outcomes-jada-ann-quinn-common"
+    },
+    {
+      "filename": "Observation-observation-mother-height-carmen-teresa-lee-common.json",
+      "resourceType": "Observation",
+      "id": "observation-mother-height-carmen-teresa-lee-common"
+    }
+  ]
+}

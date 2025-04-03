@@ -1,0 +1,11 @@
+{
+  "updated": "2025-03-31T11:12:15.0487233-04:00",
+  "dependencies": {
+    "hl7.fhir.r4.core": "4.0.1",
+    "hl7.fhir.us.core": "4.0.0",
+    "hl7.fhir.uv.bulkdata": "1.0.1",
+    "us.nlm.vsac": "0.3.0",
+    "us.cdc.phinvads": "0.7.0"
+  },
+  "missing": {}
+}

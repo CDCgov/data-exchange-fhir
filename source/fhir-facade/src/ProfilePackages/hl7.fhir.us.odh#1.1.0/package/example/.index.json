@@ -1,0 +1,45 @@
+{
+  "index-version": 1,
+  "files": [
+    {
+      "filename": "Observation-observation-odh-combat-zone-period-sample.json",
+      "resourceType": "Observation",
+      "id": "observation-odh-combat-zone-period-sample"
+    },
+    {
+      "filename": "Patient-patient-odh-maya-gordon.json",
+      "resourceType": "Patient",
+      "id": "patient-odh-maya-gordon"
+    },
+    {
+      "filename": "Composition-composition-odh-occupational-data-for-health-sample.json",
+      "resourceType": "Composition",
+      "id": "composition-odh-occupational-data-for-health-sample"
+    },
+    {
+      "filename": "Organization-organization-odh-south-hospital.json",
+      "resourceType": "Organization",
+      "id": "organization-odh-south-hospital"
+    },
+    {
+      "filename": "Observation-observation-odh-retirement-date-sample.json",
+      "resourceType": "Observation",
+      "id": "observation-odh-retirement-date-sample"
+    },
+    {
+      "filename": "Observation-observation-odh-usual-work-sample.json",
+      "resourceType": "Observation",
+      "id": "observation-odh-usual-work-sample"
+    },
+    {
+      "filename": "Observation-observation-odh-past-or-present-job-sample.json",
+      "resourceType": "Observation",
+      "id": "observation-odh-past-or-present-job-sample"
+    },
+    {
+      "filename": "Observation-observation-odh-employment-status-sample.json",
+      "resourceType": "Observation",
+      "id": "observation-odh-employment-status-sample"
+    }
+  ]
+}

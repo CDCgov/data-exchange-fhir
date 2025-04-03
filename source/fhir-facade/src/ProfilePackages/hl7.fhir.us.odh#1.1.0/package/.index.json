@@ -1,0 +1,161 @@
+{
+  "index-version": 1,
+  "files": [
+    {
+      "filename": "StructureDefinition-odh-OccupationalDataForHealth.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-OccupationalDataForHealth",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-OccupationalDataForHealth",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Composition"
+    },
+    {
+      "filename": "ValueSet-CodeSystem-soc.json",
+      "resourceType": "ValueSet",
+      "id": "CodeSystem-soc",
+      "url": "https://phinvads.cdc.gov/vads/ViewValueSet.action?oid\u003d2.16.840.1.114222.4.11.7901",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "ValueSet-v3-WorkScheduleODH.json",
+      "resourceType": "ValueSet",
+      "id": "v3-WorkScheduleODH",
+      "url": "http://terminology.hl7.org/ValueSet/v3-WorkScheduleODH",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-EmploymentStatus.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-EmploymentStatus",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-EmploymentStatus",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ValueSet-obf-datatype-YesNoVS.json",
+      "resourceType": "ValueSet",
+      "id": "obf-datatype-YesNoVS",
+      "url": "http://hl7.org/fhir/us/odh/ValueSet/obf-datatype-YesNoVS",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-CombatZonePeriod.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-CombatZonePeriod",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-CombatZonePeriod",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ValueSet-v3-WorkClassificationODH.json",
+      "resourceType": "ValueSet",
+      "id": "v3-WorkClassificationODH",
+      "url": "http://terminology.hl7.org/ValueSet/v3-WorkClassificationODH",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-Employer-extension.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-Employer-extension",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-Employer-extension",
+      "version": "1.1.0",
+      "kind": "complex-type",
+      "type": "Extension"
+    },
+    {
+      "filename": "ValueSet-CodeSystem-PHOccupationCDCCensus2010.json",
+      "resourceType": "ValueSet",
+      "id": "CodeSystem-PHOccupationCDCCensus2010",
+      "url": "https://phinvads.cdc.gov/vads/ViewValueSet.action?oid\u003d2.16.840.1.114222.4.11.7186",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-isCurrentJob-extension.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-isCurrentJob-extension",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-isCurrentJob-extension",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Extension"
+    },
+    {
+      "filename": "ValueSet-codesystem-industry-cdc-census-2010.json",
+      "resourceType": "ValueSet",
+      "id": "codesystem-industry-cdc-census-2010",
+      "url": "https://phinvads.cdc.gov/vads/ViewValueSet.action?oid\u003d2.16.840.1.114222.4.11.7187",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-RetirementDate.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-RetirementDate",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-RetirementDate",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "CodeSystem-PHOccupationalDataForHealthODH.json",
+      "resourceType": "CodeSystem",
+      "id": "PHOccupationalDataForHealthODH",
+      "url": "http://terminology.hl7.org/CodeSystem/PHOccupationalDataForHealthODH",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-UsualWork.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-UsualWork",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-UsualWork",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ImplementationGuide-hl7.fhir.us.odh.json",
+      "resourceType": "ImplementationGuide",
+      "id": "hl7.fhir.us.odh",
+      "url": "http://hl7.org/fhir/us/odh/ImplementationGuide/hl7.fhir.us.odh",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "ValueSet-NamingSystem-naics.json",
+      "resourceType": "ValueSet",
+      "id": "NamingSystem-naics",
+      "url": "https://phinvads.cdc.gov/vads/ViewValueSet.action?oid\u003d2.16.840.1.114222.4.11.7900",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "StructureDefinition-odh-PastOrPresentJob.json",
+      "resourceType": "StructureDefinition",
+      "id": "odh-PastOrPresentJob",
+      "url": "http://hl7.org/fhir/us/odh/StructureDefinition/odh-PastOrPresentJob",
+      "version": "1.1.0",
+      "kind": "resource",
+      "type": "Observation"
+    },
+    {
+      "filename": "ValueSet-v3-employmentStatusODH.json",
+      "resourceType": "ValueSet",
+      "id": "v3-employmentStatusODH",
+      "url": "http://terminology.hl7.org/ValueSet/v3-employmentStatusODH",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "ig-r4.json",
+      "resourceType": "ImplementationGuide",
+      "id": "hl7.fhir.us.odh",
+      "url": "http://hl7.org/fhir/us/odh/ImplementationGuide/hl7.fhir.us.odh",
+      "version": "1.1.0"
+    },
+    {
+      "filename": "ValueSet-CodeSystem-PHOccupationalDataForHealthODH.json",
+      "resourceType": "ValueSet",
+      "id": "CodeSystem-PHOccupationalDataForHealthODH",
+      "url": "https://phinvads.cdc.gov/vads/ViewValueSet.action?oid\u003d2.16.840.1.114222.4.11.7613",
+      "version": "1.1.0"
+    }
+  ]
+}

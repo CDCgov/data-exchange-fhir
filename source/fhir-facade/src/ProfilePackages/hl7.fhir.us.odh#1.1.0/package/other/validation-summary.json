@@ -1,0 +1,110 @@
+{
+  "ImplementationGuide/hl7.fhir.us.odh": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/NamingSystem-naics": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/CodeSystem-soc": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-CombatZonePeriod": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-Employer-extension": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "StructureDefinition/odh-EmploymentStatus": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/v3-employmentStatusODH": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/codesystem-industry-cdc-census-2010": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/CodeSystem-PHOccupationCDCCensus2010": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-OccupationalDataForHealth": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-PastOrPresentJob": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-RetirementDate": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-UsualWork": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/v3-WorkClassificationODH": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/v3-WorkScheduleODH": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/obf-datatype-YesNoVS": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "StructureDefinition/odh-isCurrentJob-extension": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "ValueSet/CodeSystem-PHOccupationalDataForHealthODH": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-odh-combat-zone-period-sample": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-odh-employment-status-sample": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-odh-retirement-date-sample": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Patient/patient-odh-maya-gordon": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-odh-usual-work-sample": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "CodeSystem/PHOccupationalDataForHealthODH": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Composition/composition-odh-occupational-data-for-health-sample": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Organization/organization-odh-south-hospital": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "Observation/observation-odh-past-or-present-job-sample": {
+    "errors": 0,
+    "warnings": 1
+  }
+}
