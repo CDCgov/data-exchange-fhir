@@ -1,67 +1,85 @@
-## Overview
-Code Repository for the CDC FHIR Façade solution. The purpose of this FHIR Facade is ingestion and storage of FHIR data with additional features for authentication, 
-authorization, and observability. Proof of concept built of the FHIR Facade is using AWS cloud infrastructure.
+****CDC FHIR Façade Repository**
+**Overview**
+This repository contains the codebase for the CDC FHIR Façade solution. The purpose of the Façade is to ingest and store FHIR data while providing additional functionality for authentication, authorization, and observability. This proof-of-concept implementation is designed to run on AWS cloud infrastructure.
 
-### Application Code Instructions
-## Run Locally with AWS
-# PreRequisites:
-- An AWS account needs to be setup in before running the application locally. The account will need the following:
-    - S3 Bunket with write access for Budles, Logs, and OpenTelemetry to be saved to it.
-    - Log Group so that Logs can be written to it.
-    - IAM User with access to read and write to S3 Bunket and Log Group. 
-    - AWS Instruction - https://docs.aws.amazon.com/AmazonS3/latest/userguide/walkthrough1.html
+****Running the Application Locally with AWS****
+**Prerequisites
+Before running the application locally with AWS, ensure you have the following setup in your AWS account:
+- S3 Bucket with write access for:
+    - FHIR Bundles
+    - Logs
+    - OpenTelemetry data
+- Log Group for writing logs
+- IAM User with appropriate permissions to read/write to the S3 Bucket and Log Group
+- [AWS Setup Instructions](https://docs.aws.amazon.com/AmazonS3/latest/userguide/walkthrough1.html)
 
-- When running the application locally with AWS setting, bundles, logs, and Open Telemetry will be saved to the assigned AWS account. 
-- Make sure to change appsettings.Local.json according to YOUR AWS settings.
-- In Properties -> launchSettings.json -> Set 
-     "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Local"
-      }
-    This should be changed in three different sections.
+When running locally with AWS Bundles, logs, and telemetry will be saved to the configured AWS services.
 
-# Steps
-- Step 1: Update appsettings.Local.json file. 
-  - AccessKey and SecretKey need to be set from the AWS IAM user that was created above. 
-  - "RunEnvironment": Needs to be set to "AWS". 
-  - "VerifyAuthURL": Needs to be set according to the Token Signing Key URL
-    - Can be found here: Amazon Cognito -> User Pool -> "pool_Name" -> Token Signing Key URL
-- Step 3: If using Visual Studio, Run application by pressing Start Application button or press F5.
-    - Command Line: cd "ProjectLocation" -> dotnet run
-- Step 4: You will need an Authorize your POST Bundle request before sending the request.
-    - a) In Swagger under POST Auth you will need to change the client_id and client_secret according to your AWS settings. 
-     - This can be setup/found under AWS Cognito -> User Pool -> YourUserPoolName -> App Client (https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools.html)
-   - b) Send POST request and copy access_token from response body.
-   - Under POST Bundle OK -> Authorization -> Auth Type Pick "Bearer Token" -> Paste Token in the provided token box
-- Step 5: There are two different formats that a bundle can be sent.
-    - a) A raw json fromated Bundle can be paste into the Body -> raw field of the POST Bundle OK request.
-    - b) A json formated Bundle file can be uploaded to Post a bundle. Body -> form-data -> Key = File -> Format Type = File -> Value = Select file from local machine
-- Step 6: Sent a Post request to http://localhost:5215/Bundle
+**Configuration Steps**
+1. Update appsettings.Local.json:
+    a) Set your AWS credentials: AccessKey and SecretKey
+    b) Set "RunEnvironment": "AWS"
+    c) Set "VerifyAuthURL" using the Token Signing Key URL from:
+        AWS Console → Amazon Cognito → User Pools → [Your Pool] → Token  Signing Key URL
 
-*Note: File size can not exceed 300mb*
+2. Set ASP.NET Core Environment:
+In Properties/launchSettings.json, update the "environmentVariables" section in all three profiles to: "ASPNETCORE_ENVIRONMENT": "Local"
 
-## Run Locally without AWS
-- When running the application local without AWS settings the Bundle will get saved on your computer and logs will be written to the console. This can be set in appsetting. 
+3. Run the Application:
+- Visual Studio: Click the green "Start" button or press F5
+- Command Line:
+      cd path/to/project
+      dotnet run
+  
+4. Authenticate API Requests:
+- In Swagger, go to POST /Auth and set:
+- client_id and client_secret from AWS Cognito:
+    - AWS Console → Cognito → User Pools → [Your Pool] → App Clients
+- Send the request and copy the access_token from the response.
+- In POST /Bundle OK, choose Bearer Token under Authorization and paste the access token.
 
-# Steps
-- Step 1: Update appsettings.Local.json file. 
-    - a) "RunEnvironment": "Local",
-    - b) "FileSettings": {"LocalDevFolder": "BundleToBeSaved_FolderPath"}, 
-        - Set this to the folder you want the bundle to be saved to. Ex."FileSettings": {"LocalDevFolder": "C:\Users\Desktop\Dev\Bundles"},
-- Step 2: OneCDPFHIRFacade.csproj (The Project file) under <PropertyGroup> -> <DefineConstants>AWS</DefineConstants> needs to be set to "runLocal" <DefineConstants>runLocal</DefineConstants>.
-- Step 3: Run Applocation:
-  - Visual Studio: Run application by pressing the green Start Application button or press F5.
-  - Command Line: cd "ProjectLocation" -> dotnet run
-- Step 4: There are two different formats that a bundle can be sent.
-    - a) A raw json fromated Bundle can be paste into the Body -> raw field of the POST Bundle OK request.
-    - b) A json formated Bundle file can be uploaded to Post a bundle. Body -> form-data -> Key = File -> Format Type = File -> Value = Select file from local machine
-- Step 5: Sent a Post request to http://localhost:5215/Bundle
+5. FHIR Bundle can be send using two different formats:
+- Raw JSON: Paste directly in Body → Raw
+- File Upload: Use Body → form-data → Key: File, Type: File, Value: [Select file]
 
-- *Note: File size can not exceed 300mb*
+6. Send POST Request:
+POST http://localhost:5215/Bundle
 
+⚠️ File size must not exceed 300MB
 
-### Docker Instructions
-## Docker Build Instructions
+****Running Locally Without AWS****
+When not using AWS, FHIR Bundles are saved to the local file system, and logs are printed to the console.
+
+**Configuration Steps**
+1. Update appsettings.Local.json:
+- "RunEnvironment": "Local",
+- "FileSettings": {
+  "LocalDevFolder": "C:\\Path\\To\\Save\\Bundles"
+  }
+  
+2. Modify Project File:
+- In OneCDPFHIRFacade.csproj, set:
+<DefineConstants>runLocal</DefineConstants>
+
+3. Run the Application:
+- Visual Studio: Click the green "Start" button or press F5
+- Command Line:
+    cd path/to/project
+    dotnet run
+  
+4. Send FHIR Bundle:
+Supported formats:
+- Raw JSON: Body -> raw -> Paste in Body
+- File Upload: Body → form-data → Key: File, Type: File, Value: [Select file]
+
+5. Send POST Request:
+- POST http://localhost:5215/Bundle
+
+⚠️ File size must not exceed 300MB
+
+****Docker Instructions****
+Build Docker Image
 docker build -t one-cdp-fhir-facade .
 
-## Docker Run Instructions
+Run Docker Container
 docker run -p 8080:8080 -p 80:80 one-cdp-fhir-facade
