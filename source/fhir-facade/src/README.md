@@ -20,8 +20,11 @@ authorization, and observability. Proof of concept built of the FHIR Facade is u
     This should be changed in three different sections.
 
 # Steps
-- Step 1: Update appsettings.Local.json file. Make sure to include AccessKey and SecretKey from the AWS IAM user that was created above. 
-- Step 2: "RunEnvironment": Needs to be set to "AWS". 
+- Step 1: Update appsettings.Local.json file. 
+  - AccessKey and SecretKey need to be set from the AWS IAM user that was created above. 
+  - "RunEnvironment": Needs to be set to "AWS". 
+  - "VerifyAuthURL": Needs to be set according to the Token Signing Key URL
+    - Can be found here: Amazon Cognito -> User Pool -> "pool_Name" -> Token Signing Key URL
 - Step 3: If using Visual Studio, Run application by pressing Start Application button or press F5.
     - Command Line: cd "ProjectLocation" -> dotnet run
 - Step 4: You will need an Authorize your POST Bundle request before sending the request.
