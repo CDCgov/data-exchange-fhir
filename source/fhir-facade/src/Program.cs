@@ -210,7 +210,7 @@ namespace OneCDPFHIRFacade
             // #####################################################
             // Register serivces, Create instances of Logging
             // #####################################################
-            if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint))
+            if (!string.IsNullOrEmpty(AwsConfig.OltpEndpoint) && runEnvironment == "AWS")
             {
                 builder.Services.AddOpenTelemetry().WithTracing(tracerProviderBuilder =>
                 {
