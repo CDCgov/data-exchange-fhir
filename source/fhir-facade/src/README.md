@@ -16,34 +16,34 @@ Before running the application locally with AWS, ensure you have the following s
 When running locally with AWS Bundles, logs, and telemetry will be saved to the configured AWS services.
 
 **Configuration Steps**
-1. Update appsettings.Local.json:
+- Step 1. Update appsettings.Local.json:
      - a) Set your AWS credentials: AccessKey and SecretKey
      - b) Set "RunEnvironment": "AWS"
      - c) Set "VerifyAuthURL" using the Token Signing Key URL from:
          - AWS Console → Amazon Cognito → User Pools → [Your Pool] → Token  Signing Key URL
 
-2. Set ASP.NET Core Environment:
-- In Properties/launchSettings.json, update the "environmentVariables" section in all three profiles to: "ASPNETCORE_ENVIRONMENT": "Local"
+- Step 2. Set ASP.NET Core Environment:
+    - In Properties/launchSettings.json, update the "environmentVariables" section in all three profiles to: "ASPNETCORE_ENVIRONMENT": "Local"
 
-3. Run the Application:
-- Visual Studio: Click the green "Start" button or press F5
-- Command Line:
+- Step 3. Run the Application:
+    - Visual Studio: Click the green "Start" button or press F5
+    - Command Line:
       - cd path/to/project
       - dotnet run
   
-4. Authenticate API Requests:
-- In Swagger, go to POST /Auth and set:
-- client_id and client_secret from AWS Cognito:
-    - AWS Console → Cognito → User Pools → [Your Pool] → App Clients
-- Send the request and copy the access_token from the response.
-- In POST /Bundle OK, choose Bearer Token under Authorization and paste the access token.
+- Step 4. Authenticate API Requests:
+    - In Swagger, go to POST /Auth and set:
+    - client_id and client_secret from AWS Cognito:
+        - AWS Console → Cognito → User Pools → [Your Pool] → App Clients
+    - Send the request and copy the access_token from the response.
+    - In POST /Bundle OK, choose Bearer Token under Authorization and paste the access token.
 
-5. FHIR Bundle can be send using two different formats:
-- Raw JSON: Paste directly in Body → Raw
-- File Upload: Use Body → form-data → Key: File, Type: File, Value: [Select file]
+- Step 5. FHIR Bundle can be send using two different formats:
+    - Raw JSON: Paste directly in Body → Raw
+    - File Upload: Use Body → form-data → Key: File, Type: File, Value: [Select file]
 
-6. Send POST Request:
-- POST http://localhost:5215/Bundle
+- Step 6. Send POST Request:
+    - POST http://localhost:5215/Bundle
 
 ⚠️ File size must not exceed 300MB
 
@@ -51,26 +51,26 @@ When running locally with AWS Bundles, logs, and telemetry will be saved to the 
 When not using AWS, FHIR Bundles are saved to the local file system, and logs are printed to the console.
 
 **Configuration Steps**
-1. Update appsettings.Local.json:
-- "RunEnvironment": "Local",
-- "FileSettings": {"LocalDevFolder": "PathToSaveBundles"}
+- Step 1. Update appsettings.Local.json:
+    - "RunEnvironment": "Local",
+    - "FileSettings": {"LocalDevFolder": "PathToSaveBundles"}
   
-2. Modify Project File:
-- In OneCDPFHIRFacade.csproj (the Project file), set: <DefineConstants>**runLocal**</DefineConstants>
+- Step 2. Modify Project File:
+    - In OneCDPFHIRFacade.csproj (the Project file), set: <DefineConstants>**runLocal**</DefineConstants>
 
-3. Run the Application:
-- Visual Studio: Click the green "Start" button or press F5
-- Command Line:
-    - cd path/to/project
-    - dotnet run
+- Step 3. Run the Application:
+    - Visual Studio: Click the green "Start" button or press F5
+    - Command Line:
+        - cd path/to/project
+        - dotnet run
   
-4. Send FHIR Bundle:
-- Supported formats:
-    - Raw JSON: Body -> raw -> Paste in Body
-    - File Upload: Body → form-data → Key: File, Type: File, Value: [Select file]
+- Step 4. Send FHIR Bundle:
+    - Supported formats:
+        - Raw JSON: Body -> raw -> Paste in Body
+        - File Upload: Body → form-data → Key: File, Type: File, Value: [Select file]
 
-5. Send POST Request:
-- POST http://localhost:5215/Bundle
+- Step 5. Send POST Request:
+    - POST http://localhost:5215/Bundle
 
 ⚠️ File size must not exceed 300MB
 
