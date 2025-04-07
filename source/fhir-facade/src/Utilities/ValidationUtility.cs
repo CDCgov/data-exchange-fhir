@@ -28,7 +28,7 @@ namespace OneCDPFHIRFacade.Utilities
                 $"{issue.Severity}: {issue.Code} - {issue.Details?.Text} (Location: {string.Join(", ", issue.Location)})"
             ).ToList();
 
-            string resultString = $"Bundle Validation Result: {result.Success}\n{string.Join("\n", errorMessages)}";
+            string resultString = $"Bundle Validation Result: {result.Success} {string.Join(" ", errorMessages)}";
 
             return resultString;
         }
