@@ -1,9 +1,9 @@
-**CDC FHIR Façade Repository**
-**Overview**
+**CDC FHIR Façade Repository**  
+**Overview**  
 This repository contains the codebase for the CDC FHIR Façade solution. The purpose of the Façade is to ingest and store FHIR data while providing additional functionality for authentication, authorization, and observability. This proof-of-concept implementation is designed to run on AWS cloud infrastructure.
 
-**Running the Application Locally with AWS**
-**Prerequisites:
+**Running the Application Locally with AWS**  
+**Prerequisites:**
 Before running the application locally with AWS, ensure you have the following setup in your AWS account:
 - S3 Bucket with write access for:
     - FHIR Bundles
