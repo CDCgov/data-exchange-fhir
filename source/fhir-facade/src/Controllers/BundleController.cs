@@ -109,7 +109,7 @@ namespace OneCDPFHIRFacade.Controllers
 
                     bundle = await parser.ParseAsync<Bundle>(fileContent);
                     string validBundle = validationUtility.ValidateBundle(bundle);
-                    Console.WriteLine(validBundle);
+                    await _loggingUtility.Logging(validBundle);
                 }
                 catch
                 {
