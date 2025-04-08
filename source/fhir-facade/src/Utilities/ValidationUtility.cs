@@ -1,13 +1,14 @@
 ﻿using Hl7.Fhir.Model;
 using Hl7.Fhir.Specification.Source;
 using Hl7.Fhir.Specification.Terminology;
+using System.Diagnostics.CodeAnalysis;
 using Validator = Firely.Fhir.Validation.Validator;
-
 
 namespace OneCDPFHIRFacade.Utilities
 {
     public class ValidationUtility
     {
+        [SuppressMessage("SonarQube", "csharpsquid:S5332", Justification = "We are not access this, we are ")]
 
         public string ValidateBundle(Bundle bundle)
         {
